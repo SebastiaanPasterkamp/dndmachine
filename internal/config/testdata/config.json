@@ -1,0 +1,8 @@
+{
+    "server":{
+        "port": "7070"
+    },
+    "database": {
+        "dsn": "mysql://user:pwd@tcp(host:3306)/database"
+    }
+}

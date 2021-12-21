@@ -1,0 +1,6 @@
+# github.com/alexflint/go-arg v1.4.2
+## explicit; go 1.13
+github.com/alexflint/go-arg
+# github.com/alexflint/go-scalar v1.0.0
+## explicit
+github.com/alexflint/go-scalar
