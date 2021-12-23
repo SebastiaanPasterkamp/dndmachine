@@ -1,0 +1,120 @@
+---
+kind: pipeline
+type: kubernetes
+name: Test
+
+platform:
+    os: linux
+    arch: arm
+
+steps:
+  - name: golang:test
+    image: golang:1.17-stretch
+    commands:
+      # 'go test -race ...' not supported on ARM
+      - go test -v -count=10 ./...
+
+  - name: golang:coverage:report
+    image: golang:1.17-stretch
+    commands:
+      - go test -v -coverprofile cover.out ./...
+      - go tool cover -func cover.out
+    depends_on:
+      - golang:test
+
+---
+kind: pipeline
+type: kubernetes
+name: Image Staging
+
+depends_on:
+- Test
+
+platform:
+  os: linux
+  arch: arm
+
+steps:
+  - name: docker:staging
+    image: docker-registry.pikube.dev:31443/drone-genuinetools-img
+    settings:
+      registry: docker-registry-service.docker-registry:5000
+      repo: dndmachine-go
+      tags: ${DRONE_BRANCH},unstable
+      insecure_registry: true
+
+---
+kind: pipeline
+type: kubernetes
+name: Image Production
+
+trigger:
+  event:
+  - tag
+
+depends_on:
+- Image Staging
+
+platform:
+  os: linux
+  arch: arm
+
+steps:
+  - name: docker:staging
+    image: docker-registry.pikube.dev:31443/drone-genuinetools-img
+    settings:
+      registry: docker-registry-service.docker-registry:5000
+      repo: dndmachine-go
+      auto_tag: true
+      insecure_registry: true
+
+---
+kind: pipeline
+type: kubernetes
+name: Notify Status
+
+clone:
+  disable: true
+
+trigger:
+  status:
+  - success
+  - failure
+
+depends_on:
+- Image Staging
+- Image Production
+
+platform:
+  os: linux
+  arch: arm
+
+steps:
+  - name: discord:notification
+    image: appleboy/drone-discord
+    settings:
+      webhook_id:
+        from_secret: discord_id
+      webhook_token:
+        from_secret: discord_token
+      username: drone.io
+      color: auto
+      message: >
+        <:dndmachine:855198423245389844> **{{repo.name}}**
+
+        {{#success build.status}}
+        :white_check_mark: {{build.event}} build {{build.number}} succeeded. Good job.
+        {{else}}
+        :warning: {{build.event}} build {{build.number}} failed. Fix me please.
+        {{/success}}
+
+        {{build.link}}
+
+        **Branch:** {{commit.branch}} {{commit.tag}}
+
+        **Message:** {{commit.message}}
+---
+kind: signature
+hmac: e0c3364d2d4dabe6fb3cef7fadd3afc178a6ba22ee852ef81f96c6a127e2990e
+
+...
