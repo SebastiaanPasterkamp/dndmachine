@@ -29,7 +29,7 @@ func TestInitialize(t *testing.T) {
 					MaxOpenConns:    3,
 					PingTimeout:     3 * time.Second,
 				},
-				Server: &service.Instance{Port: "8080"},
+				Server: serviceInstance("8080"),
 			},
 		},
 		{"CLI args over defaults", "./cli serve --port=9090", map[string]string{},
@@ -41,7 +41,7 @@ func TestInitialize(t *testing.T) {
 					MaxOpenConns:    3,
 					PingTimeout:     3 * time.Second,
 				},
-				Server: &service.Instance{Port: "9090"},
+				Server: serviceInstance("9090"),
 			},
 		},
 		{"Env over defaults", "./env serve", map[string]string{"DNDMACHINE_PORT": "6060"},
@@ -53,7 +53,7 @@ func TestInitialize(t *testing.T) {
 					MaxOpenConns:    3,
 					PingTimeout:     3 * time.Second,
 				},
-				Server: &service.Instance{Port: "6060"},
+				Server: serviceInstance("6060"),
 			},
 		},
 		{"File over defaults", "./file serve --config-path=testdata/config.json", map[string]string{},
@@ -66,7 +66,7 @@ func TestInitialize(t *testing.T) {
 					MaxOpenConns:    3,
 					PingTimeout:     3 * time.Second,
 				},
-				Server: &service.Instance{Port: "7070"},
+				Server: serviceInstance("7070"),
 			},
 		},
 		{"Cli over env", "./cli serve --port=9090", map[string]string{"DNDMACHINE_PORT": "6060"},
@@ -78,7 +78,7 @@ func TestInitialize(t *testing.T) {
 					MaxOpenConns:    3,
 					PingTimeout:     3 * time.Second,
 				},
-				Server: &service.Instance{Port: "9090"},
+				Server: serviceInstance("9090"),
 			},
 		},
 		{"CLI args over file", "./file serve --config-path=testdata/config.json --port=9090", map[string]string{},
@@ -91,7 +91,7 @@ func TestInitialize(t *testing.T) {
 					MaxOpenConns:    3,
 					PingTimeout:     3 * time.Second,
 				},
-				Server: &service.Instance{Port: "9090"},
+				Server: serviceInstance("9090"),
 			},
 		},
 		{"Env over file", "./env serve --config-path=testdata/config.json", map[string]string{"DNDMACHINE_PORT": "6060"},
@@ -104,13 +104,13 @@ func TestInitialize(t *testing.T) {
 					MaxOpenConns:    3,
 					PingTimeout:     3 * time.Second,
 				},
-				Server: &service.Instance{Port: "6060"},
+				Server: serviceInstance("6060"),
 			},
 		},
 		{"Broken JSON", "./broken serve --config-path=/dev/null", map[string]string{},
 			true, config.Arguments{
 				Common: config.Common{ConfigPath: "/dev/null"},
-				Server: &service.Instance{Port: "8080"},
+				Server: serviceInstance("8080"),
 				Configuration: database.Configuration{
 					DSN:             "sqlite://machine.db",
 					ConnMaxLifetime: 15 * time.Minute,
@@ -184,4 +184,17 @@ func TestInitialize(t *testing.T) {
 
 func split(s string) []string {
 	return strings.Split(s, " ")
+}
+
+func serviceInstance(port string) *service.Instance {
+	return &service.Instance{
+		Port:              port,
+		RequestTimeout:    30 * time.Second,
+		ReadTimeout:       5 * time.Second,
+		ReadHeaderTimeout: 5 * time.Second,
+		WriteTimeout:      5 * time.Second,
+		IdleTimetout:      1 * time.Minute,
+		MaxShutdownDelay:  0 * time.Second,
+		ShutdownDeadline:  5 * time.Second,
+	}
 }

@@ -5,7 +5,9 @@ go 1.17
 require (
 	github.com/alexflint/go-arg v1.4.2
 	github.com/coreos/go-semver v0.3.0
+	github.com/go-chi/chi/v5 v5.0.7
 	github.com/go-sql-driver/mysql v1.6.0
+	golang.org/x/sync v0.0.0-20201020160332-67f06af15bc9
 	modernc.org/sqlite v1.14.3
 )
 
