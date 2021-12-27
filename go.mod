@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/alexflint/go-arg v1.4.2
+	github.com/coreos/go-semver v0.3.0
 	github.com/go-sql-driver/mysql v1.6.0
 	modernc.org/sqlite v1.14.3
 )
@@ -18,6 +19,7 @@ require (
 	golang.org/x/sys v0.0.0-20211007075335-d3039528d8ac // indirect
 	golang.org/x/tools v0.0.0-20201124115921-2c860bdd6e78 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 	lukechampine.com/uint128 v1.1.1 // indirect
 	modernc.org/cc/v3 v3.35.18 // indirect
 	modernc.org/ccgo/v3 v3.12.95 // indirect

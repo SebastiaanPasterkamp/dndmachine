@@ -1,0 +1,6 @@
+-- First schema file
+
+DROP TABLE IF EXISTS `user`;
+CREATE TABLE `user` (
+  `id` INTEGER PRIMARY KEY AUTOINCREMENT
+);

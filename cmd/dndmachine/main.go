@@ -29,7 +29,7 @@ func main() {
 
 	switch {
 	case args.Storage != nil:
-		if err := args.Storage.Do(db); err != nil {
+		if err := args.Storage.Command(db); err != nil {
 			log.Fatalf("failed to execute storage command: %v", err)
 		}
 	case args.Server != nil:
