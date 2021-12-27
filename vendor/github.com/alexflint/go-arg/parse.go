@@ -77,6 +77,7 @@ var ErrVersion = errors.New("version requested by user")
 func MustParse(dest ...interface{}) *Parser {
 	p, err := NewParser(Config{}, dest...)
 	if err != nil {
+		fmt.Fprintln(stdout, err)
 		osExit(-1)
 		return nil // just in case osExit was monkey-patched
 	}
@@ -120,9 +121,6 @@ type Config struct {
 
 	// IgnoreEnv instructs the library not to read environment variables
 	IgnoreEnv bool
-
-	// IgnoreDefaults instructs the library not to use default values
-	IgnoreDefaults bool
 }
 
 // Parser represents a set of command line options with destination values
@@ -211,18 +209,16 @@ func NewParser(config Config, dests ...interface{}) (*Parser, error) {
 		}
 
 		// add nonzero field values as defaults
-		if !config.IgnoreDefaults {
-			for _, spec := range cmd.specs {
-				if v := p.val(spec.dest); v.IsValid() && !isZero(v) {
-					if defaultVal, ok := v.Interface().(encoding.TextMarshaler); ok {
-						str, err := defaultVal.MarshalText()
-						if err != nil {
-							return nil, fmt.Errorf("%v: error marshaling default value to string: %v", spec.dest, err)
-						}
-						spec.defaultVal = string(str)
-					} else {
-						spec.defaultVal = fmt.Sprintf("%v", v)
+		for _, spec := range cmd.specs {
+			if v := p.val(spec.dest); v.IsValid() && !isZero(v) {
+				if defaultVal, ok := v.Interface().(encoding.TextMarshaler); ok {
+					str, err := defaultVal.MarshalText()
+					if err != nil {
+						return nil, fmt.Errorf("%v: error marshaling default value to string: %v", spec.dest, err)
 					}
+					spec.defaultVal = string(str)
+				} else {
+					spec.defaultVal = fmt.Sprintf("%v", v)
 				}
 			}
 		}
@@ -531,9 +527,7 @@ func (p *Parser) process(args []string) error {
 
 			// instantiate the field to point to a new struct
 			v := p.val(subcmd.dest)
-			if v.IsNil() {
-				v.Set(reflect.New(v.Type().Elem())) // we already checked that all subcommands are struct pointers
-			}
+			v.Set(reflect.New(v.Type().Elem())) // we already checked that all subcommands are struct pointers
 
 			// add the new options to the set of allowed options
 			specs = append(specs, subcmd.specs...)
@@ -661,8 +655,7 @@ func (p *Parser) process(args []string) error {
 		if spec.required {
 			return fmt.Errorf("%s is required", name)
 		}
-
-		if !p.config.IgnoreDefaults && spec.defaultVal != "" {
+		if spec.defaultVal != "" {
 			err := scalar.ParseValue(p.val(spec.dest), spec.defaultVal)
 			if err != nil {
 				return fmt.Errorf("error processing default value for %s: %v", name, err)

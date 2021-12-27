@@ -23,6 +23,10 @@ func main() {
 		log.Fatalf("error connecting to the database: %v", err)
 	}
 
+	if !db.IsConnected() {
+		log.Fatalf("failed to establish a connection to the database")
+	}
+
 	switch {
 	case args.Storage != nil:
 		if err := args.Storage.Do(db); err != nil {

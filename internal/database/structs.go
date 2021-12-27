@@ -19,8 +19,8 @@ type Configuration struct {
 }
 
 type Instance struct {
-	// pool is the database connection pool.
-	pool *sql.DB
+	// Pool is the database connection pool.
+	Pool *sql.DB
 	// cfg is the configuration used to create the connection pool
 	cfg Configuration
 }
