@@ -1,4 +1,4 @@
-# github.com/alexflint/go-arg v1.4.2
+# github.com/alexflint/go-arg v1.4.2 => github.com/SebastiaanPasterkamp/go-arg v1.4.3-0.20220102141709-a87d80089a78
 ## explicit; go 1.13
 github.com/alexflint/go-arg
 # github.com/alexflint/go-scalar v1.1.0
@@ -104,3 +104,4 @@ modernc.org/strutil
 # modernc.org/token v1.0.0
 ## explicit
 modernc.org/token
+# github.com/alexflint/go-arg => github.com/SebastiaanPasterkamp/go-arg v1.4.3-0.20220102141709-a87d80089a78

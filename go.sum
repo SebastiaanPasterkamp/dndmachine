@@ -1,6 +1,5 @@
-github.com/alexflint/go-arg v1.4.2 h1:lDWZAXxpAnZUq4qwb86p/3rIJJ2Li81EoMbTMujhVa0=
-github.com/alexflint/go-arg v1.4.2/go.mod h1:9iRbDxne7LcR/GSvEr7ma++GLpdIU1zrghf2y2768kM=
-github.com/alexflint/go-scalar v1.0.0/go.mod h1:GpHzbCOZXEKMEcygYQ5n/aa4Aq84zbxjy3MxYW0gjYw=
+github.com/SebastiaanPasterkamp/go-arg v1.4.3-0.20220102141709-a87d80089a78 h1:YFaOl/X2X7DOi1VI+sh7o4nF3jjHoGWi0vloUOkuVvc=
+github.com/SebastiaanPasterkamp/go-arg v1.4.3-0.20220102141709-a87d80089a78/go.mod h1:b0KVE9XeM1yDDb5NU4/X6zgZVyEKM19+AdEmmjEwx0Y=
 github.com/alexflint/go-scalar v1.1.0 h1:aaAouLLzI9TChcPXotr6gUhq+Scr8rl0P9P4PnltbhM=
 github.com/alexflint/go-scalar v1.1.0/go.mod h1:LoFvNMqS1CPrMVltza4LvnGKhaSpc3oyLEBUZVhhS2o=
 github.com/coreos/go-semver v0.3.0 h1:wkHLiw0WNATZnSG7epLsujiMCgPAc9xhjJ4tgnAxmfM=

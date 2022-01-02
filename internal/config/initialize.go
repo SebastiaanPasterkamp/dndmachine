@@ -66,9 +66,9 @@ func Initialize(flags []string) (Arguments, error) {
 	}
 
 	cfg = arg.Config{
-		Program:        flags[0],
-		IgnoreDefaults: true,
-		IgnoreEnv:      false,
+		Program:       flags[0],
+		IgnoreDefault: true,
+		IgnoreEnv:     false,
 	}
 	if p, err = arg.NewParser(cfg, &args); err != nil {
 		return args, fmt.Errorf("failed to create CLI argument parser: %w", err)
