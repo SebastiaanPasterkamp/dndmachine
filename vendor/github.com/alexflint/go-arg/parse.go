@@ -85,13 +85,13 @@ func MustParse(dest ...interface{}) *Parser {
 	err = p.Parse(flags())
 	switch {
 	case err == ErrHelp:
-		p.writeHelpForCommand(stdout, p.lastCmd)
+		p.writeHelpForSubcommand(stdout, p.lastCmd)
 		osExit(0)
 	case err == ErrVersion:
 		fmt.Fprintln(stdout, p.version)
 		osExit(0)
 	case err != nil:
-		p.failWithCommand(err.Error(), p.lastCmd)
+		p.failWithSubcommand(err.Error(), p.lastCmd)
 	}
 
 	return p
@@ -121,6 +121,10 @@ type Config struct {
 
 	// IgnoreEnv instructs the library not to read environment variables
 	IgnoreEnv bool
+
+	// IgnoreDefault instructs the library not to reset the variables to the
+	// default values, including pointers to sub commands
+	IgnoreDefault bool
 }
 
 // Parser represents a set of command line options with destination values
@@ -527,7 +531,9 @@ func (p *Parser) process(args []string) error {
 
 			// instantiate the field to point to a new struct
 			v := p.val(subcmd.dest)
-			v.Set(reflect.New(v.Type().Elem())) // we already checked that all subcommands are struct pointers
+			if !p.config.IgnoreDefault || v.IsNil() {
+				v.Set(reflect.New(v.Type().Elem())) // we already checked that all subcommands are struct pointers
+			}
 
 			// add the new options to the set of allowed options
 			specs = append(specs, subcmd.specs...)
@@ -653,9 +659,13 @@ func (p *Parser) process(args []string) error {
 		}
 
 		if spec.required {
-			return fmt.Errorf("%s is required", name)
+			msg := fmt.Sprintf("%s is required", name)
+			if spec.env != "" {
+				msg += " (or environment variable " + spec.env + ")"
+			}
+			return errors.New(msg)
 		}
-		if spec.defaultVal != "" {
+		if !p.config.IgnoreDefault && spec.defaultVal != "" {
 			err := scalar.ParseValue(p.val(spec.dest), spec.defaultVal)
 			if err != nil {
 				return fmt.Errorf("error processing default value for %s: %v", name, err)
