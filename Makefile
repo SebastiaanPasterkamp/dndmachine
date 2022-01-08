@@ -1,4 +1,7 @@
 BINARY_NAME=dndmachine
+PWD=$(shell pwd)
+UID=$(shell id -u)
+GID=$(shell id -g)
 GIT_TAG=$(shell git describe master --tags 2> /dev/null || echo -n "v2.0.0")
 GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 GIT_COMMIT=$(shell git rev-parse --short HEAD)
@@ -49,3 +52,44 @@ docker:
 
 clean:
 	rm $(BINARY_NAME) cover.out
+
+serve-ui:
+	docker run \
+		--rm -it \
+		-p 3000:3000 \
+		-u ${UID}:${GID} \
+		-v ${PWD}/ui:/project \
+		-w /project \
+		node:17.3-stretch \
+			npm start
+
+ui-test:
+	docker run \
+		--rm -it \
+		-u ${UID}:${GID} \
+		-v ${PWD}/ui:/project \
+		-w /project \
+		node:17.3-stretch \
+			npm test
+
+ui-shell:
+	docker run \
+		--rm -it \
+		-u ${UID}:${GID} \
+		-v ${PWD}/ui:/project \
+		-w /project \
+		node:17.3-stretch \
+			/bin/bash
+
+ui-update:
+	docker run \
+		--rm -it \
+		-u ${UID}:${GID} \
+		-v ${PWD}/ui:/project \
+		-w /project \
+		node:17.3-stretch /bin/bash -c '\
+			npm install --no-save npm-check-updates ; \
+			./node_modules/.bin/ncu -u ; \
+			npm update ; \
+		'
+

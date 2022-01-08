@@ -22,6 +22,22 @@ steps:
     depends_on:
       - golang:test
 
+  - name: react:test
+    image: node:17.3-stretch
+    commands:
+      - cd ui
+      - npm install
+      - npm test -- --all --watchAll=false --coverage
+
+  - name: react:build
+    image: node:17.3-stretch
+    commands:
+      - cd ui
+      - npm install
+      - npm run build
+    depends_on:
+      - react:test
+
 ---
 kind: pipeline
 type: kubernetes
@@ -115,6 +131,6 @@ steps:
         **Message:** {{commit.message}}
 ---
 kind: signature
-hmac: e0c3364d2d4dabe6fb3cef7fadd3afc178a6ba22ee852ef81f96c6a127e2990e
+hmac: efbd014ef0edaac5643053d135b5367d57426c3c46bf97604daac16b7268dcd0
 
 ...
