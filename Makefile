@@ -7,11 +7,25 @@ GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 GIT_COMMIT=$(shell git rev-parse --short HEAD)
 BUILD_TIME=$(shell date)
 
-deps:
+update: mod-update ui-update
+
+test: go-test ui-test
+
+build: go-build ui-build
+
+dev:
+	USER=${UID}:${GID} \
+	docker-compose up \
+		--build \
+		--renew-anon-volumes \
+		--force-recreate \
+		--abort-on-container-exit
+
+mod-update:
 	go mod tidy
 	go mod vendor
 
-coverage:
+go-coverage:
 	go test -coverprofile cover.out ./...
 	go tool cover -html=cover.out
 
@@ -22,10 +36,10 @@ format:
 	gofmt -s -w cmd
 	gofmt -s -w internal
 
-test:
+go-test:
 	go test -race -count 10 -v ./...
 
-build:
+go-build:
 	CGO_ENABLED=0 \
 	GO111MODULE=on \
 	GOFLAGS=-mod=vendor \
@@ -51,7 +65,7 @@ docker:
 		.
 
 clean:
-	rm $(BINARY_NAME) cover.out
+	rm $(BINARY_NAME) cover.out ui/build
 
 serve-ui:
 	docker run \
@@ -71,6 +85,15 @@ ui-test:
 		-w /project \
 		node:17.3-stretch \
 			npm test
+
+ui-build:
+	docker run \
+		--rm -it \
+		-u ${UID}:${GID} \
+		-v ${PWD}/ui:/project \
+		-w /project \
+		node:17.3-stretch \
+			npm run build
 
 ui-shell:
 	docker run \
