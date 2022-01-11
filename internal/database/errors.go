@@ -14,7 +14,11 @@ var (
 	// ErrNoConnection is the error returned if database actions are performed
 	// without establishing a connection (pool) with the database.
 	ErrNoConnection = fmt.Errorf("no connection")
+
 	// ErrImportFailed is the error returned if a sequence of sql statements to
 	// import failed.
 	ErrImportFailed = fmt.Errorf("failed to import sql code")
+	// ErrNotFound is the error returned if the requested object does not exist
+	// in the database.
+	ErrNotFound = fmt.Errorf("object not found")
 )

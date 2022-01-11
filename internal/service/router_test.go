@@ -56,7 +56,11 @@ func TestRouter(t *testing.T) {
 				ReadTimeout:    500 * time.Microsecond,
 			}
 
-			h := s.Router(ctx, db)
+			h, err := s.Router(ctx, db)
+			if err != nil {
+				t.Fatalf("failed to create request handler: %v", err)
+			}
+
 			h.Get("/read", func(w http.ResponseWriter, r *http.Request) {
 				b := []byte{}
 				c := make(chan error, 1)
