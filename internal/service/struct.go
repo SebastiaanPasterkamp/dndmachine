@@ -19,6 +19,9 @@ type Instance struct {
 
 	// Port is the port number where the service will listen on.
 	Port string `json:"port" arg:"--port,env:DNDMACHINE_PORT" default:"8080" help:"Port to listen on."`
+	// PublicPath is the path to static files to serve. Does not get served if
+	// left empty.
+	PublicPath string `json:"publicPath" arg:"--public-path,env:DNDMACHINE_PUBLIC_PATH" help:"Public path to serve static files from."`
 
 	// RequestTimeout is the maximum duration of a request.
 	RequestTimeout time.Duration `json:"requestTimeout" arg:"--request-timeout" placeholder:"duration" default:"30s" help:"The maximum duration of a request."`
