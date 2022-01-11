@@ -24,3 +24,9 @@ type Instance struct {
 	// cfg is the configuration used to create the connection pool
 	cfg Configuration
 }
+
+type Operator struct {
+	table     string
+	baseQuery string
+	scan      func(row *sql.Row) (interface{}, error)
+}

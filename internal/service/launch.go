@@ -12,6 +12,11 @@ import (
 )
 
 func (s *Instance) Launch(ctx context.Context, db database.Instance) error {
+	handler, err := s.Router(ctx, db)
+	if err != nil {
+		return fmt.Errorf("error initializing request handler: %w", err)
+	}
+
 	listener, err := net.Listen("tcp", ":"+s.Port)
 	if err != nil {
 		return fmt.Errorf("error launching server: %w", err)
@@ -20,7 +25,7 @@ func (s *Instance) Launch(ctx context.Context, db database.Instance) error {
 	s.mu.Lock()
 	s.url = "http://" + listener.Addr().String()
 	s.srv = &http.Server{
-		Handler:           s.Router(ctx, db),
+		Handler:           handler,
 		ReadTimeout:       s.ReadTimeout,
 		ReadHeaderTimeout: s.ReadHeaderTimeout,
 		WriteTimeout:      s.WriteTimeout,

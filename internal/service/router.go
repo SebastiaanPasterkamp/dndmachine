@@ -2,13 +2,22 @@ package service
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/SebastiaanPasterkamp/dndmachine/internal/api"
+	"github.com/SebastiaanPasterkamp/dndmachine/internal/auth"
+	"github.com/SebastiaanPasterkamp/dndmachine/internal/cache"
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/database"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-func (s *Instance) Router(ctx context.Context, db database.Instance) *chi.Mux {
+func (s *Instance) Router(ctx context.Context, db database.Instance) (*chi.Mux, error) {
+	repo, err := cache.Factory(s.Cache)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize cache: %w", err)
+	}
+
 	r := chi.NewRouter()
 
 	// A good base middleware stack
@@ -31,5 +40,14 @@ func (s *Instance) Router(ctx context.Context, db database.Instance) *chi.Mux {
 	r.Get("/health", HandleHealth())
 	r.Get("/version", HandleVersion())
 
-	return r
+	r.Route("/auth", func(r chi.Router) {
+		r.Mount("/", auth.Mount(db, repo))
+	})
+
+	r.Route("/api", func(r chi.Router) {
+		r.Use(auth.WithSession(repo))
+		r.Mount("/", api.Mount(db))
+	})
+
+	return r, nil
 }
