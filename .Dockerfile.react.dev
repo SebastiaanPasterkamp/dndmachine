@@ -1,0 +1,10 @@
+FROM node:17.3-stretch
+
+WORKDIR /code
+
+COPY ui .
+
+EXPOSE 3000
+
+CMD ["npm", "start" ]
+

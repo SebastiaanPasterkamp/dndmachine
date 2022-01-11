@@ -1,0 +1,26 @@
+version: "3.9"
+
+services:
+
+  golang:
+    build:
+      dockerfile: .Dockerfile.go.dev
+      context: .
+    user: "${USER}"
+    volumes:
+    - ./:/air/code
+    links:
+    - redis
+
+  react:
+    build:
+      dockerfile: .Dockerfile.react.dev
+      context: .
+    user: "${USER}"
+    ports:
+    - "3000:3000"
+    volumes:
+    - ./ui:/code
+
+  redis:
+    image: redis

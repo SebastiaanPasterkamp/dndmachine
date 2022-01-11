@@ -1,6 +1,9 @@
 .git
 .github
 
+Dockerfile
+.Dockerfile.*.dev
+
 machine.db
 dndmachine
 

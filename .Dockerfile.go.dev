@@ -1,0 +1,22 @@
+FROM golang:1.17 as build
+
+VOLUME /air/.cache
+
+RUN useradd --home-dir /air air
+
+USER air
+
+WORKDIR /air/code
+
+RUN go install github.com/cosmtrek/air@latest
+
+COPY . .
+
+ENV CGO_ENABLED=0
+ENV GO111MODULE=on
+ENV GOFLAGS=-mod=vendor
+
+EXPOSE 8080
+EXPOSE 4000
+
+CMD [ "air" ]
