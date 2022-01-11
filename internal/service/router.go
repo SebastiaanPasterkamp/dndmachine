@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/api"
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/auth"
@@ -39,6 +40,12 @@ func (s *Instance) Router(ctx context.Context, db database.Instance) (*chi.Mux, 
 	r.Get("/ready", HandleReady(rdy, s.shutdownAck))
 	r.Get("/health", HandleHealth())
 	r.Get("/version", HandleVersion())
+
+	if s.PublicPath != "" {
+		fs := http.FileServer(http.Dir(s.PublicPath))
+		r.Handle("/", http.FileServer(http.Dir(s.PublicPath)))
+		r.Handle("/ui/*", http.StripPrefix("/ui/", fs))
+	}
 
 	r.Route("/auth", func(r chi.Router) {
 		r.Mount("/", auth.Mount(db, repo))
