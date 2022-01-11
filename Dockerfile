@@ -1,4 +1,13 @@
-FROM golang:1.17 as build
+FROM node:17.3-stretch as frontend
+
+WORKDIR /ui
+
+COPY ui .
+
+RUN npm install && \
+    npm run build
+
+FROM golang:1.17 as backend
 
 WORKDIR /app
 
@@ -58,7 +67,12 @@ LABEL build.time=${BUILD_TIME}
 LABEL build.branch=${GIT_BRANCH}
 LABEL build.sha=${GIT_COMMIT}
 
-COPY --from=build /app/dndmachine /app/dndmachine
 COPY --from=nonroot /etc/passwd /etc/passwd
+COPY --from=backend /app/schema /app/LICENSE /app/dndmachine /app/
+COPY --from=frontend /ui/build /app/public/
+
+EXPOSE 8080
 
 ENTRYPOINT [ "/app/dndmachine" ]
+
+CMD ["serve", "--public-path", "/app/public"]

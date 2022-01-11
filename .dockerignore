@@ -1,0 +1,9 @@
+.git
+.github
+
+machine.db
+dndmachine
+
+ui/node_modules
+ui/coverage
+ui/build
