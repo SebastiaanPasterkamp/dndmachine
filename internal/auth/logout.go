@@ -25,7 +25,7 @@ func HandleLogout(repo cache.Repository) http.HandlerFunc {
 			return
 		}
 
-		err = repo.Del(r.Context(), sessionID)
+		err = repo.Del(r.Context(), sessionID.String())
 		if err != nil {
 			log.Printf("failed to destroy session: %v", err)
 		}

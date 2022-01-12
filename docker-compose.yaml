@@ -11,6 +11,8 @@ services:
     - ./:/air/code
     links:
     - redis
+    environment:
+      - DNDMACHINE_REDIS_ADDRESS=redis:6379
 
   react:
     build:
@@ -23,4 +25,4 @@ services:
     - ./ui:/code
 
   redis:
-    image: redis
+    image: redis:alpine

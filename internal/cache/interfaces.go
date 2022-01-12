@@ -6,7 +6,7 @@ import (
 )
 
 type Repository interface {
-	Set(ctx context.Context, key, value interface{}, TTL time.Duration) error
-	Get(ctx context.Context, key interface{}) (interface{}, error)
-	Del(ctx context.Context, key interface{}) error
+	Set(ctx context.Context, key string, value interface{}, TTL time.Duration) error
+	Get(ctx context.Context, key string, value interface{}) error
+	Del(ctx context.Context, key string) error
 }

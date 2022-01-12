@@ -22,6 +22,8 @@ type Instance struct {
 	// PublicPath is the path to static files to serve. Does not get served if
 	// left empty.
 	PublicPath string `json:"publicPath" arg:"--public-path,env:DNDMACHINE_PUBLIC_PATH" help:"Public path to serve static files from."`
+	// Cache is the configuration for a cache implementation.
+	cache.Configuration `json:"cache"`
 
 	// RequestTimeout is the maximum duration of a request.
 	RequestTimeout time.Duration `json:"requestTimeout" arg:"--request-timeout" placeholder:"duration" default:"30s" help:"The maximum duration of a request."`
@@ -39,7 +41,4 @@ type Instance struct {
 	MaxShutdownDelay time.Duration `json:"maxShutdownDelay" arg:"--max-shutdown-delay" placeholder:"duration" default:"0s" help:"The maximum time a shutdown is delayed to allow for a readiness probe to occur. During this time all readiness probes will be unsuccessful, so no more traffic is sent to the terminating service."`
 	// ShutdownDeadline is the maximum grace time for a shutdown.
 	ShutdownDeadline time.Duration `json:"shutdownDeadline" arg:"--shutdown-deadline" placeholder:"duration" default:"5s" help:"The maximum grace time for a shutdown."`
-
-	// Cache is the configuration for a cache implementation.
-	Cache cache.Configuration `json:"cache" arg:"-"`
 }
