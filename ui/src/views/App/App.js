@@ -7,6 +7,7 @@ import { createTheme, ThemeProvider, StyledEngineProvider } from '@mui/material/
 import Dashboard from '../Dashboard'
 import Footer from '../../partials/Footer'
 import Header from '../../partials/Header'
+import Menu from '../../partials/Menu'
 import SignIn from '../SignIn'
 
 async function currentUser() {
@@ -39,6 +40,15 @@ export default function App() {
     [prefersDarkMode],
   );
 
+  const [menuOpen, setMenuOpen] = React.useState(false);
+  const toggleMenu = (open) => (event) => {
+    if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
+      return;
+    }
+
+    setMenuOpen(open);
+  };
+
   const [user, setUser] = React.useState(null);
 
   const mounted = React.useRef(true);
@@ -62,8 +72,12 @@ export default function App() {
         <CssBaseline />
 
         <header>
-         <Header user={user} setUser={setUser} />
+         <Header user={user} setUser={setUser} toggleMenu={toggleMenu} />
         </header>
+
+        <nav>
+          <Menu toggleMenu={toggleMenu} menuOpen={menuOpen} />
+        </nav>
 
         <main>
           {user ? (

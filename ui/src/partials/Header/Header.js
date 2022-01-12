@@ -19,7 +19,7 @@ async function logoutUser(credentials) {
   })
 }
 
-export default function Header({ user, setUser }) {
+export default function Header({ user, setUser, menuOpen, toggleMenu }) {
 
   const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -44,7 +44,8 @@ export default function Header({ user, setUser }) {
           edge="start"
           color="inherit"
           aria-label="menu"
-          sx={{ mr: 2 }}
+          sx={{ mr: 2, ...(menuOpen && { display: 'none' }) }}
+          onClick={toggleMenu(true)}
         >
           <MenuIcon />
         </IconButton>
@@ -90,5 +91,7 @@ export default function Header({ user, setUser }) {
 }
 
 Header.propTypes = {
-  setUser: PropTypes.func.isRequired
+  setUser: PropTypes.func.isRequired,
+  toggleMenu: PropTypes.func.isRequired,
+  menuOpen: PropTypes.bool,
 };
