@@ -33,7 +33,9 @@ func WithSession(repo cache.Repository) func(next http.Handler) http.Handler {
 				return
 			}
 
-			obj, err := repo.Get(r.Context(), sessionID.String())
+			user := model.User{}
+
+			err = repo.Get(r.Context(), sessionID.String(), &user)
 			switch {
 			case errors.Is(err, cache.ErrNotFound):
 				log.Printf("invalid session %q: %v", sessionID, err)
@@ -45,8 +47,6 @@ func WithSession(repo cache.Repository) func(next http.Handler) http.Handler {
 				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 				return
 			}
-
-			user := obj.(model.User)
 
 			ctx := context.WithValue(r.Context(), CurrentUser, &user)
 			r = r.WithContext(ctx)

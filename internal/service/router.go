@@ -14,7 +14,7 @@ import (
 )
 
 func (s *Instance) Router(ctx context.Context, db database.Instance) (*chi.Mux, error) {
-	repo, err := cache.Factory(s.Cache)
+	repo, err := cache.Factory(ctx, s.Configuration)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize cache: %w", err)
 	}

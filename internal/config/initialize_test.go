@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/SebastiaanPasterkamp/dndmachine/internal/cache"
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/config"
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/database"
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/service"
@@ -196,5 +197,6 @@ func serviceInstance(port string) *service.Instance {
 		IdleTimetout:      1 * time.Minute,
 		MaxShutdownDelay:  0 * time.Second,
 		ShutdownDeadline:  5 * time.Second,
+		Configuration:     cache.Configuration{},
 	}
 }
