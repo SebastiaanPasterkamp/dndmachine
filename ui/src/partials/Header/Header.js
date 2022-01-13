@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import AppBar from '@mui/material/AppBar';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import IconButton from '@mui/material/IconButton';
+import { Link } from 'react-router-dom'
 import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuItem from '@mui/material/MenuItem';
@@ -79,8 +80,8 @@ export default function Header({ user, setUser, menuOpen, toggleMenu }) {
               open={Boolean(anchorEl)}
               onClose={handleClose}
             >
-              <MenuItem onClick={handleClose}>Profile</MenuItem>
-              <MenuItem onClick={handleClose}>My account</MenuItem>
+              <MenuItem component={Link} to="/user/1">Profile</MenuItem>
+              <MenuItem component={Link} to="/user/2">Profile 2</MenuItem>
               <MenuItem onClick={handleLogout}>Logout</MenuItem>
             </Menu>
           </div>

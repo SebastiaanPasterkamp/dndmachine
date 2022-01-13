@@ -8,7 +8,9 @@ import Dashboard from '../Dashboard'
 import Footer from '../../partials/Footer'
 import Header from '../../partials/Header'
 import Menu from '../../partials/Menu'
+import ObjectView from '../../partials/ObjectView'
 import SignIn from '../SignIn'
+import UserCard from '../../partials/UserCard'
 
 async function currentUser() {
   return fetch('/auth/current-user', {
@@ -70,30 +72,39 @@ export default function App() {
     <StyledEngineProvider injectFirst>
       <ThemeProvider theme={theme}>
         <CssBaseline />
+        <BrowserRouter>
 
-        <header>
-         <Header user={user} setUser={setUser} toggleMenu={toggleMenu} />
-        </header>
+          <header>
+          <Header user={user} setUser={setUser} toggleMenu={toggleMenu} />
+          </header>
 
-        <nav>
-          <Menu toggleMenu={toggleMenu} menuOpen={menuOpen} />
-        </nav>
+          <nav>
+            <Menu toggleMenu={toggleMenu} menuOpen={menuOpen} />
+          </nav>
 
-        <main>
           {user ? (
-            <BrowserRouter>
+            <main>
               <Routes>
                 <Route path="/" element={<Dashboard />} />
               </Routes>
-            </BrowserRouter>
+              <Routes>
+                <Route
+                  path="/user/:id"
+                  element={<ObjectView component={UserCard} type="user" />}
+                />
+              </Routes>
+            </main>
           ) : (
-            <SignIn setUser={setUser} />
+            <main>
+              <SignIn setUser={setUser} />
+            </main>
           )}
-        </main>
 
-        <footer>
-          <Footer />
-        </footer>
+          <footer>
+            <Footer />
+          </footer>
+
+        </BrowserRouter>
       </ThemeProvider>
     </StyledEngineProvider>
   );
