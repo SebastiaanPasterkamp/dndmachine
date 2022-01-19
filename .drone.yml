@@ -22,6 +22,13 @@ steps:
     depends_on:
       - golang:test
 
+  - name: rego:test
+    image: golang:1.17-stretch
+    commands:
+      - go install github.com/open-policy-agent/opa@v0.36.1
+      - opa test -v internal/policy/rego/
+      - opa test -v internal/policy/testdata/
+
   - name: react:test
     image: node:17.3-stretch
     commands:
@@ -131,6 +138,6 @@ steps:
         **Message:** {{commit.message}}
 ---
 kind: signature
-hmac: efbd014ef0edaac5643053d135b5367d57426c3c46bf97604daac16b7268dcd0
+hmac: c45d22b57cedc1ac94edd08fb5e823bbc7ed7abb341a8c519cc1330cb5f729ca
 
 ...
