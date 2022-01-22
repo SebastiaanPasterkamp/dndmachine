@@ -1,8 +1,29 @@
+FROM golang:1.17 as opa
+
+WORKDIR /app
+
+RUN go install github.com/open-policy-agent/opa@v0.36.1
+
+COPY internal/policy/rego/ rego/ 
+
+RUN opa build \
+		--target wasm \
+		--entrypoint authz/auth/allow \
+		--entrypoint authz/character/allow \
+		--entrypoint authz/pages/allow \
+		--entrypoint authz/user/allow \
+		--ignore \*_test.rego \
+		rego/ && \
+	tar -xzf \
+		./bundle.tar.gz \
+		/policy.wasm
+
 FROM node:17.3-stretch as frontend
 
-WORKDIR /ui
+WORKDIR /app
 
-COPY ui .
+COPY ui . 
+COPY --from=opa /app/policy.wasm public/
 
 RUN npm install && \
     npm run build
@@ -10,8 +31,6 @@ RUN npm install && \
 FROM golang:1.17 as backend
 
 WORKDIR /app
-
-COPY . .
 
 ENV CGO_ENABLED=0
 ENV GO111MODULE=on
@@ -21,6 +40,11 @@ ARG GIT_TAG
 ARG GIT_COMMIT
 ARG GIT_BRANCH
 ARG BUILD_TIME
+
+COPY go.mod go.sum /app/ 
+COPY cmd/ /app/cmd/
+COPY vendor/ /app/vendor/ 
+COPY internal/ /app/internal/ 
 
 RUN go build \
     -o dndmachine \
@@ -67,9 +91,11 @@ LABEL build.time=${BUILD_TIME}
 LABEL build.branch=${GIT_BRANCH}
 LABEL build.sha=${GIT_COMMIT}
 
+COPY LICENSE /app/
+COPY schema/ /app/schema/
 COPY --from=nonroot /etc/passwd /etc/passwd
-COPY --from=backend /app/schema /app/LICENSE /app/dndmachine /app/
-COPY --from=frontend /ui/build /app/public/
+COPY --from=frontend /app/build/ /app/public/
+COPY --from=backend /app/dndmachine /app/
 
 EXPOSE 8080
 
