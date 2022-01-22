@@ -1,7 +1,6 @@
 package model
 
 import (
-	"database/sql"
 	"encoding/json"
 
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/database"
@@ -24,7 +23,7 @@ var CharacterDB = database.NewOperator(
 		id, user_id, name, level, config
 	FROM character
 	`,
-	func(row *sql.Row) (interface{}, error) {
+	func(row database.Scanner) (interface{}, error) {
 		var (
 			c      Character
 			config string

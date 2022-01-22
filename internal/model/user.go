@@ -1,7 +1,6 @@
 package model
 
 import (
-	"database/sql"
 	"encoding/json"
 
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/database"
@@ -25,7 +24,7 @@ var UserDB = database.NewOperator(
 		id, username, password, config
 	FROM user
 	`,
-	func(row *sql.Row) (interface{}, error) {
+	func(row database.Scanner) (interface{}, error) {
 		var (
 			u      User
 			config string
