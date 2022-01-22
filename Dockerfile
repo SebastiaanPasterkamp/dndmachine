@@ -1,13 +1,28 @@
+FROM golang:1.17 as backend
+
+RUN go install github.com/open-policy-agent/opa@v0.36.1
+
+RUN opa build \
+		--target wasm \
+		--entrypoint authz \
+		--ignore \*_test.rego \
+		internal/policy/rego/ && \
+	tar -xzf \
+		./bundle.tar.gz \
+		--directory=ui/public \
+		/policy.wasm
+
 FROM node:17.3-stretch as frontend
 
 WORKDIR /ui
 
 COPY ui .
+COPY --from=backend ui/public/policy.wasm ui/public
 
 RUN npm install && \
     npm run build
 
-FROM golang:1.17 as backend
+FROM backend
 
 WORKDIR /app
 
