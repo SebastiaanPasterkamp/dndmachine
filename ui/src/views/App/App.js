@@ -58,7 +58,7 @@ export default function App() {
   React.useEffect(() => {
     mounted.current = true;
 
-    if(user) {
+    if (user) {
       return;
     }
 
@@ -75,7 +75,7 @@ export default function App() {
         <BrowserRouter>
 
           <header>
-          <Header user={user} setUser={setUser} toggleMenu={toggleMenu} />
+            <Header user={user} setUser={setUser} toggleMenu={toggleMenu} />
           </header>
 
           <nav>
@@ -85,9 +85,10 @@ export default function App() {
           {user ? (
             <main>
               <Routes>
-                <Route path="/" element={<Dashboard />} />
-              </Routes>
-              <Routes>
+                <Route
+                  path="/user"
+                  element={<Dashboard component={UserCard} type="user" />}
+                />
                 <Route
                   path="/user/:id"
                   element={<ObjectView component={UserCard} type="user" />}
