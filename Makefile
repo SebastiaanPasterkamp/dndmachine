@@ -9,9 +9,28 @@ BUILD_TIME=$(shell date)
 
 update: mod-update ui-update
 
-test: go-test ui-test
+test: opa-test go-test ui-test
 
-build: go-build ui-build
+build: opa-build go-build ui-build
+
+opa-build:
+	opa build \
+		--target wasm \
+		--entrypoint authz/auth/allow \
+		--entrypoint authz/character/allow \
+		--entrypoint authz/user/allow \
+		--entrypoint authz \
+		--ignore \*_test.rego \
+		internal/policy/rego/
+	tar -xzvf \
+		./bundle.tar.gz \
+		--directory=ui/public \
+		/policy.wasm
+	rm bundle.tar.gz
+
+opa-test:
+	opa test -v internal/policy/rego
+	opa test -v internal/policy/testdata
 
 dev:
 	USER=${UID}:${GID} \
@@ -65,7 +84,11 @@ docker:
 		.
 
 clean:
-	rm $(BINARY_NAME) cover.out ui/build
+	rm \
+		$(BINARY_NAME) \
+		cover.out \
+		ui/build \
+		ui/public/policy.wasm
 
 serve-ui:
 	docker run \
