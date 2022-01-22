@@ -1,12 +1,22 @@
 package authz.character
 
 character := {
-	"id": 1,
-	"user_id": "alice",
-	"party": {"members": [
-		{"id": 1, "user_id": "alice"},
-		{"id": 2, "user_id": "bob"},
-	]},
+	{
+		"id": 1,
+		"user_id": "alice",
+		"party": {"members": [
+			{"id": 1, "user_id": "alice"},
+			{"id": 2, "user_id": "bob"},
+		]},
+	},
+	{
+		"id": 2,
+		"user_id": "bob",
+		"party": {"members": [
+			{"id": 1, "user_id": "alice"},
+			{"id": 2, "user_id": "bob"},
+		]},
+	},
 }
 
 test_get_anonymous_denied {
@@ -14,7 +24,7 @@ test_get_anonymous_denied {
 		"path": ["api", "character", "1"],
 		"method": "GET",
 	}
-		 with data.character as character
+		with data.character as character
 }
 
 test_get_own_character_allowed {
@@ -23,7 +33,7 @@ test_get_own_character_allowed {
 		"method": "GET",
 		"user": {"id": "alice"},
 	}
-		 with data.character as character
+		with data.character as character
 }
 
 test_get_some_others_character_denied {
@@ -32,7 +42,7 @@ test_get_some_others_character_denied {
 		"method": "GET",
 		"user": {"id": "trudy"},
 	}
-		 with data.character as character
+		with data.character as character
 }
 
 test_get_party_members_allowed {
@@ -41,14 +51,41 @@ test_get_party_members_allowed {
 		"method": "GET",
 		"user": {"id": "bob"},
 	}
-		 with data.character as character
+		with data.character as character
 }
 
-test_as_admin_allowed {
+test_get_as_admin_allowed {
 	allow with input as {
 		"path": ["api", "character", "1"],
 		"method": "GET",
 		"user": {"id": "bob", "role": ["admin"]},
 	}
-		 with data.character as character
+		with data.character as character
+}
+
+test_list_as_party_member_allowed {
+	allow with input as {
+		"path": ["api", "character"],
+		"method": "GET",
+		"user": {"id": "bob"},
+	}
+		with data.character as character
+}
+
+test_list_as_non_party_member_denied {
+	not allow with input as {
+		"path": ["api", "character"],
+		"method": "GET",
+		"user": {"id": "trudy"},
+	}
+		with data.character as character
+}
+
+test_list_as_admin_allowed {
+	allow with input as {
+		"path": ["api", "character"],
+		"method": "GET",
+		"user": {"id": "bob", "role": ["admin"]},
+	}
+		with data.character as character
 }

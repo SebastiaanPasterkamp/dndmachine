@@ -97,7 +97,7 @@ func TestPartial(t *testing.T) {
 			},
 		},
 			true,
-			`(members.user_id = ? AND character.id = ?) OR (character.user_id = ? AND character.id = ?)`,
+			`(character.user_id = ? AND character.id = ?) OR (members.user_id = ? AND character.id = ?)`,
 			[]interface{}{int64(2), int64(1), int64(2), int64(1)},
 		},
 		{"GET some others character denied", map[string]interface{}{
@@ -109,7 +109,7 @@ func TestPartial(t *testing.T) {
 			},
 		},
 			true,
-			`(members.user_id = ? AND character.id = ?) OR (character.user_id = ? AND character.id = ?)`,
+			`(character.user_id = ? AND character.id = ?) OR (members.user_id = ? AND character.id = ?)`,
 			[]interface{}{int64(6), int64(1), int64(6), int64(1)},
 		},
 		{"GET party character possible", map[string]interface{}{
@@ -121,7 +121,7 @@ func TestPartial(t *testing.T) {
 			},
 		},
 			true,
-			`(members.user_id = ? AND character.id = ?) OR (character.user_id = ? AND character.id = ?)`,
+			`(character.user_id = ? AND character.id = ?) OR (members.user_id = ? AND character.id = ?)`,
 			[]interface{}{int64(3), int64(1), int64(3), int64(1)},
 		},
 		{"GET character as admin allowed", map[string]interface{}{

@@ -37,7 +37,7 @@ func TestIfPossible(t *testing.T) {
 		},
 		{"GET own character allowed", "/api/character/1", &model.User{ID: 2},
 			http.StatusOK,
-			`(members.user_id = ? AND character.id = ?) OR (character.user_id = ? AND character.id = ?)`,
+			`(character.user_id = ? AND character.id = ?) OR (members.user_id = ? AND character.id = ?)`,
 			[]interface{}{int64(2), int64(1), int64(2), int64(1)},
 		},
 		{"GET character as admin allowed", "/api/character/1", &model.User{ID: 1, UserAttributes: model.UserAttributes{Role: []string{"admin"}}},
