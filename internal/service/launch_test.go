@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -35,7 +36,6 @@ func TestLaunchAndShutdown(t *testing.T) {
 	for _, tt := range testCases {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-
 			ctx := context.Background()
 
 			db, err := mockDatabase()
@@ -54,9 +54,21 @@ func TestLaunchAndShutdown(t *testing.T) {
 				return s.Launch(gCTx, db)
 			})
 
-			time.Sleep(100 * time.Millisecond)
-
-			URL := s.URL()
+			var URL string
+			check := time.Tick(10 * time.Millisecond)
+			deadline := time.After(1 * time.Second)
+		probe:
+			for {
+				select {
+				case <-check:
+					URL = s.URL()
+					if URL != "" {
+						break probe
+					}
+				case <-deadline:
+					t.Fatalf("Launch failed. No URL.")
+				}
+			}
 
 			res, err := http.Get(URL + tt.firstProbe)
 			if err != nil {
@@ -69,13 +81,18 @@ func TestLaunchAndShutdown(t *testing.T) {
 					tt.firstProbe, tt.firstStatus, res.StatusCode)
 			}
 
+			var shutdown sync.WaitGroup
+
+			shutdown.Add(1)
 			g.Go(func() error {
+				shutdown.Done()
 				return s.Shutdown(gCTx)
 			})
 
-			time.Sleep(100 * time.Millisecond)
-
 			g.Go(func() error {
+				shutdown.Wait()
+				time.Sleep(100 * time.Millisecond)
+
 				res, err := http.Get(URL + tt.secondProbe)
 				if err != nil {
 					return fmt.Errorf("unexpected error calling %q: %v", tt.secondProbe, err)
