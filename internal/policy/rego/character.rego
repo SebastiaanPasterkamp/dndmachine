@@ -7,8 +7,15 @@ allow {
 	input.method == "GET"
 	input.user.id != null
 	character_id := to_number(path_id)
-	allowed[character]
-	character.id == character_id
+	allowed[char]
+	char.id == character_id
+}
+
+allow {
+	input.path = ["api", "character"]
+	input.method == "GET"
+	input.user.id != null
+	allowed[char]
 }
 
 is_admin {
@@ -16,22 +23,22 @@ is_admin {
 }
 
 # Admin can see everything
-allowed[character] {
+allowed[char] {
 	is_admin
-	character = data.character
+	char = data.character[_]
 }
 
 # Non-admin needs to own the character
-allowed[character] {
+allowed[char] {
 	not is_admin
-	character = data.character
-	character.user_id = input.user.id
+	char = data.character[_]
+	char.user_id = input.user.id
 }
 
 # Non-admin needs to be in a party with the character
-allowed[character] {
+allowed[char] {
 	not is_admin
-	character = data.character
-	member = character.party.members[_]
+	char = data.character[_]
+	member = char.party.members[_]
 	member.user_id == input.user.id
 }
