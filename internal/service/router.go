@@ -9,6 +9,7 @@ import (
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/auth"
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/cache"
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/database"
+	"github.com/SebastiaanPasterkamp/dndmachine/internal/policy"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
@@ -17,6 +18,11 @@ func (s *Instance) Router(ctx context.Context, db database.Instance) (*chi.Mux, 
 	repo, err := cache.Factory(ctx, s.Configuration)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize cache: %w", err)
+	}
+
+	opa, err := policy.NewEnforcer(policy.Configuration{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize policy: %w", err)
 	}
 
 	r := chi.NewRouter()
@@ -53,7 +59,7 @@ func (s *Instance) Router(ctx context.Context, db database.Instance) (*chi.Mux, 
 
 	r.Route("/api", func(r chi.Router) {
 		r.Use(auth.WithSession(repo))
-		r.Mount("/", api.Mount(db))
+		r.Mount("/", api.Mount(db, opa))
 	})
 
 	return r, nil
