@@ -24,7 +24,7 @@ func HandleLogin(db database.Instance, repo cache.Repository) http.HandlerFunc {
 			return
 		}
 
-		obj, err := model.UserDB.GetByQuery(r.Context(), db, "username = ?", creds.Username)
+		obj, err := model.UserDB.GetOneByQuery(r.Context(), db, "username = ?", creds.Username)
 		if errors.Is(err, database.ErrNotFound) {
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 

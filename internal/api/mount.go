@@ -13,19 +13,17 @@ func Mount(db database.Instance, e *policy.Enforcer) http.Handler {
 	r := chi.NewRouter()
 
 	r.Route("/user", func(r chi.Router) {
-		r.Route("/{objID:[0-9]+}", func(r chi.Router) {
-			r.Use(policy.IfPossible(e, "authz.user.allow", []string{"user"}))
+		r.Use(policy.IfPossible(e, "authz.user.allow", []string{"user"}))
 
-			r.Get("/", GetObject(db, model.UserDB))
-		})
+		r.Get("/", ListObjectsHandler(db, model.UserDB))
+		r.Get("/{objID:[0-9]+}", GetObjectHandler(db, model.UserDB))
 	})
 
 	r.Route("/character", func(r chi.Router) {
-		r.Route("/{objID:[0-9]+}", func(r chi.Router) {
-			r.Use(policy.IfPossible(e, "authz.character.allow", []string{"character"}))
+		r.Use(policy.IfPossible(e, "authz.character.allow", []string{"character"}))
 
-			r.Get("/", GetObject(db, model.CharacterDB))
-		})
+		r.Get("/", ListObjectsHandler(db, model.CharacterDB))
+		r.Get("/{objID:[0-9]+}", GetObjectHandler(db, model.CharacterDB))
 	})
 
 	return r

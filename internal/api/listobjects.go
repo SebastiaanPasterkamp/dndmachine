@@ -10,13 +10,13 @@ import (
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/policy"
 )
 
-func GetObject(db database.Instance, op database.Operator) http.HandlerFunc {
+func ListObjectsHandler(db database.Instance, op database.Operator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		clause := ctx.Value(policy.Clause).(string)
 		values := ctx.Value(policy.Values).([]interface{})
 
-		obj, err := op.GetByQuery(r.Context(), db, clause, values...)
+		objs, err := op.GetByQuery(r.Context(), db, clause, values...)
 		switch {
 		case errors.Is(err, database.ErrNotFound):
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
@@ -30,7 +30,9 @@ func GetObject(db database.Instance, op database.Operator) http.HandlerFunc {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		err = json.NewEncoder(w).Encode(obj)
+		err = json.NewEncoder(w).Encode(map[string]interface{}{
+			"result": objs,
+		})
 		if err != nil {
 			log.Printf("error returning object ID %q (%q): %v",
 				clause, values, err)

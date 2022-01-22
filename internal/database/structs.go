@@ -28,5 +28,5 @@ type Instance struct {
 type Operator struct {
 	table     string
 	baseQuery string
-	scan      func(row *sql.Row) (interface{}, error)
+	scan      func(row Scanner) (interface{}, error)
 }
