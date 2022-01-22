@@ -3,28 +3,28 @@ package api
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/database"
-	"github.com/go-chi/chi/v5"
+	"github.com/SebastiaanPasterkamp/dndmachine/internal/policy"
 )
 
 func GetObject(db database.Instance, op database.Operator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		objID, err := strconv.Atoi(chi.URLParam(r, "objID"))
-		if err != nil {
-			http.Error(w, fmt.Sprintf("failed to parse object ID %q: %v", objID, err),
-				http.StatusInternalServerError)
+		ctx := r.Context()
+		clause := ctx.Value(policy.Clause).(string)
+		values := ctx.Value(policy.Values).([]interface{})
+
+		obj, err := op.GetByQuery(r.Context(), db, clause, values...)
+		switch {
+		case errors.Is(err, database.ErrNotFound):
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 			return
-		}
-
-		obj, err := op.GetByID(r.Context(), db, objID)
-
-		if errors.Is(err, database.ErrNotFound) {
-			http.Error(w, http.StatusText(404), 404)
+		case err != nil:
+			log.Printf("Error: failed to get object(s) for %q (%q): %v",
+				clause, values, err)
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 			return
 		}
 
@@ -32,7 +32,8 @@ func GetObject(db database.Instance, op database.Operator) http.HandlerFunc {
 		w.WriteHeader(http.StatusOK)
 		err = json.NewEncoder(w).Encode(obj)
 		if err != nil {
-			log.Printf("error returning object ID %d: %v", objID, err)
+			log.Printf("error returning object ID %q (%q): %v",
+				clause, values, err)
 		}
 	}
 }
