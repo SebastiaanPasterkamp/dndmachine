@@ -101,7 +101,7 @@ serve-ui:
 		node:17.3-stretch \
 			npm start
 
-ui-test:
+ui-test-watch:
 	docker run \
 		--rm -it \
 		-u ${UID}:${GID} \
@@ -109,6 +109,15 @@ ui-test:
 		-w /project \
 		node:17.3-stretch \
 			npm test
+
+ui-test:
+	docker run \
+		--rm -it \
+		-u ${UID}:${GID} \
+		-v ${PWD}/ui:/project \
+		-w /project \
+		node:17.3-stretch \
+			npm test -- --all --watchAll=false --coverage
 
 ui-build:
 	docker run \
