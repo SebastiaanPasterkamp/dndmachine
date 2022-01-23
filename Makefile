@@ -18,6 +18,7 @@ opa-build:
 		--target wasm \
 		--entrypoint authz/auth/allow \
 		--entrypoint authz/character/allow \
+		--entrypoint authz/pages/allow \
 		--entrypoint authz/user/allow \
 		--entrypoint authz \
 		--ignore \*_test.rego \
