@@ -1,53 +1,20 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
-import { CurrentUserContext } from '../../context/CurrentUser'
-import { Link } from 'react-router-dom'
-import MenuItem from '@mui/material/MenuItem';
-import getPolicy from './policy'
+import PolicyContext from '../../context/PolicyContext';
+import PolicyLink from './PolicyLink';
 
-export default function ProtectedLink({ to, path, query, data, children, method = 'GET', ...rest }) {
-  const { user } = CurrentUserContext()
-
-  const [allowed, setAllowed] = React.useState();
-
-  const mounted = React.useRef(undefined);
-
-  React.useEffect(() => {
-    mounted.current = true;
-
-    if (allowed !== undefined) {
-      return;
-    }
-
-    const input = {
-      path: (path || to).replace(/\/\/+/, '/').replace(/^\/+|\/+$/, '').split('/'),
-      method,
-      user,
-    }
-
-    getPolicy(input, `authz/${query}/allow`, data)
-      .then(allowed => setAllowed(allowed))
-      .catch(() => setAllowed(false))
-
-    return () => mounted.current = false;
-  }, [user, data, to, path, method, query, allowed])
-
-  if (!allowed) {
-    return null
-  }
-
+export default function ProtectedLink({ data, query, ...rest }) {
   return (
-    <MenuItem
-      component={Link}
-      to={to}
-      {...rest}
-    >
-      {children}
-    </MenuItem>
+    <PolicyContext data={data} query={`authz/${query}/allow`}>
+      <PolicyLink {...rest} />
+    </PolicyContext>
   )
 }
 
 ProtectedLink.propTypes = {
   to: PropTypes.string.isRequired,
+  query: PropTypes.string.isRequired,
+  children: PropTypes.any.isRequired,
   data: PropTypes.object,
+  method: PropTypes.string,
 };
