@@ -18,7 +18,7 @@ async function currentUser() {
     });
 }
 
-export default function CurrentUserProvider({ children }) {
+export default function CurrentUserContext({ children }) {
   const [user, setUser] = React.useState(null);
 
   const mounted = React.useRef(true);
@@ -43,7 +43,7 @@ export default function CurrentUserProvider({ children }) {
   );
 }
 
-export function CurrentUserContext() {
+export function useCurrentUserContext() {
   const context = React.useContext(CurrentUser);
   if (context === undefined) {
     throw new Error("Context must be used within a Provider");

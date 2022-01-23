@@ -10,7 +10,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 
 import Copyright from '../../partials/Copyright'
-import { CurrentUserContext } from '../../context/CurrentUser'
+import { useCurrentUserContext } from '../../context/CurrentUserContext'
 
 async function loginUser(credentials) {
   return fetch('/auth/login', {
@@ -33,7 +33,7 @@ async function loginUser(credentials) {
 }
 
 export default function SignIn() {
-  const { setUser } = CurrentUserContext();
+  const { setUser } = useCurrentUserContext();
 
   const [username, setUserName] = React.useState("");
   const [password, setPassword] = React.useState("");
