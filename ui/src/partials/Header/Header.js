@@ -1,14 +1,17 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
 import AppBar from '@mui/material/AppBar';
-import AccountCircle from '@mui/icons-material/AccountCircle';
+import Avatar from '@mui/material/Avatar';
+import { CurrentUserContext } from '../../context/CurrentUser'
 import IconButton from '@mui/material/IconButton';
-import { Link } from 'react-router-dom'
 import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuItem from '@mui/material/MenuItem';
+import ProtectedLink from '../ProtectedLink';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
+
+import { stringToInitials, stringToColor } from '../../utils';
 
 async function logoutUser(credentials) {
   return fetch('/auth/logout', {
@@ -20,7 +23,10 @@ async function logoutUser(credentials) {
   })
 }
 
-export default function Header({ user, setUser, menuOpen, toggleMenu }) {
+export default function Header({ menuOpen, toggleMenu }) {
+  const { user, setUser } = CurrentUserContext();
+  const { name, username } = user || {};
+  const displayName = name ? name : username;
 
   const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -63,7 +69,13 @@ export default function Header({ user, setUser, menuOpen, toggleMenu }) {
               onClick={handleMenu}
               color="inherit"
             >
-              <AccountCircle />
+              <Avatar
+                sx={{
+                  bgcolor: stringToColor(displayName),
+                }}
+                children={stringToInitials(displayName)}
+                aria-label="name"
+              />
             </IconButton>
             <Menu
               id="menu-appbar"
@@ -80,8 +92,8 @@ export default function Header({ user, setUser, menuOpen, toggleMenu }) {
               open={Boolean(anchorEl)}
               onClose={handleClose}
             >
-              <MenuItem component={Link} to="/user/1">Profile</MenuItem>
-              <MenuItem component={Link} to="/user/2">Profile 2</MenuItem>
+              <ProtectedLink to="/user/1">Profile</ProtectedLink>
+              <ProtectedLink to="/user/2">Profile</ProtectedLink>
               <MenuItem onClick={handleLogout}>Logout</MenuItem>
             </Menu>
           </div>
@@ -92,7 +104,6 @@ export default function Header({ user, setUser, menuOpen, toggleMenu }) {
 }
 
 Header.propTypes = {
-  setUser: PropTypes.func.isRequired,
   toggleMenu: PropTypes.func.isRequired,
   menuOpen: PropTypes.bool,
 };

@@ -1,5 +1,4 @@
 import * as React from 'react';
-import PropTypes from 'prop-types';
 
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
@@ -11,6 +10,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 
 import Copyright from '../../partials/Copyright'
+import { CurrentUserContext } from '../../context/CurrentUser'
 
 async function loginUser(credentials) {
   return fetch('/auth/login', {
@@ -32,7 +32,9 @@ async function loginUser(credentials) {
     });
 }
 
-export default function SignIn({ setUser }) {
+export default function SignIn() {
+  const { setUser } = CurrentUserContext();
+
   const [username, setUserName] = React.useState("");
   const [password, setPassword] = React.useState("");
 
@@ -112,9 +114,5 @@ export default function SignIn({ setUser }) {
       </Box>
       <Copyright sx={{ mt: 8, mb: 4 }} />
     </Container>
- );
+  );
 }
-
-SignIn.propTypes = {
-  setUser: PropTypes.func.isRequired
-};
