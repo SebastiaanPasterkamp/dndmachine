@@ -27,6 +27,7 @@ export default function ProtectedLink({ to, path, query, data, children, method 
 
     getPolicy(input, `authz/${query}/allow`, data)
       .then(allowed => setAllowed(allowed))
+      .catch(() => setAllowed(false))
 
     return () => mounted.current = false;
   }, [user, data, to, path, method, query, allowed])

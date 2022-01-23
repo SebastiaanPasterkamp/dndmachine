@@ -1,9 +1,11 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import AppBar from '@mui/material/AppBar';
 import Avatar from '@mui/material/Avatar';
 import { CurrentUserContext } from '../../context/CurrentUser'
 import IconButton from '@mui/material/IconButton';
+import LogoutIcon from '@mui/icons-material/Logout';
 import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
 import ProtectedLink from '../ProtectedLink';
@@ -101,6 +103,7 @@ export default function Header({ menuOpen, toggleMenu }) {
                 query="user"
                 data={{ user: [user] }}
               >
+                <AccountCircleIcon />
                 Profile
               </ProtectedLink>
               <ProtectedLink
@@ -108,6 +111,7 @@ export default function Header({ menuOpen, toggleMenu }) {
                 query="auth"
                 onClick={handleLogout}
               >
+                <LogoutIcon />
                 Logout
               </ProtectedLink>
             </Menu>

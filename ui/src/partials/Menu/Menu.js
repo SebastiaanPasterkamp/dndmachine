@@ -1,15 +1,17 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
-import Drawer from '@mui/material/Drawer';
-import List from '@mui/material/List';
 import Divider from '@mui/material/Divider';
-import ListItem from '@mui/material/ListItem';
+import Drawer from '@mui/material/Drawer';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import List from '@mui/material/List';
+import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
+import ProtectedLink from '../ProtectedLink';
 
-export default function Menu({menuOpen, toggleMenu}) {
+import items from './items';
+
+export default function Menu({ menuOpen, toggleMenu }) {
   return (
     <Drawer
       anchor='left'
@@ -23,27 +25,26 @@ export default function Menu({menuOpen, toggleMenu}) {
         onKeyDown={toggleMenu(false)}
       >
         <List>
-          {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-            <ListItem button key={text}>
-              <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItem>
-          ))}
-        </List>
-        <Divider />
-        <List>
-          {['All mail', 'Trash', 'Spam'].map((text, index) => (
-            <ListItem button key={text}>
-              <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItem>
+          {items.map(({ title, divider, icon: Icon, faIcon, to }) => (
+            <div key={title}>
+              {divider ? (<Divider />) : null}
+              <ProtectedLink to={to} query="pages">
+                <ListItemButton >
+                  <ListItemIcon>
+                    {faIcon
+                      ? (<FontAwesomeIcon icon={faIcon} />)
+                      : <Icon />
+                    }
+                  </ListItemIcon>
+                  <ListItemText>
+                    {title}
+                  </ListItemText>
+                </ListItemButton>
+              </ProtectedLink>
+            </div>
           ))}
         </List>
       </Box>
-    </Drawer>
+    </Drawer >
   );
 }
