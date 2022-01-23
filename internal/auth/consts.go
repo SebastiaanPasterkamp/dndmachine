@@ -13,3 +13,12 @@ const (
 	// SessionCookie is the name of the session cookie.
 	SessionCookie = "session"
 )
+
+const (
+	// SQLClauses the context key to store and retrieve the SQL where clause
+	// from a partial policy query.
+	SQLClause = ContextField("sql clause")
+	// SQLValues the context key to store and retrieve the SQL where clause
+	// values from a partial policy query.
+	SQLValues = ContextField("sql values")
+)

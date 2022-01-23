@@ -6,15 +6,15 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/SebastiaanPasterkamp/dndmachine/internal/auth"
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/database"
-	"github.com/SebastiaanPasterkamp/dndmachine/internal/policy"
 )
 
 func GetObjectHandler(db database.Instance, op database.Operator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		clause := ctx.Value(policy.Clause).(string)
-		values := ctx.Value(policy.Values).([]interface{})
+		clause := ctx.Value(auth.SQLClause).(string)
+		values := ctx.Value(auth.SQLValues).([]interface{})
 
 		obj, err := op.GetOneByQuery(r.Context(), db, clause, values...)
 		switch {
