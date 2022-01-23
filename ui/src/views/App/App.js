@@ -11,24 +11,10 @@ import Menu from '../../partials/Menu'
 import ObjectView from '../../partials/ObjectView'
 import SignIn from '../SignIn'
 import UserCard from '../../partials/UserCard'
-
-async function currentUser() {
-  return fetch('/auth/current-user', {
-    method: 'GET',
-    credentials: 'same-origin',
-  })
-    .then(response => {
-      if (!response.ok) {
-        return null;
-      }
-      return response.json();
-    })
-    .catch((error) => {
-      console.error('Error:', error);
-    });
-}
+import { CurrentUserContext } from '../../context/CurrentUser'
 
 export default function App() {
+  const { user } = CurrentUserContext();
 
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
 
@@ -51,23 +37,6 @@ export default function App() {
     setMenuOpen(open);
   };
 
-  const [user, setUser] = React.useState(null);
-
-  const mounted = React.useRef(true);
-
-  React.useEffect(() => {
-    mounted.current = true;
-
-    if (user) {
-      return;
-    }
-
-    currentUser()
-      .then(user => setUser(user))
-
-    return () => mounted.current = false;
-  }, [user])
-
   return (
     <StyledEngineProvider injectFirst>
       <ThemeProvider theme={theme}>
@@ -75,7 +44,7 @@ export default function App() {
         <BrowserRouter>
 
           <header>
-            <Header user={user} setUser={setUser} toggleMenu={toggleMenu} />
+            <Header toggleMenu={toggleMenu} />
           </header>
 
           <nav>
@@ -97,7 +66,7 @@ export default function App() {
             </main>
           ) : (
             <main>
-              <SignIn setUser={setUser} />
+              <SignIn />
             </main>
           )}
 
