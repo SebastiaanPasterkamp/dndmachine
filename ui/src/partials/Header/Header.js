@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import AppBar from '@mui/material/AppBar';
 import Avatar from '@mui/material/Avatar';
-import { CurrentUserContext } from '../../context/CurrentUser'
+import { useCurrentUserContext } from '../../context/CurrentUserContext'
 import IconButton from '@mui/material/IconButton';
 import LogoutIcon from '@mui/icons-material/Logout';
 import Menu from '@mui/material/Menu';
@@ -25,7 +25,7 @@ async function logoutUser(credentials) {
 }
 
 export default function Header({ menuOpen, toggleMenu }) {
-  const { user, setUser } = CurrentUserContext();
+  const { user, setUser } = useCurrentUserContext();
   const { name, username } = user || {};
   const displayName = name ? name : username;
 

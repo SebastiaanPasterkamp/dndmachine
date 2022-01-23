@@ -11,10 +11,10 @@ import Menu from '../../partials/Menu'
 import ObjectView from '../../partials/ObjectView'
 import SignIn from '../SignIn'
 import UserCard from '../../partials/UserCard'
-import { CurrentUserContext } from '../../context/CurrentUser'
+import { useCurrentUserContext } from '../../context/CurrentUserContext'
 
 export default function App() {
-  const { user } = CurrentUserContext();
+  const { user } = useCurrentUserContext();
 
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
 
