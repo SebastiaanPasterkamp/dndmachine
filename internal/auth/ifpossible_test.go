@@ -1,4 +1,4 @@
-package policy_test
+package auth_test
 
 import (
 	"context"
@@ -20,7 +20,7 @@ func TestIfPossible(t *testing.T) {
 		t.Fatalf("Failed to initialize policy enforcer: %v", err)
 	}
 
-	authz := policy.IfPossible(e, "authz.character.allow", []string{"character"})
+	authz := auth.IfPossible(e, "authz.character.allow", []string{"character"})
 
 	testCases := []struct {
 		name         string
@@ -54,8 +54,8 @@ func TestIfPossible(t *testing.T) {
 
 			next := authz(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				ctx := r.Context()
-				clause := ctx.Value(policy.Clause).(string)
-				values := ctx.Value(policy.Values).([]interface{})
+				clause := ctx.Value(auth.SQLClause).(string)
+				values := ctx.Value(auth.SQLValues).([]interface{})
 
 				if clause != tt.clause {
 					t.Errorf("Unexpected clause. Expected %q, got %q.",

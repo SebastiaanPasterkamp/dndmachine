@@ -54,11 +54,12 @@ func (s *Instance) Router(ctx context.Context, db database.Instance) (*chi.Mux, 
 	}
 
 	r.Route("/auth", func(r chi.Router) {
-		r.Mount("/", auth.Mount(db, repo))
+		r.Use(auth.WithSession(repo, false))
+		r.Mount("/", auth.Mount(db, opa, repo))
 	})
 
 	r.Route("/api", func(r chi.Router) {
-		r.Use(auth.WithSession(repo))
+		r.Use(auth.WithSession(repo, true))
 		r.Mount("/", api.Mount(db, opa))
 	})
 

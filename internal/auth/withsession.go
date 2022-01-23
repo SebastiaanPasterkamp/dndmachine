@@ -11,13 +11,17 @@ import (
 	"github.com/google/uuid"
 )
 
-func WithSession(repo cache.Repository) func(next http.Handler) http.Handler {
+func WithSession(repo cache.Repository, required bool) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			cookie, err := r.Cookie(SessionCookie)
 			switch {
 			case errors.Is(err, http.ErrNoCookie):
-				http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+				if !required {
+					next.ServeHTTP(w, r)
+				} else {
+					http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+				}
 				return
 			case err != nil:
 				log.Printf("failed to get cookie: %v", err)
@@ -29,7 +33,7 @@ func WithSession(repo cache.Repository) func(next http.Handler) http.Handler {
 			if err != nil {
 				log.Printf("invalid session ID: %v", err)
 				http.SetCookie(w, logoutCookie())
-				http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 				return
 			}
 
@@ -44,6 +48,7 @@ func WithSession(repo cache.Repository) func(next http.Handler) http.Handler {
 				return
 			case err != nil:
 				log.Printf("failed to load session %q: %v", sessionID, err)
+				http.SetCookie(w, logoutCookie())
 				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 				return
 			}

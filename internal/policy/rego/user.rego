@@ -5,16 +5,16 @@ default allow = false
 allow {
 	input.path = ["api", "user", path_id]
 	input.method == "GET"
-	input.user.id != null
+	input.user.id
 	user_id := to_number(path_id)
 	allowed[usr]
 	usr.id == user_id
 }
 
 allow {
-	input.path = ["api", "user"]
+	input.path == ["api", "user"]
 	input.method == "GET"
-	input.user.id != null
+	input.user.id
 	allowed[usr]
 }
 
