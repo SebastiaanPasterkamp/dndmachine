@@ -6,7 +6,6 @@ import { CurrentUserContext } from '../../context/CurrentUser'
 import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
-import MenuItem from '@mui/material/MenuItem';
 import ProtectedLink from '../ProtectedLink';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
@@ -37,7 +36,8 @@ export default function Header({ menuOpen, toggleMenu }) {
     setAnchorEl(null);
   };
 
-  const handleLogout = async () => {
+  const handleLogout = async (e) => {
+    e.preventDefault()
     await logoutUser()
     setAnchorEl(null);
     setUser(null);
@@ -56,9 +56,11 @@ export default function Header({ menuOpen, toggleMenu }) {
         >
           <MenuIcon />
         </IconButton>
+
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           D&amp;D Machine
         </Typography>
+
         {user && (
           <div>
             <IconButton
@@ -77,6 +79,7 @@ export default function Header({ menuOpen, toggleMenu }) {
                 aria-label="name"
               />
             </IconButton>
+
             <Menu
               id="menu-appbar"
               anchorEl={anchorEl}
@@ -92,9 +95,21 @@ export default function Header({ menuOpen, toggleMenu }) {
               open={Boolean(anchorEl)}
               onClose={handleClose}
             >
-              <ProtectedLink to="/user/1">Profile</ProtectedLink>
-              <ProtectedLink to="/user/2">Profile</ProtectedLink>
-              <MenuItem onClick={handleLogout}>Logout</MenuItem>
+              <ProtectedLink
+                to={`user/${user.id}`}
+                path={`/api/user/${user.id}`}
+                query="user"
+                data={{ user: [user] }}
+              >
+                Profile
+              </ProtectedLink>
+              <ProtectedLink
+                to="/auth/logout"
+                query="auth"
+                onClick={handleLogout}
+              >
+                Logout
+              </ProtectedLink>
             </Menu>
           </div>
         )}

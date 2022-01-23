@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'
 import MenuItem from '@mui/material/MenuItem';
 import getPolicy from './policy'
 
-export default function ProtectedLink({ to, data, children, ...rest }) {
+export default function ProtectedLink({ to, path, query, data, children, method = 'GET', ...rest }) {
   const { user } = CurrentUserContext()
 
   const [allowed, setAllowed] = React.useState();
@@ -19,22 +19,17 @@ export default function ProtectedLink({ to, data, children, ...rest }) {
       return;
     }
 
-    getPolicy().then(policy => {
-      policy.setData(data)
+    const input = {
+      path: (path || to).replace(/\/\/+/, '/').replace(/^\/+|\/+$/, '').split('/'),
+      method,
+      user,
+    }
 
-      const input = {
-        path: to.trim('/').split('/'),
-        method: 'GET',
-        user,
-      }
-
-      const result = policy.evaluate(input)
-
-      setAllowed(result)
-    })
+    getPolicy(input, `authz/${query}/allow`, data)
+      .then(allowed => setAllowed(allowed))
 
     return () => mounted.current = false;
-  }, [user, data, to, allowed])
+  }, [user, data, to, path, method, query, allowed])
 
   if (!allowed) {
     return null
