@@ -4,13 +4,11 @@ import CssBaseline from '@mui/material/CssBaseline';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { createTheme, ThemeProvider, StyledEngineProvider } from '@mui/material/styles';
 
-import { UsersDashboard } from '../Users';
+import { UsersDashboard, UserView } from '../Users';
 import Footer from '../../partials/Footer';
 import Header from '../../partials/Header';
 import Menu from '../../partials/Menu';
-import ObjectView from '../../partials/ObjectView';
 import SignIn from '../SignIn';
-import UserCard from '../../partials/UserCard';
 import { useCurrentUserContext } from '../../context/CurrentUserContext';
 
 export default function App() {
@@ -60,7 +58,7 @@ export default function App() {
                 />
                 <Route
                   path="/user/:id"
-                  element={<ObjectView component={UserCard} type="user" />}
+                  element={<UserView />}
                 />
               </Routes>
             </main>
