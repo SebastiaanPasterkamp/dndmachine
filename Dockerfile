@@ -2,6 +2,8 @@ FROM golang:1.17 as backend
 
 RUN go install github.com/open-policy-agent/opa@v0.36.1
 
+COPY internal/policy/rego internal/policy/rego
+
 RUN opa build \
 		--target wasm \
 		--entrypoint authz \
