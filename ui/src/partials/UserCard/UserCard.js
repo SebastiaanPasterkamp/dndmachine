@@ -40,13 +40,6 @@ export default function UserCard(props) {
             />
           )
         }
-        action={
-          loading ? null : (
-            <IconButton aria-label="settings">
-              <MoreVertIcon />
-            </IconButton>
-          )
-        }
         title={
           loading ? (
             <Skeleton
