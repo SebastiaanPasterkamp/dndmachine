@@ -4,14 +4,14 @@ import CssBaseline from '@mui/material/CssBaseline';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { createTheme, ThemeProvider, StyledEngineProvider } from '@mui/material/styles';
 
-import Dashboard from '../Dashboard'
-import Footer from '../../partials/Footer'
-import Header from '../../partials/Header'
-import Menu from '../../partials/Menu'
-import ObjectView from '../../partials/ObjectView'
-import SignIn from '../SignIn'
-import UserCard from '../../partials/UserCard'
-import { useCurrentUserContext } from '../../context/CurrentUserContext'
+import { UsersDashboard } from '../Users';
+import Footer from '../../partials/Footer';
+import Header from '../../partials/Header';
+import Menu from '../../partials/Menu';
+import ObjectView from '../../partials/ObjectView';
+import SignIn from '../SignIn';
+import UserCard from '../../partials/UserCard';
+import { useCurrentUserContext } from '../../context/CurrentUserContext';
 
 export default function App() {
   const { user } = useCurrentUserContext();
@@ -56,7 +56,7 @@ export default function App() {
               <Routes>
                 <Route
                   path="/user"
-                  element={<Dashboard component={UserCard} type="user" />}
+                  element={<UsersDashboard />}
                 />
                 <Route
                   path="/user/:id"

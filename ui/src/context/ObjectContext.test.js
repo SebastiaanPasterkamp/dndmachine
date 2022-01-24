@@ -1,7 +1,7 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
-import Dashboard from './Dashboard';
+import ObjectsContext, { Objects } from './ObjectsContext';
 
 const server = setupServer(
   rest.get('/api/mock', (req, res, ctx) => {
@@ -18,13 +18,16 @@ beforeAll(() => server.listen())
 afterEach(() => server.resetHandlers())
 afterAll(() => server.close())
 
-test('renders Dashboard header', async () => {
-  render(<Dashboard
-    component={({ text }) => (<h1>{text}</h1>)}
-    type="mock"
-  />);
+test('renders result using ObjectContext', async () => {
+  await act(async () => render(
+    <ObjectsContext types={['mock']}>
+      <Objects.Consumer>
+        {({ mock }) => mock ? (<h1>${mock[1].text}</h1>) : 'loading'}
+      </Objects.Consumer>
+    </ObjectsContext>
+  ));
 
-  await waitFor(() => screen.getAllByRole('heading'))
+  await waitFor(() => screen.getByRole('heading'))
 
   const linkElement = screen.getByText(/hello/i);
   expect(linkElement).toBeInTheDocument();
