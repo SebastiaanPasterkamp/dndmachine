@@ -22,7 +22,7 @@ func NewRedis(ctx context.Context, cfg RedisSettings) (*Redis, error) {
 
 	err := rdb.Ping(ctx).Err()
 	if err != nil {
-		return nil, fmt.Errorf("%v: %q", ErrBadConfig, err)
+		return nil, fmt.Errorf("%w: %v", ErrBadConfig, err)
 	}
 
 	return &Redis{rdb: rdb}, nil
@@ -31,11 +31,11 @@ func NewRedis(ctx context.Context, cfg RedisSettings) (*Redis, error) {
 func (r *Redis) Set(ctx context.Context, key string, value interface{}, TTL time.Duration) error {
 	obj, err := json.Marshal(value)
 	if err != nil {
-		return fmt.Errorf("%v: %q", ErrNotStored, err)
+		return fmt.Errorf("%w: %v", ErrNotStored, err)
 	}
 
 	if err := r.rdb.Set(ctx, key, obj, TTL).Err(); err != nil {
-		return fmt.Errorf("%v: %v", ErrNotStored, err)
+		return fmt.Errorf("%w: %v", ErrNotStored, err)
 	}
 
 	return nil
@@ -44,11 +44,11 @@ func (r *Redis) Set(ctx context.Context, key string, value interface{}, TTL time
 func (r *Redis) Get(ctx context.Context, key string, value interface{}) error {
 	obj, err := r.rdb.Get(ctx, key).Result()
 	if err != nil {
-		return fmt.Errorf("%v: %q", ErrNotFound, err)
+		return fmt.Errorf("%w: %v", ErrNotFound, err)
 	}
 
 	if err := json.Unmarshal([]byte(obj), value); err != nil {
-		return fmt.Errorf("%v: %q", ErrNotFound, err)
+		return fmt.Errorf("%w: %v", ErrNotFound, err)
 	}
 
 	return nil
@@ -56,7 +56,7 @@ func (r *Redis) Get(ctx context.Context, key string, value interface{}) error {
 
 func (r *Redis) Del(ctx context.Context, key string) error {
 	if err := r.rdb.Del(ctx, key).Err(); err != nil {
-		return fmt.Errorf("failed to delete from redis: %v", err)
+		return fmt.Errorf("failed to delete from redis: %w", err)
 	}
 
 	return nil

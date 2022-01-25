@@ -65,7 +65,7 @@ func (o Operator) GetByQuery(ctx context.Context, db Instance, clause string, ar
 
 	stmt, err := db.Pool.PrepareContext(ctx, query.String())
 	if err != nil {
-		return objs, fmt.Errorf("failed to prepare %q: %w", query, err)
+		return objs, fmt.Errorf("failed to prepare %q: %w", query.String(), err)
 	}
 	defer stmt.Close()
 
@@ -156,7 +156,7 @@ func (o Operator) UpdateByQuery(ctx context.Context, db Instance, rdr io.Reader,
 
 	stmt, err := db.Pool.PrepareContext(ctx, query.String())
 	if err != nil {
-		return obj, fmt.Errorf("failed to prepare %q: %w", query, err)
+		return obj, fmt.Errorf("failed to prepare %q: %w", query.String(), err)
 	}
 	defer stmt.Close()
 

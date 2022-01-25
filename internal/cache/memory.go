@@ -18,7 +18,7 @@ func NewMemory(ctx context.Context, _ InMemorySettings) (*Memory, error) {
 func (m *Memory) Set(_ context.Context, key string, value interface{}, _ time.Duration) error {
 	obj, err := json.Marshal(value)
 	if err != nil {
-		return fmt.Errorf("%v: %q", ErrNotStored, err)
+		return fmt.Errorf("%w: %v", ErrNotStored, err)
 	}
 
 	m.db[key] = obj
@@ -33,7 +33,7 @@ func (m *Memory) Get(_ context.Context, key string, value interface{}) error {
 	}
 
 	if err := json.Unmarshal(obj, value); err != nil {
-		return fmt.Errorf("%v: %q", ErrNotFound, err)
+		return fmt.Errorf("%w: %v", ErrNotFound, err)
 	}
 
 	return nil
