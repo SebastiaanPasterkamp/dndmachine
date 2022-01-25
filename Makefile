@@ -76,7 +76,6 @@ go-build:
 
 docker:
 	docker build \
-		--no-cache \
 		--build-arg GIT_BRANCH="$(GIT_BRANCH)" \
 		--build-arg GIT_COMMIT="$(GIT_COMMIT)" \
 		--build-arg GIT_TAG="$(GIT_TAG)" \

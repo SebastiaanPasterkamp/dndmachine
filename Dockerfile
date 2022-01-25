@@ -14,8 +14,11 @@ RUN opa build \
 		--entrypoint authz/user/allow \
 		--ignore \*_test.rego \
 		rego/ && \
-	tar -xzf \
-		./bundle.tar.gz \
+	tar \
+		--no-same-owner \
+		--no-same-permissions \
+		--no-xattrs \
+		-xzf ./bundle.tar.gz \
 		/policy.wasm
 
 FROM node:17.3-stretch as frontend
