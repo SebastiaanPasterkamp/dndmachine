@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	ctx := context.Background()
+	ctx := graceful.Shutdown(context.Background())
 
 	log.Printf("%s %s (%s-%s @ %s)\n",
 		build.Name, build.Version, build.Branch, build.Commit, build.Timestamp)
@@ -40,8 +40,6 @@ func main() {
 			log.Fatalf("failed to execute storage command: %v", err)
 		}
 	case args.Server != nil:
-		ctx = graceful.Shutdown(ctx)
-
 		g, gCtx := errgroup.WithContext(ctx)
 
 		g.Go(func() error {
@@ -63,6 +61,8 @@ func main() {
 		if err := g.Wait(); err != nil {
 			log.Fatalf("exit reason: %v\n", err)
 		}
+
+		log.Println("Terminated")
 	default:
 		log.Fatalf("unknown command")
 	}
