@@ -1,4 +1,5 @@
 import { act, render, screen, waitFor } from '@testing-library/react';
+import { Route, Routes, MemoryRouter } from 'react-router-dom';
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import fs from 'fs';
@@ -31,7 +32,16 @@ afterEach(() => server.resetHandlers())
 afterAll(() => server.close())
 
 test('renders UsersDashboard', async () => {
-  await act(async () => render(<UsersDashboard />));
+  await act(async () => render(
+    <MemoryRouter initialEntries={['/user']} >
+      <Routes>
+        <Route
+          path='/user'
+          element={<UsersDashboard />}
+        />
+      </Routes>
+    </MemoryRouter >
+  ));
 
   await waitFor(() => screen.getByText('hello'))
 

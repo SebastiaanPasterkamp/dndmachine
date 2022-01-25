@@ -4,7 +4,8 @@ import CssBaseline from '@mui/material/CssBaseline';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { createTheme, ThemeProvider, StyledEngineProvider } from '@mui/material/styles';
 
-import { UsersDashboard, UserView } from '../Users';
+import UserForm from '../../partials/UserForm';
+import { UserEdit, UsersDashboard, UserView } from '../Users';
 import Footer from '../../partials/Footer';
 import Header from '../../partials/Header';
 import Menu from '../../partials/Menu';
@@ -57,8 +58,16 @@ export default function App() {
                   element={<UsersDashboard />}
                 />
                 <Route
+                  path="/user/new"
+                  element={<UserForm />}
+                />
+                <Route
                   path="/user/:id"
                   element={<UserView />}
+                />
+                <Route
+                  path="/user/:id/edit"
+                  element={<UserEdit />}
                 />
               </Routes>
             </main>

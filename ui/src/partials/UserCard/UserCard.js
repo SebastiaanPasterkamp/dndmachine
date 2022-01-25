@@ -26,6 +26,17 @@ export default function UserCard(props) {
   const loading = id === undefined;
   const displayName = name ? name : username;
 
+  const handleDelete = async (e) => {
+    e.preventDefault();
+
+    fetch(`/api/user/${id}`, {
+      method: 'DELETE',
+      credentials: 'same-origin',
+    })
+      .then(response => (response.ok ? response.json() : null))
+      .catch((error) => console.error('Error:', error));
+  }
+
   return (
     <Card sx={{ maxWidth: 345, m: 2 }}>
       <CardActionArea component={Link} to={`/user/${id}`}>
@@ -99,7 +110,8 @@ export default function UserCard(props) {
           )}
         </CardContent>
       </CardActionArea>
-      <CardActions>
+
+      <CardActions style={{ display: "flex", justifyContent: "space-evenly", alignItems: "center" }}>
         <PolicyLink
           to={`/user/${id}`}
           path={`/api/user/${id}`}
@@ -109,7 +121,7 @@ export default function UserCard(props) {
           View
         </PolicyLink>
         <PolicyLink
-          to={`/user/${id}`}
+          to={`/user/${id}/edit`}
           path={`/api/user/${id}`}
           method="PATCH"
           size="small"
@@ -120,6 +132,7 @@ export default function UserCard(props) {
         <PolicyLink
           to={`/user/${id}`}
           path={`/api/user/${id}`}
+          onClick={handleDelete}
           method="DELETE"
           size="small"
           color="warning"

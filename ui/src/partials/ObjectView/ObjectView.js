@@ -17,10 +17,7 @@ async function getObject(type, id) {
     });
 }
 
-export default function ObjectView({
-  component: Component,
-  type,
-}) {
+export default function ObjectView({ component: Component, type, propname }) {
   const { id } = useParams();
 
   const [error, setError] = React.useState(false);
@@ -40,12 +37,19 @@ export default function ObjectView({
         if (data == null || data.error) {
           setError(true)
         } else {
-          setObject(data.result)
+          setObject(propname
+            ? { [propname]: data.result }
+            : data.result
+          );
         }
       })
 
     return () => mounted.current = false;
-  }, [type, id, error, object])
+  }, [type, id, error, object, propname])
+
+  if (!object) {
+    return null;
+  }
 
   return (
     <Component {...object} />
