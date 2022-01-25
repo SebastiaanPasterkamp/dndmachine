@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"io"
 	"time"
 )
 
@@ -25,8 +26,18 @@ type Instance struct {
 	cfg Configuration
 }
 
+type Persistable interface {
+	Table() string
+	Columns() []string
+	NewFromReader(r io.Reader) (Persistable, error)
+	GetFields() []interface{}
+	NewFromRow(row Scanner) (Persistable, error)
+}
+
 type Operator struct {
-	table     string
-	baseQuery string
-	scan      func(row Scanner) (interface{}, error)
+	persistable  Persistable
+	table        string
+	columns      string
+	placeholders string
+	fields       string
 }

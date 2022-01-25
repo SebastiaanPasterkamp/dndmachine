@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"errors"
 	"log"
 	"net/http"
 
@@ -10,21 +9,19 @@ import (
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/database"
 )
 
-func GetObjectHandler(db database.Instance, op database.Operator) http.HandlerFunc {
+func PostObjectHandler(db database.Instance, op database.Operator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		defer r.Body.Close()
+
 		ctx := r.Context()
 		clause := ctx.Value(auth.SQLClause).(string)
 		values := ctx.Value(auth.SQLValues).([]interface{})
 
-		obj, err := op.GetOneByQuery(r.Context(), db, clause, values...)
-		switch {
-		case errors.Is(err, database.ErrNotFound):
-			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-			return
-		case err != nil:
-			log.Printf("Error: failed to get object for %q (%q): %v",
+		obj, err := op.InsertByQuery(ctx, db, r.Body, clause, values...)
+		if err != nil {
+			log.Printf("Error: failed to insert object for %q (%q): %v",
 				clause, values, err)
-			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
 
@@ -34,7 +31,7 @@ func GetObjectHandler(db database.Instance, op database.Operator) http.HandlerFu
 			"result": obj,
 		})
 		if err != nil {
-			log.Printf("error returning object ID %q (%q): %v",
+			log.Printf("error returning new object %q (%q): %v",
 				clause, values, err)
 		}
 	}

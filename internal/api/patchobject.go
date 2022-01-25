@@ -10,19 +10,21 @@ import (
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/database"
 )
 
-func GetObjectHandler(db database.Instance, op database.Operator) http.HandlerFunc {
+func PatchObjectHandler(db database.Instance, op database.Operator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		defer r.Body.Close()
+
 		ctx := r.Context()
 		clause := ctx.Value(auth.SQLClause).(string)
 		values := ctx.Value(auth.SQLValues).([]interface{})
 
-		obj, err := op.GetOneByQuery(r.Context(), db, clause, values...)
+		obj, err := op.UpdateByQuery(r.Context(), db, r.Body, clause, values...)
 		switch {
 		case errors.Is(err, database.ErrNotFound):
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 			return
 		case err != nil:
-			log.Printf("Error: failed to get object for %q (%q): %v",
+			log.Printf("Error: failed to patch object for %q (%q): %v",
 				clause, values, err)
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 			return
