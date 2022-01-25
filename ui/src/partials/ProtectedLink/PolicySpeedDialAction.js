@@ -8,11 +8,23 @@ export default function PolicySpeedDialAction({ to, path, query, method = 'GET',
   const { user } = useCurrentUserContext()
   const { isAllowed } = usePolicyContext()
 
-  const allowed = isAllowed({
-    path: (path || to).replace(/\/\/+/, '/').replace(/^\/+|\/+$/, '').split('/'),
-    method,
-    user,
-  }, query)
+  const [allowed, setAllowed] = React.useState(false);
+
+  const mounted = React.useRef(true);
+
+  React.useEffect(() => {
+    mounted.current = true;
+
+    const allowed = isAllowed({
+      path: (path || to).replace(/\/\/+/, '/').replace(/^\/+|\/+$/, '').split('/'),
+      method,
+      user,
+    }, query);
+
+    setAllowed(allowed);
+
+    return () => mounted.current = false;
+  }, [to, path, query, method, user, isAllowed])
 
   if (!allowed) {
     return null
