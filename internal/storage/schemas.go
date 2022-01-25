@@ -162,6 +162,10 @@ func ListSchemaDir(dir string) ([]*SchemaChange, error) {
 	}
 
 	for _, file := range files {
+		if !strings.HasSuffix(file.Name(), ".sql") {
+			continue
+		}
+
 		schema, err := NewSchemaChange(filepath.Join(dir, file.Name()))
 		if err != nil {
 			return schemas, fmt.Errorf("failed to load schema %q: %w",
