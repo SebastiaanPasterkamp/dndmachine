@@ -28,10 +28,6 @@ export default function ObjectView({ component: Component, type, propname }) {
   React.useEffect(() => {
     mounted.current = true;
 
-    if (object || error) {
-      return;
-    }
-
     getObject(type, id)
       .then(data => {
         if (data == null || data.error) {
@@ -45,7 +41,7 @@ export default function ObjectView({ component: Component, type, propname }) {
       })
 
     return () => mounted.current = false;
-  }, [type, id, error, object, propname])
+  }, [type, id, propname])
 
   if (!object) {
     return null;

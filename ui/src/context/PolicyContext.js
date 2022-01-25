@@ -12,7 +12,10 @@ async function getPolicy() {
 export default function PolicyContext({ data, query, children }) {
   const [policy, setPolicy] = React.useState(null);
 
-  const isAllowed = !policy ? () => false : (input, override) => {
+  const isAllowed = (input, override) => {
+    if (!policy) {
+      return false;
+    }
     const rules = policy.evaluate(input, override || query);
     for (const i in rules) {
       if (rules[i].result) {
@@ -27,18 +30,14 @@ export default function PolicyContext({ data, query, children }) {
   React.useEffect(() => {
     mounted.current = true;
 
-    if (policy) {
-      return;
-    }
-
-    getPolicy(data)
+    getPolicy()
       .then(policy => {
         policy.setData(data);
         setPolicy(policy)
       })
 
     return () => mounted.current = false;
-  }, [data, policy])
+  }, [data])
 
   return (
     <Policy.Provider value={{ policy, isAllowed }}>
