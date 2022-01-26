@@ -15,11 +15,10 @@ RUN opa build \
 		--ignore \*_test.rego \
 		rego/ && \
 	tar \
-		--no-same-owner \
-		--no-same-permissions \
-		--no-xattrs \
+        --to-stdout \
 		-xzf ./bundle.tar.gz \
-		/policy.wasm
+		/policy.wasm \
+        > policy.wasm
 
 FROM node:17.3-stretch as frontend
 
