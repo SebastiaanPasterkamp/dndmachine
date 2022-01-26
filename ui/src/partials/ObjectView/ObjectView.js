@@ -47,6 +47,10 @@ export default function ObjectView({ component: Component, type, propname }) {
     return null;
   }
 
+  if (error) {
+      return null;
+  }
+
   return (
     <Component {...object} />
   );
