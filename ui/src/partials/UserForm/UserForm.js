@@ -28,7 +28,8 @@ const defaultUser = {
   role: [],
 }
 
-export default function UserForm({ user, onClose }) {
+export default function UserForm({ user, onClose, onDone }) {
+
   const validate = async (values) => {
     var errors = {};
     if ('username' in values) {
@@ -63,6 +64,13 @@ export default function UserForm({ user, onClose }) {
     resetForm,
   } = useFormHelper({ ...defaultUser, ...user }, validate, false)
 
+  const handleCancel = async (e) => {
+    e.preventDefault();
+
+    resetForm();
+    onClose();
+  }
+
   const handleUpdate = async (e) => {
     e.preventDefault();
     const valid = await isValid();
@@ -79,11 +87,12 @@ export default function UserForm({ user, onClose }) {
       body: JSON.stringify(values),
     })
       .then(response => (response.ok ? response.json() : null))
+      .then(({ result }) => result)
       .catch((error) => console.error('Error:', error));
 
     if (updatedUser) {
       resetForm();
-      if (onClose) onClose();
+      if (onDone) onDone(updatedUser);
     }
   }
 
@@ -103,11 +112,14 @@ export default function UserForm({ user, onClose }) {
       body: JSON.stringify(values),
     })
       .then(response => (response.ok ? response.json() : null))
+      .then(({ result }) => result)
       .catch((error) => console.error('Error:', error));
+
+    console.log({ newUser });
 
     if (newUser) {
       resetForm();
-      if (onClose) onClose();
+      if (onDone) onDone(newUser);
     }
   }
 
@@ -180,13 +192,13 @@ export default function UserForm({ user, onClose }) {
           />
         </Grid>
 
-        <Grid item xs={12} lg={6} style={{ display: "flex", justifyContent: "space-evenly", alignItems: "center" }}>
+        <Grid item xs={12} style={{ display: "flex", justifyContent: "space-evenly", alignItems: "center" }}>
           {onClose && (
             <Button
               variant="contained"
               type="cancel"
               color="secondary"
-              onClick={onClose}
+              onClick={handleCancel}
               startIcon={<CancelIcon />}
             >
               Cancel
@@ -231,4 +243,5 @@ export default function UserForm({ user, onClose }) {
 UserForm.propTypes = {
   user: PropTypes.object,
   onClose: PropTypes.func,
+  onDone: PropTypes.func,
 };

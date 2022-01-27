@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Dashboard from '../../partials/Dashboard';
 import Dialog from '@mui/material/Dialog';
 import ObjectsContext, { Objects } from '../../context/ObjectsContext';
@@ -11,9 +12,15 @@ import UserForm from '../../partials/UserForm';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 
 export default function UsersDashboard() {
+  const navigate = useNavigate();
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
+  const handleDone = (newUser) => {
+    console.log({ newUser })
+    navigate(`/user/${newUser.id}`);
+  }
 
   const actions = [
     {
@@ -48,7 +55,7 @@ export default function UsersDashboard() {
               open={open}
               onClose={handleClose}
             >
-              <UserForm onClose={handleClose} />
+              <UserForm onClose={handleClose} onDone={handleDone} />
             </Dialog>
           </PolicyContext>
         )}
