@@ -130,9 +130,7 @@ func TestPartial(t *testing.T) {
 			"user": &model.User{
 				ID:       1,
 				Username: "admin",
-				UserAttributes: model.UserAttributes{
-					Role: []string{"admin"},
-				},
+				Role:     []string{"admin"},
 			},
 		},
 			true,

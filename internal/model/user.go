@@ -10,16 +10,17 @@ import (
 
 type User struct {
 	UserAttributes
-	ID       int64  `json:"id"`
-	Username string `json:"username"`
-	Password string `json:"-"`
-	Email    string `json:"email,omitempty"`
+	ID       int64    `json:"id"`
+	Username string   `json:"username"`
+	Password string   `json:"password,omitempty"`
+	Role     []string `json:"role"`
+	Email    string   `json:"email,omitempty"`
+	GoogleID string   `json:"googleID,omitempty"`
 }
 
 type UserAttributes struct {
-	Role []string `json:"role"`
-	DCI  string   `json:"dci,omitempty"`
-	Name string   `json:"name,omitempty"`
+	DCI  string `json:"dci,omitempty"`
+	Name string `json:"name,omitempty"`
 }
 
 func (User) Table() string {
@@ -27,7 +28,7 @@ func (User) Table() string {
 }
 
 func (User) Columns() []string {
-	return []string{"username", "password", "email", "config"}
+	return []string{"username", "password", "role", "email", "google_id", "config"}
 }
 
 func (u User) NewFromReader(r io.Reader) (database.Persistable, error) {
