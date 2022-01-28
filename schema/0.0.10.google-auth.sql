@@ -1,4 +1,4 @@
--- Rename users to user
+-- Add Google ID to user table
 
 ALTER TABLE `user`
     ADD COLUMN `google_id` TEXT AFTER `email`;
