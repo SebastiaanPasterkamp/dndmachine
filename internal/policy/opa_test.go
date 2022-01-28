@@ -79,6 +79,7 @@ func TestPartial(t *testing.T) {
 		expected bool
 		clause   string
 		values   []interface{}
+		fields   []string
 	}{
 		{"GET anonymous denied", map[string]interface{}{
 			"path":   []string{"api", "character", "1"},
@@ -87,6 +88,7 @@ func TestPartial(t *testing.T) {
 			false,
 			``,
 			[]interface{}{},
+			[]string{},
 		},
 		{"GET own character allowed", map[string]interface{}{
 			"path":   []string{"api", "character", "1"},
@@ -94,23 +96,41 @@ func TestPartial(t *testing.T) {
 			"user": &model.User{
 				ID:       2,
 				Username: "alice",
+				Role:     []string{"player"},
 			},
 		},
 			true,
 			`(character.user_id = ? AND character.id = ?) OR (members.user_id = ? AND character.id = ?)`,
 			[]interface{}{int64(2), int64(1), int64(2), int64(1)},
+			[]string{"user_id", "name", "level", "config"},
 		},
-		{"GET some others character denied", map[string]interface{}{
+		{"GET list of character allowed", map[string]interface{}{
+			"path":   []string{"api", "character"},
+			"method": "GET",
+			"user": &model.User{
+				ID:       2,
+				Username: "alice",
+				Role:     []string{"player"},
+			},
+		},
+			true,
+			`character.user_id = ? OR members.user_id = ?`,
+			[]interface{}{int64(2), int64(2)},
+			[]string{"user_id", "name", "level"},
+		},
+		{"GET some others character will not work", map[string]interface{}{
 			"path":   []string{"api", "character", "1"},
 			"method": "GET",
 			"user": &model.User{
 				ID:       6,
 				Username: "trudy",
+				Role:     []string{"player"},
 			},
 		},
 			true,
 			`(character.user_id = ? AND character.id = ?) OR (members.user_id = ? AND character.id = ?)`,
 			[]interface{}{int64(6), int64(1), int64(6), int64(1)},
+			[]string{"user_id", "name", "level", "config"},
 		},
 		{"GET party character possible", map[string]interface{}{
 			"path":   []string{"api", "character", "1"},
@@ -118,11 +138,13 @@ func TestPartial(t *testing.T) {
 			"user": &model.User{
 				ID:       3,
 				Username: "bob",
+				Role:     []string{"player"},
 			},
 		},
 			true,
 			`(character.user_id = ? AND character.id = ?) OR (members.user_id = ? AND character.id = ?)`,
 			[]interface{}{int64(3), int64(1), int64(3), int64(1)},
+			[]string{"user_id", "name", "level", "config"},
 		},
 		{"GET character as admin allowed", map[string]interface{}{
 			"path":   []string{"api", "character", "1"},
@@ -136,6 +158,63 @@ func TestPartial(t *testing.T) {
 			true,
 			`character.id = ?`,
 			[]interface{}{int64(1)},
+			[]string{"user_id", "name", "level", "config"},
+		},
+		{"PATCH own character allowed", map[string]interface{}{
+			"path":   []string{"api", "character", "1"},
+			"method": "PATCH",
+			"user": &model.User{
+				ID:       2,
+				Username: "alice",
+				Role:     []string{"player"},
+			},
+		},
+			true,
+			`(character.user_id = ? AND character.id = ?)`,
+			[]interface{}{int64(2), int64(1)},
+			[]string{"name", "config"},
+		},
+		{"PATCH others character will not work", map[string]interface{}{
+			"path":   []string{"api", "character", "2"},
+			"method": "PATCH",
+			"user": &model.User{
+				ID:       2,
+				Username: "alice",
+				Role:     []string{"player"},
+			},
+		},
+			true,
+			`(character.user_id = ? AND character.id = ?)`,
+			[]interface{}{int64(2), int64(2)},
+			[]string{"name", "config"},
+		},
+		{"DELETE own character allowed", map[string]interface{}{
+			"path":   []string{"api", "character", "1"},
+			"method": "DELETE",
+			"user": &model.User{
+				ID:       2,
+				Username: "alice",
+				Role:     []string{"player"},
+			},
+		},
+			true,
+			`(character.user_id = ? AND character.id = ?)`,
+			[]interface{}{int64(2), int64(1)},
+			[]string{},
+		},
+		{"DELETE others character will not work", map[string]interface{}{
+			"path":   []string{"api", "character", "2"},
+			"method": "DELETE",
+			"user": &model.User{
+				ID:       2,
+				Username: "alice",
+				Role:     []string{"player"},
+			},
+		},
+			true,
+			`(character.user_id = ? AND character.id = ?)`,
+			[]interface{}{int64(2), int64(2)},
+			[]string{},
 		},
 	}
 
@@ -144,7 +223,7 @@ func TestPartial(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			possible, clause, values, err := p.Partial(ctx,
+			possible, sql, err := p.Partial(ctx,
 				"authz.character.allow",
 				[]string{"character"},
 				tt.input,
@@ -158,14 +237,19 @@ func TestPartial(t *testing.T) {
 					tt.expected, possible)
 			}
 
-			if clause != tt.clause {
+			if sql.Clause != tt.clause {
 				t.Errorf("Unexpected clause. Expected %q, got %q.",
-					tt.clause, clause)
+					tt.clause, sql.Clause)
 			}
 
-			if !reflect.DeepEqual(values, tt.values) {
+			if !reflect.DeepEqual(sql.Values, tt.values) {
 				t.Errorf("Unexpected values. Expected %q, got %q.",
-					tt.values, values)
+					tt.values, sql.Values)
+			}
+
+			if !reflect.DeepEqual(sql.Fields, tt.fields) {
+				t.Errorf("Unexpected fields. Expected %q, got %q.",
+					tt.fields, sql.Fields)
 			}
 		})
 	}

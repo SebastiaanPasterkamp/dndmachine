@@ -83,9 +83,9 @@ func (e *Enforcer) Allow(ctx context.Context, query string, input map[string]int
 	return rs.Allowed(), nil
 }
 
-func (e *Enforcer) Partial(ctx context.Context, query string, unknowns []string, input map[string]interface{}) (bool, string, []interface{}, error) {
+func (e *Enforcer) Partial(ctx context.Context, query string, unknowns []string, input map[string]interface{}) (bool, PartialSQL, error) {
 	if len(unknowns) == 0 {
-		return false, "", []interface{}{}, fmt.Errorf("cannot create partial query without unknowns")
+		return false, PartialSQL{}, ErrMissingUnknowns
 	}
 
 	eng := e.getRegoEngine(query, unknowns...)
@@ -95,25 +95,39 @@ func (e *Enforcer) Partial(ctx context.Context, query string, unknowns []string,
 	e.mu.Unlock()
 
 	if err != nil {
-		return false, "", []interface{}{}, fmt.Errorf("failed to prepare partial opa query: %w", err)
+		return false, PartialSQL{}, fmt.Errorf("failed to prepare partial opa query: %w", err)
 	}
 
 	pq, err := ppq.Partial(ctx, rego.EvalInput(input))
 	if err != nil {
-		return false, "", []interface{}{}, fmt.Errorf("failed to evaluate partial opa query: %w", err)
+		return false, PartialSQL{}, fmt.Errorf("failed to evaluate partial opa query: %w", err)
 	}
 
 	if len(pq.Support) == 0 {
-		return false, "false", []interface{}{}, nil
+		return false, PartialSQL{}, nil
 	}
 
+	allowed := false
+	fields := []string{}
 	for _, module := range pq.Support {
-		if len(module.Rules) == 1 && module.Rules[0].Default {
-			return module.Rules[0].Head.Value.Value.String() == "true", "", []interface{}{}, nil
+		for _, rule := range module.Rules {
+			permit := false
+			if err := ast.As(rule.Head.Value.Value, &permit); err == nil {
+				allowed = allowed || permit
+				continue
+			}
+
+			f := []string{}
+			if err := ast.As(rule.Head.Value.Value, &fields); err == nil {
+				fields = append(fields, f...)
+				allowed = allowed || len(fields) > 0
+				continue
+			}
 		}
 	}
 
-	clause, values, err := queriesToSQL(pq.Support)
+	sql, err := queriesToSQL(pq.Support)
+	sql.Fields = fields
 
-	return true, clause, values, err
+	return allowed, sql, err
 }

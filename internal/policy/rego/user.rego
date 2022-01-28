@@ -2,7 +2,15 @@ package authz.user
 
 default allow = false
 
-allow {
+get_one := ["username", "role", "email", "google_id", "config"]
+
+get_list := ["username", "role", "config"]
+
+patch_one := ["username", "password", "email", "google_id", "config"]
+
+post_one := ["username", "password", "role", "email", "config"]
+
+allow = get_one {
 	input.path = ["api", "user", path_id]
 	input.method == "GET"
 	input.user.id
@@ -11,14 +19,14 @@ allow {
 	usr.id == user_id
 }
 
-allow {
+allow = get_list {
 	input.path == ["api", "user"]
 	input.method == "GET"
 	input.user.id
 	allowed[usr]
 }
 
-allow {
+allow = patch_one {
 	input.path = ["api", "user", path_id]
 	input.method == "PATCH"
 	input.user.id
@@ -28,6 +36,15 @@ allow {
 }
 
 allow {
+	input.path = ["api", "user", path_id]
+	input.method == "DELETE"
+	input.user.id
+	user_id := to_number(path_id)
+	allowed[usr]
+	usr.id == user_id
+}
+
+allow = post_one {
 	input.path == ["api", "user"]
 	input.method == "POST"
 	input.user.id

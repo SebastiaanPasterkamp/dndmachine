@@ -8,29 +8,32 @@ import (
 	"github.com/open-policy-agent/opa/ast"
 )
 
-func queriesToSQL(modules []*ast.Module) (string, []interface{}, error) {
+func queriesToSQL(modules []*ast.Module) (PartialSQL, error) {
 	var (
+		fields  = []string{}
 		clauses = []string{}
 		values  = []interface{}{}
-		clause  string
-		vals    []interface{}
-		err     error
 	)
 
 	for _, module := range modules {
 		for _, rule := range module.Rules {
-			clause, vals, err = expressionsToSQL(rule.Body)
+			sub, err := expressionsToSQL(rule.Body)
 			if err != nil {
-				return "", values, err
+				return PartialSQL{}, err
 			}
-			if clause != "" {
-				clauses = append(clauses, clause)
-				values = append(values, vals...)
+			if sub.Clause != "" {
+				fields = append(fields, sub.Fields...)
+				clauses = append(clauses, sub.Clause)
+				values = append(values, sub.Values...)
 			}
 		}
 	}
 
-	return strings.Join(clauses, " OR "), values, err
+	return PartialSQL{
+		Fields: fields,
+		Clause: strings.Join(clauses, " OR "),
+		Values: values,
+	}, nil
 }
 
 var exprToOperator = map[string]string{
@@ -45,7 +48,7 @@ var exprToOperator = map[string]string{
 	"re_match": "REGEXP",
 }
 
-func expressionsToSQL(expressions []*ast.Expr) (string, []interface{}, error) {
+func expressionsToSQL(expressions []*ast.Expr) (PartialSQL, error) {
 	var (
 		clauses = []string{}
 		values  = []interface{}{}
@@ -58,27 +61,31 @@ func expressionsToSQL(expressions []*ast.Expr) (string, []interface{}, error) {
 
 		tableColumn, value, err := termsToTableColumnAndValue(expr.Operands())
 		if err != nil {
-			return "", values, err
+			return PartialSQL{}, err
 		}
 
 		operator, ok := exprToOperator[expr.Operator().String()]
 		if !ok {
-			return "", values, fmt.Errorf("invalid expression: operator not supported: %q",
-				expr.Operator().String())
+			return PartialSQL{}, fmt.Errorf("%w: %q", ErrOperatorNotSupported, expr.Operator().String())
 		}
 
 		clauses = append(clauses, fmt.Sprintf("%s %s ?", tableColumn, operator))
 		values = append(values, value)
 	}
 
+	sql := PartialSQL{}
 	switch len(clauses) {
 	case 0:
-		return "", values, nil
+		// unchanged
 	case 1:
-		return clauses[0], values, nil
+		sql.Clause = clauses[0]
+		sql.Values = values
 	default:
-		return "(" + strings.Join(clauses, " AND ") + ")", values, nil
+		sql.Clause = "(" + strings.Join(clauses, " AND ") + ")"
+		sql.Values = values
 	}
+
+	return sql, nil
 }
 
 func termsToTableColumnAndValue(terms []*ast.Term) (tableColumn string, value interface{}, err error) {

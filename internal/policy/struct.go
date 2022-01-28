@@ -16,3 +16,9 @@ type Enforcer struct {
 	cache map[interface{}]*rego.Rego
 	rules *ast.Compiler
 }
+
+type PartialSQL struct {
+	Fields []string
+	Clause string
+	Values []interface{}
+}
