@@ -24,7 +24,7 @@ func (s *Instance) version(db database.Instance) error {
 			log.Printf("x %s %q : %q\n", schema.Version, schema.Path, schema.Description)
 		default:
 			return fmt.Errorf("cannot determine if schema %s %q has already been applied: %w",
-				schema.Version.String(), schema.Path, err)
+				schema.Version, schema.Path, err)
 		}
 	}
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/database"
 )
@@ -61,6 +62,8 @@ func (s *Instance) upgrade(db database.Instance, cfg CmdUpgrade) error {
 				return fmt.Errorf("failed to record having applied schema %s %q: %w",
 					schema.Version.String(), schema.Path, err)
 			}
+
+			log.Printf("🗸 %s %q : %q\n", schema.Version, schema.Path, schema.Description)
 
 			newChanges = true
 		default:
