@@ -29,7 +29,13 @@ func HandleLogin(db database.Instance, repo cache.Repository) http.HandlerFunc {
 		obj, err := model.UserDB.GetOneByQuery(
 			r.Context(), db, []string{"username", "password", "role"},
 			"username = ?", creds.Username)
-		if errors.Is(err, database.ErrNotFound) {
+		switch {
+		case errors.Is(err, database.ErrNotFound):
+			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+
+			return
+		case err != nil:
+			log.Printf("failed to get user: %v", err)
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 
 			return
@@ -38,7 +44,6 @@ func HandleLogin(db database.Instance, repo cache.Repository) http.HandlerFunc {
 		user := obj.(model.User)
 
 		err = user.VerifyCredentials(creds.Password)
-
 		switch {
 		case errors.Is(err, bcrypt.ErrMismatchedHashAndPassword):
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
