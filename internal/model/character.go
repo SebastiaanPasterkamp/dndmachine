@@ -2,11 +2,14 @@ package model
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/database"
 )
 
+// Character is the database.Persistable and api.JSONable implementation of a
+// character model.
 type Character struct {
 	CharacterAttributes
 	ID     int64  `json:"id"`
@@ -15,48 +18,97 @@ type Character struct {
 	Level  int    `json:"level"`
 }
 
+// CharacterAttributes are a collection of non-primary fields stored in the
+// config column of the character table.
 type CharacterAttributes struct {
 }
 
-func (Character) Table() string {
-	return `character`
+// GetID returns the primary key of the database.Persistable.
+func (c Character) GetID() int64 {
+	return c.ID
 }
 
-func (Character) Columns() []string {
-	return []string{"user_id", "name", "level", "config"}
-}
+// ExtractFields returns character attributes in order specified by the columns
+// argument.
+func (c Character) ExtractFields(columns []string) ([]interface{}, error) {
+	fields := make([]interface{}, len(columns))
+	for i, column := range columns {
+		switch column {
+		case "user_id":
+			fields[i] = c.UserID
+		case "name":
+			fields[i] = c.Name
+		case "level":
+			fields[i] = c.Level
+		case "config":
+			config, err := json.Marshal(c.CharacterAttributes)
+			if err != nil {
+				return fields, fmt.Errorf("failed to serialize %q: %w", column, err)
+			}
 
-func (c Character) NewFromReader(r io.Reader) (database.Persistable, error) {
-	var n Character
-	err := json.NewDecoder(r).Decode(&n)
-	return n, err
-}
-
-func (c Character) GetFields() []interface{} {
-	config, _ := json.Marshal(c.CharacterAttributes)
-	return []interface{}{
-		c.UserID,
-		c.Name,
-		c.Level,
-		string(config),
-	}
-}
-
-func (Character) NewFromRow(row database.Scanner) (database.Persistable, error) {
-	var (
-		c      Character
-		config string
-	)
-
-	if err := row.Scan(&c.ID, &c.UserID, &c.Name, &c.Level, &config); err != nil {
-		return c, err
+			fields[i] = config
+		default:
+			return fields, fmt.Errorf("%w: %q", database.ErrUnknownColumn, column)
+		}
 	}
 
-	if err := json.Unmarshal([]byte(config), &c.CharacterAttributes); err != nil {
-		return c, err
-	}
-
-	return c, nil
+	return fields, nil
 }
 
-var CharacterDB = database.NewOperatorForPersistable(Character{})
+// CharacterDB is a database Operator to store / retrieve character models.
+var CharacterDB = database.Operator{
+	Table: "character",
+	NewFromRow: func(row database.Scanner, columns []string) (database.Persistable, error) {
+		c := Character{}
+		fields := make([]interface{}, len(columns)+1)
+		fields[len(columns)] = &c.ID
+
+		for i, column := range columns {
+			switch column {
+			case "user_id":
+				fields[i] = &c.UserID
+			case "name":
+				fields[i] = &c.Name
+			case "level":
+				fields[i] = &c.Level
+			case "config":
+				config := []byte{}
+				fields[i] = &config
+			default:
+				return nil, fmt.Errorf("%w: %q", database.ErrUnknownColumn, column)
+			}
+		}
+
+		if err := row.Scan(fields...); err != nil {
+			return nil, err
+		}
+
+		for i, column := range columns {
+			switch column {
+			case "config":
+				if err := json.Unmarshal(*fields[i].(*[]byte), &c.CharacterAttributes); err != nil {
+					return nil, err
+				}
+			}
+		}
+
+		return &c, nil
+	},
+}
+
+// CharacterFromReader returns a character model created from a json stream.
+func CharacterFromReader(r io.Reader) (database.Persistable, error) {
+	c := Character{}
+	err := c.UnmarshalFromReader(r)
+	return c, err
+}
+
+// UnmarshalFromReader updates a character object from a JSON stream.
+func (c *Character) UnmarshalFromReader(r io.Reader) error {
+	return json.NewDecoder(r).Decode(c)
+}
+
+// MarshalToWriter writes a character object as a JSON stream.
+func (c *Character) MarshalToWriter(w io.Writer) error {
+	return json.NewEncoder(w).Encode(c)
+}

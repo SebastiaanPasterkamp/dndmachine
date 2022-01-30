@@ -10,20 +10,24 @@ import (
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/database"
 )
 
+// ListObjectsHandler returns zero or more object from the provided
+// database.Operator using the columns, queries, and values provided by the
+// IfPossible middleware.
 func ListObjectsHandler(db database.Instance, op database.Operator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
+		columns := ctx.Value(auth.SQLColumns).([]string)
 		clause := ctx.Value(auth.SQLClause).(string)
 		values := ctx.Value(auth.SQLValues).([]interface{})
 
-		objs, err := op.GetByQuery(r.Context(), db, clause, values...)
+		objs, err := op.GetByQuery(ctx, db, columns, clause, values...)
 		switch {
 		case errors.Is(err, database.ErrNotFound):
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 			return
 		case err != nil:
-			log.Printf("Error: failed to get object(s) for %q (%q): %v",
-				clause, values, err)
+			log.Printf("Error: failed to get objects columns %q with clause %q and values %q: %v",
+				columns, clause, values, err)
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 			return
 		}

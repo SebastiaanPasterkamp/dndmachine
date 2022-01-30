@@ -14,6 +14,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// HandleLogin is a request handler that checks credentials, and starts a
+// session for an authorized user.
 func HandleLogin(db database.Instance, repo cache.Repository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var creds credentials
@@ -24,7 +26,9 @@ func HandleLogin(db database.Instance, repo cache.Repository) http.HandlerFunc {
 			return
 		}
 
-		obj, err := model.UserDB.GetOneByQuery(r.Context(), db, "username = ?", creds.Username)
+		obj, err := model.UserDB.GetOneByQuery(
+			r.Context(), db, []string{"username", "password", "role"},
+			"username = ?", creds.Username)
 		if errors.Is(err, database.ErrNotFound) {
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 
@@ -33,7 +37,7 @@ func HandleLogin(db database.Instance, repo cache.Repository) http.HandlerFunc {
 
 		user := obj.(model.User)
 
-		err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(creds.Password))
+		err = user.VerifyCredentials(creds.Password)
 
 		switch {
 		case errors.Is(err, bcrypt.ErrMismatchedHashAndPassword):

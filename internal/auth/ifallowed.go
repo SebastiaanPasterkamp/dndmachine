@@ -7,6 +7,8 @@ import (
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/policy"
 )
 
+// IfAllowed is a middleware that allows/denies access to the handler based on
+// the policy. This is an all-or-nothing evaluation.
 func IfAllowed(e *policy.Enforcer, query string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

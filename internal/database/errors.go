@@ -21,4 +21,14 @@ var (
 	// ErrNotFound is the error returned if the requested object does not exist
 	// in the database.
 	ErrNotFound = fmt.Errorf("object not found")
+	// ErrInsertFailed is the error returned if the insert failed.
+	ErrInsertFailed = fmt.Errorf("failed to insert")
+	// ErrUpdateFailed is the error returned if the update failed.
+	ErrUpdateFailed = fmt.Errorf("failed to update")
+	// ErrQueryFailed is the error returned if a database statement failed.
+	ErrQueryFailed = fmt.Errorf("query failed")
+
+	// ErrUnknownColumn is the error returned if a specified column is unknown
+	// for the Persistable.
+	ErrUnknownColumn = fmt.Errorf("unknown column")
 )

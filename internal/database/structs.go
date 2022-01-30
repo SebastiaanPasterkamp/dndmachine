@@ -2,10 +2,10 @@ package database
 
 import (
 	"database/sql"
-	"io"
 	"time"
 )
 
+// Configuration is the structure with database settings.
 type Configuration struct {
 	// DSN is the URI of the database to connect to.
 	DSN string `json:"dsn" arg:"--database,env:DNDMACHINE_DSN" default:"sqlite://machine.db" placeholder:"DSN" help:"The database URI to connect to."`
@@ -19,6 +19,7 @@ type Configuration struct {
 	PingTimeout time.Duration `json:"pingTimeout" arg:"--ping-timeout" default:"3s" placeholder:"duration" help:"The maximum time a ping will wait for a response."`
 }
 
+// Instance is a database instance with a connection pool.
 type Instance struct {
 	// Pool is the database connection pool.
 	Pool *sql.DB
@@ -26,18 +27,9 @@ type Instance struct {
 	cfg Configuration
 }
 
-type Persistable interface {
-	Table() string
-	Columns() []string
-	NewFromReader(r io.Reader) (Persistable, error)
-	GetFields() []interface{}
-	NewFromRow(row Scanner) (Persistable, error)
-}
-
+// Operator provides a collection of functions to store and retrieve a
+// Persistable in the database.
 type Operator struct {
-	persistable  Persistable
-	table        string
-	columns      string
-	placeholders string
-	fields       string
+	Table      string
+	NewFromRow func(s Scanner, columns []string) (Persistable, error)
 }

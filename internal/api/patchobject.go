@@ -1,7 +1,6 @@
 package api
 
 import (
-	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
@@ -10,15 +9,41 @@ import (
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/database"
 )
 
+// PatchObjectHandler updates specific columns of a single object using the
+// provided database.Operator using the columns, queries, and values provided by
+// the IfPossible middleware.
 func PatchObjectHandler(db database.Instance, op database.Operator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
 
 		ctx := r.Context()
+		columns := ctx.Value(auth.SQLColumns).([]string)
 		clause := ctx.Value(auth.SQLClause).(string)
 		values := ctx.Value(auth.SQLValues).([]interface{})
 
-		obj, err := op.UpdateByQuery(r.Context(), db, r.Body, clause, values...)
+		obj, err := op.GetOneByQuery(ctx, db, columns, clause, values...)
+		switch {
+		case errors.Is(err, database.ErrNotFound):
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			return
+		case err != nil:
+			log.Printf("Error: failed to get object columns %q to patch with clause %q and values %q: %v",
+				columns, clause, values, err)
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			return
+		}
+
+		if j, ok := obj.(JSONable); ok {
+			if err := j.UnmarshalFromReader(r.Body); err != nil {
+				log.Printf("Error: failed to patch object %T: %v", j, err)
+				return
+			}
+		} else {
+			log.Printf("Error: object %T cannot be patched with JSON", obj)
+			return
+		}
+
+		_, err = op.UpdateByQuery(r.Context(), db, obj, columns, clause, values...)
 		switch {
 		case errors.Is(err, database.ErrNotFound):
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
@@ -30,14 +55,6 @@ func PatchObjectHandler(db database.Instance, op database.Operator) http.Handler
 			return
 		}
 
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		err = json.NewEncoder(w).Encode(map[string]interface{}{
-			"result": obj,
-		})
-		if err != nil {
-			log.Printf("error returning object ID %q (%q): %v",
-				clause, values, err)
-		}
+		http.Redirect(w, r, r.RequestURI, http.StatusTemporaryRedirect)
 	}
 }

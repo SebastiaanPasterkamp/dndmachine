@@ -27,21 +27,25 @@ func TestIfPossible(t *testing.T) {
 		path         string
 		user         *model.User
 		expectedCode int
+		columns      []string
 		clause       string
 		values       []interface{}
 	}{
 		{"GET anonymous denied", "/api/character/1", nil,
 			http.StatusUnauthorized,
+			[]string{},
 			``,
 			[]interface{}{},
 		},
-		{"GET own character allowed", "/api/character/1", &model.User{ID: 2},
+		{"GET own character allowed", "/api/character/1", &model.User{ID: 2, Role: []string{"player"}},
 			http.StatusOK,
+			[]string{"user_id", "name", "level", "config"},
 			`(character.user_id = ? AND character.id = ?) OR (members.user_id = ? AND character.id = ?)`,
 			[]interface{}{int64(2), int64(1), int64(2), int64(1)},
 		},
 		{"GET character as admin allowed", "/api/character/1", &model.User{ID: 1, Role: []string{"admin"}},
 			http.StatusOK,
+			[]string{"user_id", "name", "level", "config"},
 			`character.id = ?`,
 			[]interface{}{int64(1)},
 		},
@@ -54,8 +58,14 @@ func TestIfPossible(t *testing.T) {
 
 			next := authz(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				ctx := r.Context()
+				columns := ctx.Value(auth.SQLColumns).([]string)
 				clause := ctx.Value(auth.SQLClause).(string)
 				values := ctx.Value(auth.SQLValues).([]interface{})
+
+				if !reflect.DeepEqual(columns, tt.columns) {
+					t.Errorf("Unexpected columns. Expected %q, got %q.",
+						tt.columns, columns)
+				}
 
 				if clause != tt.clause {
 					t.Errorf("Unexpected clause. Expected %q, got %q.",

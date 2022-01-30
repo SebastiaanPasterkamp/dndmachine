@@ -8,29 +8,34 @@ import (
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/policy"
 )
 
+// IfPossible is a middleware policy enforcer that can execute partial
+// evaluations. If an action _could_ be permitted, the context will reflect
+// which SQL fields are accessible, and contain a WHERE clause with values. The
+// handler can use this information to restrict the SQL statement.
 func IfPossible(e *policy.Enforcer, query string, unknowns []string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
 			input := getInput(r)
 
-			possible, clause, values, err := e.Partial(ctx, query, unknowns, input)
+			possible, sql, err := e.Partial(ctx, query, unknowns, input)
 			if err != nil {
-				log.Printf("ERROR: failed to check permission on %q with %q for %q (%q): %v",
-					query, unknowns, clause, values, err)
+				log.Printf("ERROR: failed to check permission for %q with %q and %q as unknowns: %v",
+					query, input, unknowns, err)
 				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 				return
 			}
 
 			if !possible {
-				log.Printf("WARN: permission denied on %q with %q for %q => %q (%q)",
-					query, unknowns, input, clause, values)
+				log.Printf("WARN: permission denied for %q with %q and %q as unknowns.",
+					query, input, unknowns)
 				http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 				return
 			}
 
-			ctx = context.WithValue(ctx, SQLClause, clause)
-			ctx = context.WithValue(ctx, SQLValues, values)
+			ctx = context.WithValue(ctx, SQLColumns, sql.Fields)
+			ctx = context.WithValue(ctx, SQLClause, sql.Clause)
+			ctx = context.WithValue(ctx, SQLValues, sql.Values)
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})

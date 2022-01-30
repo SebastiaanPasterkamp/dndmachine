@@ -15,7 +15,10 @@ const (
 )
 
 const (
-	// SQLClauses the context key to store and retrieve the SQL where clause
+	// SQLColumns the context key to store and retrieve the SQL fields permitted
+	// to access by the partial policy query.
+	SQLColumns = ContextField("sql fields")
+	// SQLClause the context key to store and retrieve the SQL where clause
 	// from a partial policy query.
 	SQLClause = ContextField("sql clause")
 	// SQLValues the context key to store and retrieve the SQL where clause

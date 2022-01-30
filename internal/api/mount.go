@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// Mount returns a chi.Router with all model CRUD end-points.
 func Mount(db database.Instance, e *policy.Enforcer) http.Handler {
 	r := chi.NewRouter()
 
@@ -17,7 +18,7 @@ func Mount(db database.Instance, e *policy.Enforcer) http.Handler {
 		r.Use(auth.IfPossible(e, "authz.user.allow", []string{"user"}))
 
 		r.Get("/", ListObjectsHandler(db, model.UserDB))
-		r.Post("/", PostObjectHandler(db, model.UserDB))
+		r.Post("/", PostObjectHandler(db, model.UserFromReader, model.UserDB))
 		r.Get("/{objID:[0-9]+}", GetObjectHandler(db, model.UserDB))
 		r.Patch("/{objID:[0-9]+}", PatchObjectHandler(db, model.UserDB))
 	})
@@ -26,7 +27,7 @@ func Mount(db database.Instance, e *policy.Enforcer) http.Handler {
 		r.Use(auth.IfPossible(e, "authz.character.allow", []string{"character"}))
 
 		r.Get("/", ListObjectsHandler(db, model.CharacterDB))
-		r.Post("/", PostObjectHandler(db, model.CharacterDB))
+		r.Post("/", PostObjectHandler(db, model.CharacterFromReader, model.CharacterDB))
 		r.Get("/{objID:[0-9]+}", GetObjectHandler(db, model.CharacterDB))
 		r.Patch("/{objID:[0-9]+}", PatchObjectHandler(db, model.CharacterDB))
 	})
