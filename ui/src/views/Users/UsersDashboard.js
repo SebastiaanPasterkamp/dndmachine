@@ -18,7 +18,6 @@ export default function UsersDashboard() {
   const handleClose = () => setOpen(false);
 
   const handleDone = (newUser) => {
-    console.log({ newUser })
     navigate(`/user/${newUser.id}`);
   }
 
