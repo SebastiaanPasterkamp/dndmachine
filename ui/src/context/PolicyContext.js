@@ -9,8 +9,9 @@ async function getPolicy() {
     .then(wasm => opa.loadPolicy(wasm))
 }
 
-export default function PolicyContext({ data, query, children }) {
+export default function PolicyContext({ data, dataFunc, query, children }) {
   const [policy, setPolicy] = React.useState(null);
+  const funcData = dataFunc ? dataFunc() : {};
 
   const isAllowed = (input, override) => {
     if (!policy) {
@@ -32,16 +33,14 @@ export default function PolicyContext({ data, query, children }) {
 
     getPolicy()
       .then(policy => {
-        policy.setData(data);
+        if (!mounted.current) return;
+
+        policy.setData({ ...data, ...funcData });
         setPolicy(policy)
       })
 
     return () => mounted.current = false;
-  }, [data])
-
-  if (!policy) {
-      return null;
-  }
+  }, [data, funcData])
 
   return (
     <Policy.Provider value={{ policy, isAllowed }}>

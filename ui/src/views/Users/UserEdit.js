@@ -31,7 +31,7 @@ export default function UserEdit() {
       <Objects.Consumer>
         {({ user }) => (
           <PolicyContext data={{ user }} query={`authz/user/allow`}>
-            <ObjectView type="user" propname="user" component={userEdit} />
+            <ObjectView type="user" propName="user" component={userEdit} />
           </PolicyContext>
         )}
       </Objects.Consumer>

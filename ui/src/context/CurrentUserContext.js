@@ -26,15 +26,15 @@ export default function CurrentUserContext({ children }) {
   React.useEffect(() => {
     mounted.current = true;
 
-    if (user) {
-      return;
-    }
-
     currentUser()
-      .then(user => setUser(user))
+      .then(user => {
+        if (!mounted.current) return;
+
+        setUser(user);
+      })
 
     return () => mounted.current = false;
-  }, [user])
+  }, [])
 
   return (
     <CurrentUser.Provider value={{ user, setUser }}>

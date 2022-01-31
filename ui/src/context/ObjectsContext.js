@@ -26,14 +26,12 @@ export default function ObjectsContext({ types, children }) {
   React.useEffect(() => {
     mounted.current = true;
 
-    if (objects) {
-      return;
-    }
-
     for (const i in types) {
       const type = types[i];
       getObjects(type)
         .then(result => {
+          if (!mounted.current) return;
+
           setObjects({ ...objects, [type]: result.reduce((l, o) => ({ ...l, [o.id]: o }), {}) });
           setLoading({ ...loading, [type]: false });
         })
@@ -41,7 +39,7 @@ export default function ObjectsContext({ types, children }) {
     }
 
     return () => mounted.current = false;
-  }, [types, loading, objects])
+  }, [types])
 
   return (
     <Objects.Provider value={{ loading, ...objects }}>
