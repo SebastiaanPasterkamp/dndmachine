@@ -39,6 +39,10 @@ export default function PolicyContext({ data, query, children }) {
     return () => mounted.current = false;
   }, [data])
 
+  if (!policy) {
+      return null;
+  }
+
   return (
     <Policy.Provider value={{ policy, isAllowed }}>
       {children}
@@ -53,4 +57,3 @@ export function usePolicyContext() {
   }
   return context;
 }
-
