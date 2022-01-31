@@ -9,9 +9,9 @@ async function getPolicy() {
     .then(wasm => opa.loadPolicy(wasm))
 }
 
-export default function PolicyContext({ data, dataFunc, query, children }) {
+export default function PolicyContext({ data, useContext = () => { }, query, children }) {
   const [policy, setPolicy] = React.useState(null);
-  const funcData = dataFunc ? dataFunc() : {};
+  const funcData = useContext();
 
   const isAllowed = (input, override) => {
     if (!policy) {

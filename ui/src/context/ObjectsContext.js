@@ -32,10 +32,10 @@ export default function ObjectsContext({ types, children }) {
         .then(result => {
           if (!mounted.current) return;
 
-          setObjects({ ...objects, [type]: result.reduce((l, o) => ({ ...l, [o.id]: o }), {}) });
-          setLoading({ ...loading, [type]: false });
+          setObjects(objects => ({ ...objects, [type]: result.reduce((l, o) => ({ ...l, [o.id]: o }), {}) }));
+          setLoading(loading => ({ ...loading, [type]: false }));
         })
-        .catch(() => setObjects({ ...objects, [type]: {} }))
+        .catch(() => setObjects(objects => ({ ...objects, [type]: {} })))
     }
 
     return () => mounted.current = false;

@@ -7,7 +7,7 @@ import UserCard from '../../partials/UserCard';
 export default function UserView() {
   return (
     <ObjectsContext types={['user']}>
-      <PolicyContext dataFunc={useObjectsContext} query={`authz/user/allow`}>
+      <PolicyContext useContext={useObjectsContext} query={`authz/user/allow`}>
         <ObjectView type="user" component={UserCard} />
       </PolicyContext>
     </ObjectsContext>
