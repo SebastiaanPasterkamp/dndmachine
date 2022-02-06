@@ -41,7 +41,7 @@ func HandleLogin(db database.Instance, repo cache.Repository) http.HandlerFunc {
 			return
 		}
 
-		user := obj.(model.User)
+		user := obj.(*model.User)
 
 		err = user.VerifyCredentials(creds.Password)
 		switch {

@@ -17,7 +17,8 @@ func (o Operator) GetByID(ctx context.Context, db Instance, columns []string, id
 func (o Operator) GetOneByQuery(ctx context.Context, db Instance, columns []string, clause string, args ...interface{}) (Persistable, error) {
 	var query strings.Builder
 
-	fmt.Fprintf(&query, "SELECT %s, `id` FROM %s", columnSQL(columns), o.Table)
+	columns = append(columns, "id")
+	fmt.Fprintf(&query, "SELECT %s FROM %s", columnSQL(columns), o.Table)
 	if clause != "" {
 		fmt.Fprintf(&query, " WHERE %s", clause)
 	}
@@ -31,7 +32,9 @@ func (o Operator) GetOneByQuery(ctx context.Context, db Instance, columns []stri
 
 	r := stmt.QueryRowContext(ctx, args...)
 
-	obj, err := o.NewFromRow(r, columns)
+	obj := o.NewPersistable()
+
+	err = obj.UpdateFromScanner(r, columns)
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
 		return nil, fmt.Errorf("select failed: %w: Object %T not found", ErrNotFound, obj)
@@ -49,7 +52,8 @@ func (o Operator) GetByQuery(ctx context.Context, db Instance, columns []string,
 		query strings.Builder
 	)
 
-	fmt.Fprintf(&query, "SELECT %s, `id` FROM %s", columnSQL(columns), o.Table)
+	columns = append(columns, "id")
+	fmt.Fprintf(&query, "SELECT %s FROM %s", columnSQL(columns), o.Table)
 	if clause != "" {
 		fmt.Fprintf(&query, " WHERE %s", clause)
 	}
@@ -73,7 +77,9 @@ func (o Operator) GetByQuery(ctx context.Context, db Instance, columns []string,
 	defer r.Close()
 
 	for r.Next() {
-		obj, err := o.NewFromRow(r, columns)
+		obj := o.NewPersistable()
+
+		err := obj.UpdateFromScanner(r, columns)
 		if err != nil {
 			switch {
 			case errors.Is(err, sql.ErrNoRows):
@@ -169,6 +175,75 @@ func (o Operator) UpdateByQuery(ctx context.Context, db Instance, obj Persistabl
 	return obj.GetID(), nil
 }
 
+// Migrate updates the entire table if the object is a Migratable.
+func (o Operator) Migrate(ctx context.Context, db Instance) error {
+	tx, err := db.Pool.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("failed to start transaction: %w", err)
+	}
+	defer tx.Commit()
+
+	query := fmt.Sprintf("SELECT * FROM %s", o.Table)
+
+	_select, err := tx.PrepareContext(ctx, query)
+	if err != nil {
+		return fmt.Errorf("%w: failed to prepare %q: %v",
+			ErrQueryFailed, query, err)
+	}
+	defer _select.Close()
+
+	r, err := _select.QueryContext(ctx)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return fmt.Errorf("select failed: %w", ErrNotFound)
+		case err != nil:
+			return fmt.Errorf("%w: cannot select from result: %v", ErrQueryFailed, err)
+		}
+	}
+	defer r.Close()
+
+	columns, err := r.Columns()
+	if err != nil {
+		return fmt.Errorf("%w: cannot get columns from result: %v", ErrQueryFailed, err)
+	}
+
+	updates := removeField(columns, "id")
+	query = fmt.Sprintf("UPDATE %s SET %s WHERE id = ?", o.Table, updateSQL(updates))
+
+	_update, err := tx.PrepareContext(ctx, query)
+	if err != nil {
+		return fmt.Errorf("%w: failed to prepare %q: %v",
+			ErrQueryFailed, query, err)
+	}
+	defer _update.Close()
+
+	for r.Next() {
+		obj := o.NewPersistable()
+		m, ok := obj.(Migratable)
+		if !ok {
+			return fmt.Errorf("object %T not Migratable", obj)
+		}
+
+		if err := m.Migrate(r, columns); err != nil {
+			return fmt.Errorf("failed to migrate object %T: %v", obj, err)
+		}
+
+		fields, err := obj.ExtractFields(updates)
+		if err != nil {
+			return fmt.Errorf("failed to get fields %q from %T: %w", columns, obj, err)
+		}
+		fields = append(fields, obj.GetID())
+
+		_, err = _update.ExecContext(ctx, fields...)
+		if err != nil {
+			return fmt.Errorf("failed to update object %T: %w", obj, err)
+		}
+	}
+
+	return nil
+}
+
 func columnSQL(fields []string) string {
 	return strings.Join(fields, ", ")
 }
@@ -179,4 +254,17 @@ func updateSQL(fields []string) string {
 
 func placeholderSQL(fields []string) string {
 	return strings.Repeat(", ?", len(fields))[2:]
+}
+
+func removeField(fields []string, field string) []string {
+	for i := range field {
+		if fields[i] == field {
+			without := []string{}
+			without = append(without, fields[:i]...)
+			without = append(without, fields[i+1:]...)
+			return without
+		}
+	}
+
+	return fields
 }

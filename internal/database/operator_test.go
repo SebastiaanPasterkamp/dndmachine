@@ -32,7 +32,7 @@ func TestGetByID(t *testing.T) {
 			nil, &Mock{ID: 1, Name: "test", MockAttributes: MockAttributes{}}},
 		{"only get config", 1, []string{"config"},
 			nil, &Mock{ID: 1, MockAttributes: MockAttributes{Something: "else"}}},
-		{"get unknown fails", 2, []string{"name"},
+		{"get unknown fails", 999, []string{"name"},
 			database.ErrNotFound, nil},
 		{"get unknown column fails", 1, []string{"name", "foo", "bar"},
 			database.ErrQueryFailed, nil},
@@ -158,7 +158,7 @@ func TestInsertByQuery(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			id, err := MockDB.InsertByQuery(ctx, db, tt.input, tt.columns, "")
+			id, err := MockDB.InsertByQuery(ctx, db, &tt.input, tt.columns, "")
 			if !errors.Is(err, tt.err) {
 				t.Errorf("Unexpected error. Expected %v, got %v.", tt.err, err)
 			}
@@ -223,7 +223,7 @@ func TestUpdateByQuery(t *testing.T) {
 				t.Fatalf("Failed to get DB: %v", err)
 			}
 
-			id, err := MockDB.UpdateByQuery(ctx, db, tt.input, tt.columns, tt.clause, tt.values...)
+			id, err := MockDB.UpdateByQuery(ctx, db, &tt.input, tt.columns, tt.clause, tt.values...)
 			if !errors.Is(err, tt.err) {
 				t.Errorf("Unexpected error. Expected %v, got %v.", tt.err, err)
 			}
@@ -245,6 +245,67 @@ func TestUpdateByQuery(t *testing.T) {
 			tt.expected.ID = id
 			if !reflect.DeepEqual(m, tt.expected) {
 				t.Errorf("Unexpected name. Expected %q, got %q.", tt.expected, m)
+			}
+		})
+	}
+}
+
+func TestMigrate(t *testing.T) {
+	// t.Parallel()
+
+	ctx := context.Background()
+
+	columns := []string{"name", "value", "config"}
+
+	testCases := []struct {
+		name   string
+		id     int64
+		before *Mock
+		after  *Mock
+	}{
+		{"get up-to-date", 1,
+			&Mock{ID: 1, Name: "test", MockAttributes: MockAttributes{Something: "else"}},
+			&Mock{ID: 1, Name: "test", MockAttributes: MockAttributes{Something: "else"}},
+		},
+		{"get outdated", 2,
+			&Mock{ID: 2, Name: "outdated", MockAttributes: MockAttributes{Something: "else"}},
+			&Mock{ID: 2, Name: "updated", Value: "moved", MockAttributes: MockAttributes{Something: "else"}},
+		},
+	}
+
+	for _, tt := range testCases {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			// t.Parallel()
+
+			db, err := mockDatabase()
+			if err != nil {
+				t.Fatalf("Failed to get DB: %v", err)
+			}
+
+			p, err := MockDB.GetByID(ctx, db, columns, tt.id)
+			if err != nil {
+				t.Errorf("Unexpected error: %v", err)
+			}
+
+			if !reflect.DeepEqual(p, tt.before) {
+				t.Errorf("Unexpected %T. Expected %q, got %q.",
+					tt.before, tt.before, p)
+			}
+
+			err = MockDB.Migrate(ctx, db)
+			if err != nil {
+				t.Fatalf("Migration failed: %v", err)
+			}
+
+			p, err = MockDB.GetByID(ctx, db, columns, tt.id)
+			if err != nil {
+				t.Errorf("Unexpected error: %v", err)
+			}
+
+			if !reflect.DeepEqual(p, tt.after) {
+				t.Errorf("Unexpected %T: Expected %q, got %q.",
+					tt.after, tt.after, p)
 			}
 		})
 	}

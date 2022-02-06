@@ -11,4 +11,12 @@ type Scanner interface {
 type Persistable interface {
 	GetID() int64
 	ExtractFields(fields []string) ([]interface{}, error)
+	UpdateFromScanner(row Scanner, columns []string) error
+}
+
+// Migratable is an interface for a PErsistable model that has migration code
+// to make structure adjustments between versions.
+type Migratable interface {
+	GetID() int64
+	Migrate(row Scanner, columns []string) error
 }

@@ -32,7 +32,7 @@ func TestIfAllowed(t *testing.T) {
 			http.StatusUnauthorized},
 		{"POST login allowed", "POST", "/auth/login", nil,
 			http.StatusOK},
-		{"GET logout allowed", "GET", "/auth/logout", &model.User{ID: 1, Role: []string{"admin"}},
+		{"GET logout allowed", "GET", "/auth/logout", &model.User{ID: 1, UserRoles: model.UserRoles{Role: []string{"admin"}}},
 			http.StatusOK},
 	}
 

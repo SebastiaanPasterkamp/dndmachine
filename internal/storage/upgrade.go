@@ -7,6 +7,7 @@ import (
 	"log"
 
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/database"
+	"github.com/SebastiaanPasterkamp/dndmachine/internal/model"
 )
 
 func (s *Instance) upgrade(db database.Instance, cfg CmdUpgrade) error {
@@ -76,6 +77,10 @@ func (s *Instance) upgrade(db database.Instance, cfg CmdUpgrade) error {
 
 	if err := tx.Commit(); err != nil {
 		return fmt.Errorf("failed to commit version upgrades: %w", err)
+	}
+
+	if err := model.UserDB.Migrate(ctx, db); err != nil {
+		return fmt.Errorf("failed to upgrade user modules: %w", err)
 	}
 
 	return nil

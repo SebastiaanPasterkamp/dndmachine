@@ -30,6 +30,6 @@ type Instance struct {
 // Operator provides a collection of functions to store and retrieve a
 // Persistable in the database.
 type Operator struct {
-	Table      string
-	NewFromRow func(s Scanner, columns []string) (Persistable, error)
+	Table          string
+	NewPersistable func() Persistable
 }

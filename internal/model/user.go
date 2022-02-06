@@ -1,6 +1,7 @@
 package model
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -15,12 +16,18 @@ import (
 // credentials.
 type User struct {
 	UserAttributes
-	ID       int64    `json:"id"`
-	Username string   `json:"username"`
-	Password string   `json:"password,omitempty"`
-	Role     []string `json:"role"`
-	Email    string   `json:"email,omitempty"`
-	GoogleID string   `json:"googleID,omitempty"`
+	UserRoles
+	ID       int64  `json:"id"`
+	Username string `json:"username"`
+	Password string `json:"password,omitempty"`
+	Email    string `json:"email,omitempty"`
+	GoogleID string `json:"googleID,omitempty"`
+}
+
+// UserRoles are a collection of secondary fields stored in the role column of
+// the user table. These attributes are only editable by admins.
+type UserRoles struct {
+	Role []string `json:"role"`
 }
 
 // UserAttributes are a collection of non-primary fields stored in the config
@@ -47,16 +54,27 @@ func (u User) ExtractFields(columns []string) ([]interface{}, error) {
 	fields := make([]interface{}, len(columns))
 	for i, column := range columns {
 		switch column {
+		case "id":
+			fields[i] = u.ID
 		case "username":
 			fields[i] = u.Username
 		case "password":
 			fields[i] = u.Password
 		case "role":
-			fields[i] = strings.Join(u.Role, ",")
+			role, err := json.Marshal(u.UserRoles)
+			if err != nil {
+				return fields, fmt.Errorf("failed to serialize %q: %w", column, err)
+			}
+
+			fields[i] = role
 		case "email":
 			fields[i] = u.Email
 		case "google_id":
-			fields[i] = u.GoogleID
+			if u.GoogleID != "" {
+				fields[i] = u.GoogleID
+			} else {
+				fields[i] = sql.NullString{}
+			}
 		case "config":
 			config, err := json.Marshal(u.UserAttributes)
 			if err != nil {
@@ -72,51 +90,147 @@ func (u User) ExtractFields(columns []string) ([]interface{}, error) {
 	return fields, nil
 }
 
+// UpdateFromScanner updates the user object with values contained in the
+// database.Scanner.
+func (u *User) UpdateFromScanner(row database.Scanner, columns []string) error {
+	fields := make([]interface{}, len(columns))
+	for i, column := range columns {
+		switch column {
+		case "id":
+			fields[i] = &u.ID
+		case "username":
+			fields[i] = &u.Username
+		case "password":
+			fields[i] = &u.Password
+		case "role":
+			role := []byte{}
+			fields[i] = &role
+		case "email":
+			fields[i] = &u.Email
+		case "google_id":
+			var value sql.NullString
+			fields[i] = &value
+		case "config":
+			config := []byte{}
+			fields[i] = &config
+		default:
+			return fmt.Errorf("%w: %q", database.ErrUnknownColumn, column)
+		}
+	}
+
+	if err := row.Scan(fields...); err != nil {
+		return fmt.Errorf("failed to scan fields for %q: %w", columns, err)
+	}
+
+	for i, column := range columns {
+		switch column {
+		case "role":
+			role := *fields[i].(*[]byte)
+			if len(role) < 2 {
+				continue
+			}
+			if err := json.Unmarshal(role, &u.UserRoles); err != nil {
+				return fmt.Errorf("failed to unmarshal %q: %w", column, err)
+			}
+		case "google_id":
+			value := fields[i].(*sql.NullString)
+			if value.Valid {
+				u.GoogleID = value.String
+			}
+		case "config":
+			config := *fields[i].(*[]byte)
+			if len(config) < 2 {
+				continue
+			}
+			if err := json.Unmarshal(config, &u.UserAttributes); err != nil {
+				return fmt.Errorf("failed to unmarshal %q: %w", column, err)
+			}
+		}
+	}
+
+	return nil
+}
+
+// Migrate adjusts a User object to migrate fields from the UserAttributes
+// struct to the main User struct.
+func (u *User) Migrate(row database.Scanner, columns []string) error {
+	fields := make([]interface{}, len(columns))
+	for i, column := range columns {
+		switch column {
+		case "id":
+			fields[i] = &u.ID
+		case "username":
+			fields[i] = &u.Username
+		case "password":
+			fields[i] = &u.Password
+		case "role":
+			role := []byte{}
+			fields[i] = &role
+		case "email":
+			fields[i] = &u.Email
+		case "google_id":
+			var value sql.NullString
+			fields[i] = &value
+		case "config":
+			config := []byte{}
+			fields[i] = &config
+		default:
+			return fmt.Errorf("%w: %q", database.ErrUnknownColumn, column)
+		}
+	}
+
+	if err := row.Scan(fields...); err != nil {
+		return fmt.Errorf("failed to migrate fields for %q: %w", columns, err)
+	}
+
+	for i, column := range columns {
+		switch column {
+		case "role":
+			role := *fields[i].(*[]byte)
+			if len(role) < 2 {
+				continue
+			}
+			if err := json.Unmarshal(role, &u.UserRoles); err != nil {
+				u.UserRoles.Role = strings.Split(string(role), ",")
+				// don't try to unmarshal non-json for other fields
+				continue
+			}
+			if err := json.Unmarshal(role, &u.UserAttributes); err != nil {
+				return fmt.Errorf("failed to unmarshal %q: %w", column, err)
+			}
+			if err := json.Unmarshal(role, &u); err != nil {
+				return fmt.Errorf("failed to unmarshal %q: %w", column, err)
+			}
+		case "google_id":
+			value := fields[i].(*sql.NullString)
+			if value.Valid {
+				u.GoogleID = value.String
+			}
+		case "config":
+			config := *fields[i].(*[]byte)
+			if len(config) < 2 {
+				continue
+			}
+			if err := json.Unmarshal(config, &u.UserAttributes); err != nil {
+				return fmt.Errorf("failed to unmarshal %q for attributes: %w", column, err)
+			}
+			if err := json.Unmarshal(config, &u.UserRoles); err != nil {
+				return fmt.Errorf("failed to unmarshal %q for roles: %w", column, err)
+			}
+			if err := json.Unmarshal(config, &u); err != nil {
+				return fmt.Errorf("failed to unmarshal %q for object: %w", column, err)
+			}
+		}
+	}
+
+	return nil
+}
+
 // UserDB is a database Operator to store / retrieve user models.
 var UserDB = database.Operator{
 	Table: "user",
-	NewFromRow: func(row database.Scanner, columns []string) (database.Persistable, error) {
-		u := User{}
-		fields := make([]interface{}, len(columns)+1)
-		fields[len(columns)] = &u.ID
-
-		for i, column := range columns {
-			switch column {
-			case "username":
-				fields[i] = &u.Username
-			case "password":
-				fields[i] = &u.Password
-			case "role":
-				role := ""
-				fields[i] = &role
-			case "email":
-				fields[i] = &u.Email
-			case "google_id":
-				fields[i] = &u.GoogleID
-			case "config":
-				config := []byte{}
-				fields[i] = &config
-			default:
-				return nil, fmt.Errorf("%w: %q", database.ErrUnknownColumn, column)
-			}
-		}
-
-		if err := row.Scan(fields...); err != nil {
-			return nil, err
-		}
-
-		for i, column := range columns {
-			switch column {
-			case "role":
-				u.Role = strings.Split(*fields[i].(*string), ",")
-			case "config":
-				if err := json.Unmarshal(*fields[i].(*[]byte), &u.UserAttributes); err != nil {
-					return nil, err
-				}
-			}
-		}
-
-		return &u, nil
+	NewPersistable: func() database.Persistable {
+		return &User{}
 	},
 }
 
@@ -124,7 +238,7 @@ var UserDB = database.Operator{
 func UserFromReader(r io.Reader) (database.Persistable, error) {
 	u := User{}
 	err := u.UnmarshalFromReader(r)
-	return u, err
+	return &u, err
 }
 
 // UnmarshalFromReader updates a user object from a JSON stream.

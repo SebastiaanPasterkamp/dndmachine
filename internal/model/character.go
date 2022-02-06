@@ -34,6 +34,8 @@ func (c Character) ExtractFields(columns []string) ([]interface{}, error) {
 	fields := make([]interface{}, len(columns))
 	for i, column := range columns {
 		switch column {
+		case "id":
+			fields[i] = c.ID
 		case "user_id":
 			fields[i] = c.UserID
 		case "name":
@@ -55,44 +57,53 @@ func (c Character) ExtractFields(columns []string) ([]interface{}, error) {
 	return fields, nil
 }
 
+// UpdateFromScanner updates the character object with values contained in the
+// database.Scanner.
+func (c *Character) UpdateFromScanner(row database.Scanner, columns []string) error {
+	fields := make([]interface{}, len(columns))
+	for i, column := range columns {
+		switch column {
+		case "id":
+			fields[i] = &c.ID
+		case "user_id":
+			fields[i] = &c.UserID
+		case "name":
+			fields[i] = &c.Name
+		case "level":
+			fields[i] = &c.Level
+		case "config":
+			config := []byte{}
+			fields[i] = &config
+		default:
+			return fmt.Errorf("%w: %q", database.ErrUnknownColumn, column)
+		}
+	}
+
+	if err := row.Scan(fields...); err != nil {
+		return fmt.Errorf("failed to scan fields for %q: %w", columns, err)
+	}
+
+	for i, column := range columns {
+		switch column {
+		case "config":
+			config := *fields[i].(*[]byte)
+			if len(config) < 2 {
+				continue
+			}
+			if err := json.Unmarshal(config, &c.CharacterAttributes); err != nil {
+				return fmt.Errorf("failed to unmarshal %q: %w", column, err)
+			}
+		}
+	}
+
+	return nil
+}
+
 // CharacterDB is a database Operator to store / retrieve character models.
 var CharacterDB = database.Operator{
 	Table: "character",
-	NewFromRow: func(row database.Scanner, columns []string) (database.Persistable, error) {
-		c := Character{}
-		fields := make([]interface{}, len(columns)+1)
-		fields[len(columns)] = &c.ID
-
-		for i, column := range columns {
-			switch column {
-			case "user_id":
-				fields[i] = &c.UserID
-			case "name":
-				fields[i] = &c.Name
-			case "level":
-				fields[i] = &c.Level
-			case "config":
-				config := []byte{}
-				fields[i] = &config
-			default:
-				return nil, fmt.Errorf("%w: %q", database.ErrUnknownColumn, column)
-			}
-		}
-
-		if err := row.Scan(fields...); err != nil {
-			return nil, err
-		}
-
-		for i, column := range columns {
-			switch column {
-			case "config":
-				if err := json.Unmarshal(*fields[i].(*[]byte), &c.CharacterAttributes); err != nil {
-					return nil, err
-				}
-			}
-		}
-
-		return &c, nil
+	NewPersistable: func() database.Persistable {
+		return &Character{}
 	},
 }
 
@@ -100,7 +111,7 @@ var CharacterDB = database.Operator{
 func CharacterFromReader(r io.Reader) (database.Persistable, error) {
 	c := Character{}
 	err := c.UnmarshalFromReader(r)
-	return c, err
+	return &c, err
 }
 
 // UnmarshalFromReader updates a character object from a JSON stream.
