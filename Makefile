@@ -7,7 +7,7 @@ GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 GIT_COMMIT=$(shell git rev-parse --short HEAD)
 BUILD_TIME=$(shell date)
 
-update: mod-update ui-update
+update: go-update ui-update
 
 test: opa-test go-test ui-test
 
@@ -41,7 +41,8 @@ dev:
 		--force-recreate \
 		--abort-on-container-exit
 
-mod-update:
+go-update:
+	go get -u all
 	go mod tidy
 	go mod vendor
 
