@@ -181,7 +181,9 @@ func (o Operator) Migrate(ctx context.Context, db Instance) error {
 	if err != nil {
 		return fmt.Errorf("failed to start transaction: %w", err)
 	}
-	defer tx.Commit()
+	defer func() {
+		_ = tx.Rollback()
+	}()
 
 	query := fmt.Sprintf("SELECT * FROM %s", o.Table)
 
@@ -239,6 +241,11 @@ func (o Operator) Migrate(ctx context.Context, db Instance) error {
 		if err != nil {
 			return fmt.Errorf("failed to update object %T: %w", obj, err)
 		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return fmt.Errorf("failed to commit migration: %w", err)
 	}
 
 	return nil

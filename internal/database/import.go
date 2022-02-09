@@ -19,14 +19,21 @@ func (i *Instance) Import(fh io.Reader) error {
 	if err != nil {
 		return err
 	}
+	defer func() {
+		_ = tx.Rollback()
+	}()
 
 	err = ImportToDB(tx, fh)
 	if err != nil {
-		_ = tx.Rollback()
-		return err
+		return fmt.Errorf("failed to import to DB: %w", err)
 	}
 
-	return tx.Commit()
+	err = tx.Commit()
+	if err != nil {
+		return fmt.Errorf("failed to commit import to DB: %w", err)
+	}
+
+	return nil
 }
 
 func ImportToDB(db *sql.Tx, fh io.Reader) error {

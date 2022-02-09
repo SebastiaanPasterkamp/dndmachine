@@ -74,7 +74,7 @@ func (s SchemaChange) ApplicationDate(db database.Instance) (time.Time, error) {
 		return time.Time{}, err
 	}
 	defer func() {
-		_ = tx.Commit()
+		_ = tx.Rollback()
 	}()
 
 	return s.applicationDate(tx)
@@ -103,14 +103,21 @@ func (s *SchemaChange) Register(db database.Instance) (time.Time, error) {
 	if err != nil {
 		return time.Time{}, err
 	}
+	defer func() {
+		_ = tx.Rollback()
+	}()
 
 	dt, err := s.register(tx)
 	if err != nil {
-		_ = tx.Rollback()
 		return time.Time{}, err
 	}
 
-	return dt, tx.Commit()
+	err = tx.Commit()
+	if err != nil {
+		return dt, fmt.Errorf("failed to register schema change: %w", err)
+	}
+
+	return dt, nil
 }
 
 func (s *SchemaChange) register(db *sql.Tx) (time.Time, error) {
@@ -130,14 +137,21 @@ func Initialize(db database.Instance) error {
 	if err != nil {
 		return err
 	}
+	defer func() {
+		_ = tx.Rollback()
+	}()
 
 	err = initialize(tx)
 	if err != nil {
-		_ = tx.Rollback()
-		return err
+		return fmt.Errorf("failed to initialize database: %w", err)
 	}
 
-	return tx.Commit()
+	err = tx.Commit()
+	if err != nil {
+		return fmt.Errorf("failed to commit initialized database: %w", err)
+	}
+
+	return nil
 }
 
 func initialize(db *sql.Tx) error {
