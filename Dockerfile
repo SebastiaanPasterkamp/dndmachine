@@ -2,9 +2,9 @@ FROM golang:1.17 as opa
 
 WORKDIR /app
 
-RUN go install github.com/open-policy-agent/opa@v0.36.1
+RUN go install github.com/open-policy-agent/opa@v0.37.1
 
-COPY internal/policy/rego/ rego/ 
+COPY internal/policy/rego/ rego/
 
 RUN opa build \
 		--target wasm \
@@ -24,7 +24,7 @@ FROM node:17.3-stretch as frontend
 
 WORKDIR /app
 
-COPY ui . 
+COPY ui .
 COPY --from=opa /app/policy.wasm public/
 
 RUN npm install && \
@@ -43,10 +43,10 @@ ARG GIT_COMMIT
 ARG GIT_BRANCH
 ARG BUILD_TIME
 
-COPY go.mod go.sum /app/ 
+COPY go.mod go.sum /app/
 COPY cmd/ /app/cmd/
-COPY vendor/ /app/vendor/ 
-COPY internal/ /app/internal/ 
+COPY vendor/ /app/vendor/
+COPY internal/ /app/internal/
 
 RUN go build \
     -o dndmachine \
