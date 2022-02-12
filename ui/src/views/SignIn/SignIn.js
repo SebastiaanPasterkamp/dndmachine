@@ -6,7 +6,7 @@ import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Link from '@mui/material/Link';
-import TextField from '@mui/material/TextField';
+import OutlinedForm, { OutlinedInput } from '../../partials/OutlinedForm';
 import Typography from '@mui/material/Typography';
 
 import Copyright from '../../partials/Copyright'
@@ -67,27 +67,23 @@ export default function SignIn() {
         <Typography component="h1" variant="h5">
           Sign in
         </Typography>
-        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-          <TextField
-            margin="normal"
+        <OutlinedForm onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+          <OutlinedInput
+            label="Username or Email Address"
+            name="username"
             required
-            fullWidth
-            id="email"
-            label="Email Address"
-            name="email"
-            autoComplete="email"
+            autoComplete="username"
             autoFocus
+            value={username}
             onChange={e => setUserName(e.target.value)}
           />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            name="password"
+          <OutlinedInput
             label="Password"
+            name="password"
             type="password"
-            id="password"
+            required
             autoComplete="current-password"
+            value={password}
             onChange={e => setPassword(e.target.value)}
           />
           <Button
@@ -110,7 +106,7 @@ export default function SignIn() {
               </Link>
             </Grid>
           </Grid>
-        </Box>
+        </OutlinedForm>
       </Box>
       <Copyright sx={{ mt: 8, mb: 4 }} />
     </Container>
