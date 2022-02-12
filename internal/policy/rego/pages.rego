@@ -43,7 +43,7 @@ private_pages = [
 	["character"],
 	["session"],
 	["party"],
-	["item"],
+	["equipment"],
 	["spell"],
 	["language"],
 	["weapon"],

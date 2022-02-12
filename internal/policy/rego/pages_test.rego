@@ -15,17 +15,17 @@ test_get_anonymous_home_allowed {
 	}
 }
 
-test_get_items_allowed {
+test_get_equipment_allowed {
 	allow with input as {
-		"path": ["item"],
+		"path": ["equipment"],
 		"method": "GET",
 		"user": {"id": 1, "role": ["player"]},
 	}
 }
 
-test_get_anonymous_items_denied {
+test_get_anonymous_equipment_denied {
 	not allow with input as {
-		"path": ["items"],
+		"path": ["equipment"],
 		"method": "GET",
 	}
 }

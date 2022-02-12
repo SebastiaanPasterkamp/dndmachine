@@ -59,8 +59,8 @@ func TestRead(t *testing.T) {
 		expectedError   error
 		expectedContent string
 	}{
-		{"Working", "testdata/good_schemas/0.0.1.init.sql",
-			nil, "-- First schema file\n\nDROP TABLE IF EXISTS `user`;\nCREATE TABLE `user` (\n  `id` INTEGER PRIMARY KEY AUTOINCREMENT\n);\n"},
+		{"Working", "testdata/good_schemas/0.0.2.follow-up.sql",
+			nil, "-- Second schema file\n\nALTER TABLE `user`\n    ADD COLUMN `google_id` TEXT AFTER `email`;\n"},
 		{"Bad path", "testdata/missing.sql",
 			os.ErrNotExist, ""},
 	}

@@ -83,5 +83,9 @@ func (s *Instance) upgrade(db database.Instance, cfg CmdUpgrade) error {
 		return fmt.Errorf("failed to upgrade user modules: %w", err)
 	}
 
+	if err := model.EquipmentDB.Migrate(ctx, db); err != nil {
+		return fmt.Errorf("failed to upgrade equipment modules: %w", err)
+	}
+
 	return nil
 }

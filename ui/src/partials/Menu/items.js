@@ -2,8 +2,8 @@ import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
+import BackpackIcon from '@mui/icons-material/Backpack';
 import ContentPasteIcon from '@mui/icons-material/ContentPaste';
-import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import GavelIcon from '@mui/icons-material/Gavel';
 import GroupsIcon from '@mui/icons-material/Groups';
 import HomeIcon from '@mui/icons-material/Home';
@@ -82,10 +82,10 @@ const items = [
     to: `/party`,
   },
   {
-    title: "Items",
+    title: "Equipment",
     divider: true,
-    icon: FormatListBulletedIcon,
-    to: `/item`,
+    icon: BackpackIcon,
+    to: `/equipment`,
   },
   {
     title: "Spells",

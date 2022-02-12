@@ -32,5 +32,14 @@ func Mount(db database.Instance, e *policy.Enforcer) http.Handler {
 		r.Patch("/{objID:[0-9]+}", PatchObjectHandler(db, model.CharacterDB))
 	})
 
+	r.Route("/equipment", func(r chi.Router) {
+		r.Use(auth.IfPossible(e, "authz.equipment.allow", []string{"equipment"}))
+
+		r.Get("/", ListObjectsHandler(db, model.EquipmentDB))
+		r.Post("/", PostObjectHandler(db, model.EquipmentFromReader, model.EquipmentDB))
+		r.Get("/{objID:[0-9]+}", GetObjectHandler(db, model.EquipmentDB))
+		r.Patch("/{objID:[0-9]+}", PatchObjectHandler(db, model.EquipmentDB))
+	})
+
 	return r
 }
