@@ -78,7 +78,7 @@ export default function UserForm({ user, onClose, onDone }) {
       return;
     }
 
-    const updatedUser = await fetch(`/api/user/${values.id}`, {
+    const success = await fetch(`/api/user/${values.id}`, {
       method: 'PATCH',
       credentials: 'same-origin',
       headers: {
@@ -86,13 +86,12 @@ export default function UserForm({ user, onClose, onDone }) {
       },
       body: JSON.stringify(values),
     })
-      .then(response => (response.ok ? response.json() : null))
-      .then(({ result }) => result)
+      .then(response => response.ok)
       .catch((error) => console.error('Error:', error));
 
-    if (updatedUser) {
+    if (success) {
       resetForm();
-      if (onDone) onDone(updatedUser);
+      if (onDone) onDone();
     }
   }
 
@@ -114,8 +113,6 @@ export default function UserForm({ user, onClose, onDone }) {
       .then(response => (response.ok ? response.json() : null))
       .then(({ result }) => result)
       .catch((error) => console.error('Error:', error));
-
-    console.log({ newUser });
 
     if (newUser) {
       resetForm();
@@ -142,8 +139,9 @@ export default function UserForm({ user, onClose, onDone }) {
       <Grid container>
         <Grid item xs={12} sm={6} sx={{ px: 1 }}>
           <OutlinedInput
-            label="Username *"
+            label="Username"
             name="username"
+            required
             value={values.username}
             error={errors.username}
             onChange={handleInputChange}
@@ -151,9 +149,10 @@ export default function UserForm({ user, onClose, onDone }) {
           />
 
           <OutlinedInput
-            label="Password *"
+            label="Password"
             name="password"
             type="password"
+            required
             value={values.password}
             error={errors.password}
             onChange={handleInputChange}
@@ -161,8 +160,9 @@ export default function UserForm({ user, onClose, onDone }) {
           />
 
           <OutlinedInput
-            label="Email *"
+            label="Email"
             name="email"
+            required
             value={values.email}
             error={errors.email}
             onChange={handleInputChange}
@@ -193,26 +193,6 @@ export default function UserForm({ user, onClose, onDone }) {
         </Grid>
 
         <Grid item xs={12} style={{ display: "flex", justifyContent: "space-evenly", alignItems: "center" }}>
-          {onClose && (
-            <Button
-              variant="contained"
-              type="cancel"
-              color="secondary"
-              onClick={handleCancel}
-              startIcon={<CancelIcon />}
-            >
-              Cancel
-            </Button>
-          )}
-          <Button
-            variant="contained"
-            type="reset"
-            color="warning"
-            onClick={resetForm}
-            startIcon={<BackspaceIcon />}
-          >
-            Reset
-          </Button>
           {values.id ? (
             <Button
               variant="contained"
@@ -234,6 +214,26 @@ export default function UserForm({ user, onClose, onDone }) {
               Create
             </Button>
           )}
+          {onClose && (
+            <Button
+              variant="contained"
+              type="cancel"
+              color="secondary"
+              onClick={handleCancel}
+              startIcon={<CancelIcon />}
+            >
+              Cancel
+            </Button>
+          )}
+          <Button
+            variant="contained"
+            type="reset"
+            color="warning"
+            onClick={resetForm}
+            startIcon={<BackspaceIcon />}
+          >
+            Reset
+          </Button>
         </Grid>
       </Grid>
     </OutlinedForm >

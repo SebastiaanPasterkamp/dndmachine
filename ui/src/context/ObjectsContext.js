@@ -17,16 +17,44 @@ async function getObjects(type) {
     .catch((error) => console.error('Error:', error));
 }
 
+async function getObject(type, id) {
+  return fetch(`/api/${type}/${id}`, {
+    method: 'GET',
+    credentials: 'same-origin',
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    })
+    .then(data => data.result)
+    .catch((error) => console.error('Error:', error));
+}
+
 export default function ObjectsContext({ types, children }) {
+  const mounted = React.useRef(true);
+
   const [objects, setObjects] = React.useState(null);
   const [loading, setLoading] = React.useState(types.reduce((l, t) => ({ ...l, [t]: true }), {}));
 
-  const mounted = React.useRef(true);
+  const updateObject = async (type, id) => {
+    getObject(type, id)
+      .then(object => {
+        if (!mounted.current) return;
+
+        setObjects(objects => {
+          const { [type]: current } = objects;
+          return {
+            ...objects,
+            [type]: { ...current, [id]: object },
+          }
+        });
+      })
+  };
 
   React.useEffect(() => {
-    mounted.current = true;
-
-    for (const i in types) {
+    for (let i = 0; i < types.length; i++) {
       const type = types[i];
       getObjects(type)
         .then(result => {
@@ -35,14 +63,18 @@ export default function ObjectsContext({ types, children }) {
           setObjects(objects => ({ ...objects, [type]: result.reduce((l, o) => ({ ...l, [o.id]: o }), {}) }));
           setLoading(loading => ({ ...loading, [type]: false }));
         })
-        .catch(() => setObjects(objects => ({ ...objects, [type]: {} })))
+        .catch(() => {
+          if (!mounted.current) return;
+
+          setObjects(objects => ({ ...objects, [type]: {} }));
+        })
     }
 
     return () => mounted.current = false;
   }, [types])
 
   return (
-    <Objects.Provider value={{ loading, ...objects }}>
+    <Objects.Provider value={{ loading, updateObject, ...objects }}>
       {children}
     </Objects.Provider>
   );
