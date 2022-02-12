@@ -55,6 +55,6 @@ func PatchObjectHandler(db database.Instance, op database.Operator) http.Handler
 			return
 		}
 
-		http.Redirect(w, r, r.RequestURI, http.StatusTemporaryRedirect)
+		w.WriteHeader(http.StatusNoContent)
 	}
 }
