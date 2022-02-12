@@ -250,6 +250,10 @@ func (u *User) UnmarshalFromReader(r io.Reader) error {
 		return err
 	}
 
+	if u.Password == "" {
+		u.Password = old
+	}
+
 	if u.Password != old {
 		pwd, err := bcrypt.GenerateFromPassword([]byte(u.Password), 0)
 		if err != nil {
