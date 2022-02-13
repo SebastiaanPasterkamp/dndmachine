@@ -11,6 +11,8 @@ update: go-update ui-update
 
 test: opa-test go-test ui-test
 
+coverage: opa-coverage go-coverage ui-coverage
+
 build: opa-build go-build ui-build
 
 opa-build:
@@ -30,8 +32,11 @@ opa-build:
 	rm bundle.tar.gz
 
 opa-test:
-	opa test -v internal/policy/rego
-	opa test -v internal/policy/testdata
+	opa test --verbose internal/policy/rego
+	opa test --verbose internal/policy/testdata
+
+opa-coverage:
+	opa test --coverage --verbose internal/policy/rego
 
 dev:
 	USER=${UID}:${GID} \
@@ -111,6 +116,15 @@ ui-test-watch:
 			npm test
 
 ui-test:
+	docker run \
+		--rm -it \
+		-u ${UID}:${GID} \
+		-v ${PWD}/ui:/project \
+		-w /project \
+		node:17.3-stretch \
+			npm test -- --all --watchAll=false --coverage
+
+ui-coverage:
 	docker run \
 		--rm -it \
 		-u ${UID}:${GID} \
