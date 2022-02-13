@@ -4,6 +4,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { createTheme, ThemeProvider, StyledEngineProvider } from '@mui/material/styles';
 
+import { EquipmentTable } from '../Equipment';
 import { UserCreate, UserEdit, UsersDashboard, UserView } from '../Users';
 import Footer from '../../partials/Footer';
 import Header from '../../partials/Header';
@@ -52,6 +53,13 @@ export default function App() {
           {user ? (
             <main>
               <Routes>
+                {/* Equipment */}
+                <Route
+                  path="/equipment"
+                  element={<EquipmentTable />}
+                />
+
+                {/* Users */}
                 <Route
                   path="/user"
                   element={<UsersDashboard />}
