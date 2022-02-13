@@ -12,7 +12,7 @@ steps:
     image: golang:1.17-stretch
     commands:
       # 'go test -race ...' not supported on ARM
-      - go test -v -count=10 ./...
+      - go test -v -count=1 ./...
 
   - name: golang:coverage:report
     image: golang:1.17-stretch
@@ -138,6 +138,6 @@ steps:
         **Message:** {{commit.message}}
 ---
 kind: signature
-hmac: c45d22b57cedc1ac94edd08fb5e823bbc7ed7abb341a8c519cc1330cb5f729ca
+hmac: ac4a7e71a9c450f57e9ee98d9146b93a32e60be34341600c53550c291a63ff08
 
 ...
