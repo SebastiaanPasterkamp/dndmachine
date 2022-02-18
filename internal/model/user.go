@@ -27,7 +27,7 @@ type User struct {
 // UserRoles are a collection of secondary fields stored in the role column of
 // the user table. These attributes are only editable by admins.
 type UserRoles struct {
-	Role []string `json:"role"`
+	Role []string `json:"role,omitempty"`
 }
 
 // UserAttributes are a collection of non-primary fields stored in the config
@@ -68,7 +68,11 @@ func (u User) ExtractFields(columns []string) ([]interface{}, error) {
 
 			fields[i] = role
 		case "email":
-			fields[i] = u.Email
+			if u.Email != "" {
+				fields[i] = u.Email
+			} else {
+				fields[i] = sql.NullString{}
+			}
 		case "google_id":
 			if u.GoogleID != "" {
 				fields[i] = u.GoogleID
@@ -106,7 +110,8 @@ func (u *User) UpdateFromScanner(row database.Scanner, columns []string) error {
 			role := []byte{}
 			fields[i] = &role
 		case "email":
-			fields[i] = &u.Email
+			var value sql.NullString
+			fields[i] = &value
 		case "google_id":
 			var value sql.NullString
 			fields[i] = &value
@@ -131,6 +136,11 @@ func (u *User) UpdateFromScanner(row database.Scanner, columns []string) error {
 			}
 			if err := json.Unmarshal(role, &u.UserRoles); err != nil {
 				return fmt.Errorf("failed to unmarshal %q: %w", column, err)
+			}
+		case "email":
+			value := fields[i].(*sql.NullString)
+			if value.Valid {
+				u.Email = value.String
 			}
 		case "google_id":
 			value := fields[i].(*sql.NullString)
@@ -167,7 +177,8 @@ func (u *User) Migrate(row database.Scanner, columns []string) error {
 			role := []byte{}
 			fields[i] = &role
 		case "email":
-			fields[i] = &u.Email
+			var value sql.NullString
+			fields[i] = &value
 		case "google_id":
 			var value sql.NullString
 			fields[i] = &value
@@ -200,6 +211,11 @@ func (u *User) Migrate(row database.Scanner, columns []string) error {
 			}
 			if err := json.Unmarshal(role, &u); err != nil {
 				return fmt.Errorf("failed to unmarshal %q: %w", column, err)
+			}
+		case "email":
+			value := fields[i].(*sql.NullString)
+			if value.Valid {
+				u.Email = value.String
 			}
 		case "google_id":
 			value := fields[i].(*sql.NullString)
