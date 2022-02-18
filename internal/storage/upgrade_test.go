@@ -32,6 +32,8 @@ func TestUpgradeCommand(t *testing.T) {
 			storage.ErrInvalidVersion, ""},
 		{"Missing header", "testdata/missing_header", "", storage.CmdUpgrade{},
 			storage.ErrMissingSchemaDescription, ""},
+		{"Real schema", "../../schema", "", storage.CmdUpgrade{},
+			nil, "SELECT count(*) FROM user"},
 	}
 
 	for _, tt := range testCases {
