@@ -27,7 +27,7 @@ func GetObjectHandler(db database.Instance, op database.Operator) http.HandlerFu
 		case err != nil:
 			log.Printf("Error: failed to get object columns %q with clause %q and values %q: %v",
 				columns, clause, values, err)
-			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
 
