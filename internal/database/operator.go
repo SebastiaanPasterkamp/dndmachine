@@ -48,8 +48,8 @@ func (o Operator) GetOneByQuery(ctx context.Context, db Instance, columns []stri
 // GetByQuery returns zero or persistables by the provided query.
 func (o Operator) GetByQuery(ctx context.Context, db Instance, columns []string, clause string, args ...interface{}) ([]Persistable, error) {
 	var (
-		objs  []Persistable
-		query strings.Builder
+		objs  = []Persistable{}
+		query = strings.Builder{}
 	)
 
 	columns = append(columns, "id")
