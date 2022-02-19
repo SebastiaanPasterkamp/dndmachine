@@ -29,17 +29,19 @@ func PatchObjectHandler(db database.Instance, op database.Operator) http.Handler
 		case err != nil:
 			log.Printf("Error: failed to get object columns %q to patch with clause %q and values %q: %v",
 				columns, clause, values, err)
-			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
 
 		if j, ok := obj.(JSONable); ok {
 			if err := j.UnmarshalFromReader(r.Body); err != nil {
-				log.Printf("Error: failed to patch object %T: %v", j, err)
+				log.Printf("Error: failed to unmarshal payload %T: %v", j, err)
+				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 				return
 			}
 		} else {
 			log.Printf("Error: object %T cannot be patched with JSON", obj)
+			http.Error(w, http.StatusText(http.StatusNotImplemented), http.StatusNotImplemented)
 			return
 		}
 
@@ -51,7 +53,7 @@ func PatchObjectHandler(db database.Instance, op database.Operator) http.Handler
 		case err != nil:
 			log.Printf("Error: failed to patch object for %q (%q): %v",
 				clause, values, err)
-			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
 
