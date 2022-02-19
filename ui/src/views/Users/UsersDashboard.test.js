@@ -9,7 +9,7 @@ import UsersDashboard from './UsersDashboard';
 const server = setupServer(
   rest.get('/api/user', (_, res, ctx) => {
     return res(ctx.json({
-      result: [
+      results: [
         { id: 1, name: "hello" },
         { id: 2, name: "world" },
       ]

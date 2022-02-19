@@ -9,7 +9,7 @@ import UserView from './UserView';
 const server = setupServer(
   rest.get('/api/user', (_, res, ctx) => {
     return res(ctx.json({
-      result: [{ id: 1, name: "hello" }],
+      results: [{ id: 1, name: "hello" }],
     }))
   }),
   rest.get('/api/user/1', (_, res, ctx) => {

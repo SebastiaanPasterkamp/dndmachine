@@ -13,7 +13,7 @@ async function getObjects(type) {
       }
       return response.json();
     })
-    .then(data => data.result)
+    .then(data => data.results)
     .catch((error) => console.error('Error:', error));
 }
 

@@ -6,7 +6,7 @@ import ObjectsContext, { Objects } from './ObjectsContext';
 const server = setupServer(
   rest.get('/api/mock', (req, res, ctx) => {
     return res(ctx.json({
-      result: [
+      results: [
         { id: 1, text: "hello" },
         { id: 2, text: "world" },
       ]
