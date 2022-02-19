@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"errors"
 	"log"
 	"net/http"
 
@@ -21,21 +20,17 @@ func ListObjectsHandler(db database.Instance, op database.Operator) http.Handler
 		values := ctx.Value(auth.SQLValues).([]interface{})
 
 		objs, err := op.GetByQuery(ctx, db, columns, clause, values...)
-		switch {
-		case errors.Is(err, database.ErrNotFound):
-			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-			return
-		case err != nil:
+		if err != nil {
 			log.Printf("Error: failed to get objects columns %q with clause %q and values %q: %v",
 				columns, clause, values, err)
-			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		err = json.NewEncoder(w).Encode(map[string]interface{}{
-			"result": objs,
+			"results": objs,
 		})
 		if err != nil {
 			log.Printf("error returning object ID %q (%q): %v",
