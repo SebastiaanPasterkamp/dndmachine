@@ -8,6 +8,8 @@ import (
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/model"
 )
 
+// HandleCurrentUser returns the user as stored in the context. Basically it
+// returns the user associated with the active session.
 func HandleCurrentUser() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user, ok := r.Context().Value(CurrentUser).(*model.User)
@@ -21,7 +23,7 @@ func HandleCurrentUser() http.HandlerFunc {
 
 		err := json.NewEncoder(w).Encode(user)
 		if err != nil {
-			log.Printf("writing version failed: %v", err)
+			log.Printf("writing current user failed: %v", err)
 		}
 	}
 }
