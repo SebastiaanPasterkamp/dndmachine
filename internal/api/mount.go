@@ -10,7 +10,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-// Mount returns a chi.Router with all model CRUD end-points.
+// Mount returns a chi.Router with all supported CRUD end-points.
 func Mount(db database.Instance, e *policy.Enforcer) http.Handler {
 	r := chi.NewRouter()
 
