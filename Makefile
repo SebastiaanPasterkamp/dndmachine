@@ -122,7 +122,7 @@ ui-test:
 		-v ${PWD}/ui:/project \
 		-w /project \
 		node:17.3-stretch \
-			npm test -- --all --watchAll=false --coverage
+			npm test -- --all --watchAll=false
 
 ui-coverage:
 	docker run \
