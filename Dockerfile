@@ -2,7 +2,7 @@ FROM golang:1.17 as opa
 
 WORKDIR /app
 
-RUN go install github.com/open-policy-agent/opa@v0.37.1
+RUN go install github.com/open-policy-agent/opa@v0.37.2
 
 COPY internal/policy/rego/ rego/
 
