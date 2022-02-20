@@ -1,18 +1,22 @@
 import * as React from 'react';
+import Coinage from '../../partials/Coinage';
+import Damage from '../../partials/Damage';
 import ListObjects from '../../hoc/ListObjects';
 import ObjectsContext, { Objects } from '../../context/ObjectsContext';
 import PolicyContext from '../../context/PolicyContext';
 import Typography from '@mui/material/Typography';
+import Weight from '../../partials/Weight';
 
 const columns = [
   {
     name: 'name',
     align: 'left',
     label: 'Name',
+    sx: { maxWidth: "39vw" },
     render: ({ name, description }) => (
       <>
         {name}
-        <Typography>
+        <Typography noWrap>
           {description}
         </Typography>
       </>
@@ -22,30 +26,31 @@ const columns = [
     name: 'cost',
     align: 'right',
     label: 'Cost / Value',
+    sx: { minWidth: "15vw" },
     render: ({ cost, value }) => (
-      <Typography>
-        {cost.gp || value.gp} gp
-      </Typography>
+      cost
+        ? <Coinage {...cost} />
+        : <Coinage {...value} />
     ),
   },
   {
     name: 'weight',
     align: 'right',
     label: 'Weight',
+    sx: { minWidth: "15vw" },
     render: ({ weight }) => (
-      <Typography>
-        {weight.lb} lb.
-      </Typography>
+      <Weight {...weight} />
     ),
   },
   {
     name: 'attribute',
     align: 'right',
     label: 'Armor / Damage',
+    sx: { minWidth: "29vw" },
     render: ({ armor, damage, versatile, range }) => (
       <>
-        {armor.value || damage.type}
-        {versatile && ` / ${versatile.type}`}
+        {armor.value}
+        <Damage damage={damage} versatile={versatile} />
         <Typography>
           {range.min}
           {range.min <= range.max && ` / ${range.max}`}

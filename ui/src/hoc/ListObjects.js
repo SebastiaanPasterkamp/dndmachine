@@ -97,10 +97,11 @@ export default function ListObjects({ title, columns, data, order, filter, onCli
                     height: `${rowHeight}px`,
                   }}
                 >
-                  {columns.map(({ name, align, render }, index) => (
+                  {columns.map(({ name, align, render, sx }, index) => (
                     <TableCell
                       key={`table-column-${row.id}-${name}`}
                       align={align}
+                      sx={sx}
                       component={index === 0 ? "th" : "td"}
                       scope="row"
                     >
@@ -156,10 +157,11 @@ function SortableTableHead({ columns, orderBy, orderDir, onRequestSort }) {
   return (
     <TableHead>
       <TableRow>
-        {columns.map(({ name, align, label }) => (
+        {columns.map(({ name, align, label, sx }) => (
           <TableCell
             key={`sortable-table-head-${name}`}
             align={align}
+            sx={sx}
             sortDirection={orderBy === name ? orderDir : false}
           >
             <TableSortLabel
@@ -187,6 +189,7 @@ SortableTableHead.propTypes = {
     label: PropTypes.string.isRequired,
     align: PropTypes.oneOf(['left', 'right']),
     render: PropTypes.func.isRequired,
+    sx: PropTypes.object,
   })).isRequired,
   onRequestSort: PropTypes.func.isRequired,
   orderDir: PropTypes.oneOf(['asc', 'desc']).isRequired,
