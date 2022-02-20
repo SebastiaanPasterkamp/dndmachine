@@ -21,10 +21,10 @@ export default function App() {
     () =>
       createTheme({
         palette: {
-          mode: prefersDarkMode ? 'dark' : 'light',
+          mode: (user && /^(light|dark)$/.test(user.theme)) ? user.theme : (prefersDarkMode ? 'dark' : 'light'),
         },
       }),
-    [prefersDarkMode],
+    [user, prefersDarkMode],
   );
 
   const [menuOpen, setMenuOpen] = React.useState(false);

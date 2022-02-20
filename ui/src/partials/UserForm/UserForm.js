@@ -19,6 +19,12 @@ const roles = [
   { id: 'admin', title: 'Administrator' },
 ];
 
+const themes = [
+  { id: 'auto', title: 'Follow system' },
+  { id: 'light', title: 'Light theme' },
+  { id: 'dark', title: 'Dark theme' },
+];
+
 const defaultUser = {
   username: "",
   name: "",
@@ -26,6 +32,7 @@ const defaultUser = {
   password: "",
   dci: "",
   role: [],
+  theme: "auto",
 }
 
 export default function UserForm({ user, onClose, onDone }) {
@@ -178,6 +185,17 @@ export default function UserForm({ user, onClose, onDone }) {
             error={errors.name}
             onChange={handleInputChange}
             helper="Defaults to the username if left blank."
+          />
+
+          <OutlinedSelect
+            label="Theme"
+            name="theme"
+            options={themes}
+            value={values.theme}
+            error={errors.theme}
+            defaultValue="auto"
+            onChange={handleInputChange}
+            helper="The theme may require signing in and out to take effect."
           />
 
           <OutlinedSelect
