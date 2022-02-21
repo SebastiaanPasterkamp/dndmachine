@@ -1,11 +1,22 @@
 import * as React from 'react';
+import Armor from '../../partials/Armor';
 import Coinage from '../../partials/Coinage';
 import Damage from '../../partials/Damage';
+import Grid from '@mui/material/Grid';
 import ListObjects from '../../hoc/ListObjects';
+import Markdown from '../../partials/Markdown';
 import ObjectsContext, { Objects } from '../../context/ObjectsContext';
 import PolicyContext from '../../context/PolicyContext';
+import Range from '../../partials/Range';
+import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import Weight from '../../partials/Weight';
+
+const descStyle = {
+  maxHeight: '1.5em',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+};
 
 const columns = [
   {
@@ -16,9 +27,20 @@ const columns = [
     render: ({ name, description }) => (
       <>
         {name}
-        <Typography noWrap>
-          {description}
-        </Typography>
+        {description && (
+          <Tooltip
+            component="div"
+            variant="body2"
+            title={
+              <Markdown description={description} />
+            }
+          >
+            <Typography sx={descStyle}>
+              <Markdown description={description} />
+            </Typography>
+          </Tooltip>
+        )
+        }
       </>
     ),
   },
@@ -46,16 +68,13 @@ const columns = [
     name: 'attribute',
     align: 'right',
     label: 'Armor / Damage',
-    sx: { minWidth: "29vw" },
+    sx: { minWidth: "15vw" },
     render: ({ armor, damage, versatile, range }) => (
-      <>
-        {armor.value}
-        <Damage damage={damage} versatile={versatile} />
-        <Typography>
-          {range.min}
-          {range.min <= range.max && ` / ${range.max}`}
-        </Typography>
-      </>
+      <Grid container>
+        <Grid item xs={12}><Armor {...armor} /></Grid>
+        <Grid item xs={12}><Damage damage={damage} versatile={versatile} /></Grid>
+        <Grid item xs={12}><Range {...range} /></Grid>
+      </Grid>
     ),
   },
 ];
