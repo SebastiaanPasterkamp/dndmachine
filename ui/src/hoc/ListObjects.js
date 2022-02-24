@@ -17,9 +17,9 @@ import Tooltip from '@mui/material/Tooltip';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { visuallyHidden } from '@mui/utils';
 
-export default function ListObjects({ title, columns, data, order, filter, onClick, openFilter, rowHeight = 77 }) {
+export default function ListObjects({ title, columns, data, order, filter, onClick, openFilter, rowHeight = 85 }) {
   const [orderDir, setOrderDir] = React.useState('asc');
-  const [orderBy, setOrderBy] = React.useState('id');
+  const [orderBy, setOrderBy] = React.useState({ column: 'id', fields: ['id'] });
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
@@ -30,8 +30,18 @@ export default function ListObjects({ title, columns, data, order, filter, onCli
 
   const handleRequestSort = (e, property) => {
     e.preventDefault();
-    setOrderDir(orderBy === property && orderDir === 'asc' ? 'desc' : 'asc');
-    setOrderBy(property);
+    setOrderDir(orderBy.column === property && orderDir === 'asc' ? 'desc' : 'asc');
+    setPage(0);
+
+    const sortFields = columns.reduce((sortFields, column) => {
+      if (column.name === property && 'sortFields' in column) {
+        return [...column.sortFields, 'id'];
+      }
+
+      return sortFields;
+    }, [property, 'id']);
+
+    setOrderBy({ column: property, fields: sortFields });
   };
 
   const handleChangePage = (e, newPage) => {
@@ -47,15 +57,13 @@ export default function ListObjects({ title, columns, data, order, filter, onCli
 
   if (!data) return null;
 
-  let rows = Object.values(data);
-  if (filter) {
-    rows = rows.filter(filter);
-  }
-  if (order) {
-    rows = rows.sort(orderDir === 'desc'
-      ? (a, b) => order(a, b, orderBy)
-      : (a, b) => -order(a, b, orderBy))
-  }
+  const rows = Object.values(data)
+    .filter(filter ? filter : () => true)
+    .sort(order ? (
+      orderDir === 'desc'
+        ? (a, b) => order(a, b, orderBy.fields)
+        : (a, b) => -order(a, b, orderBy.fields)
+    ) : (a, b) => 0);
 
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
@@ -81,7 +89,7 @@ export default function ListObjects({ title, columns, data, order, filter, onCli
           <SortableTableHead
             columns={columns}
             orderDir={orderDir}
-            orderBy={orderBy}
+            orderBy={orderBy.column}
             onRequestSort={handleRequestSort}
           />
 

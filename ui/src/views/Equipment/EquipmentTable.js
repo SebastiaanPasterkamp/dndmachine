@@ -8,6 +8,7 @@ import Markdown from '../../partials/Markdown';
 import ObjectsContext, { Objects } from '../../context/ObjectsContext';
 import PolicyContext from '../../context/PolicyContext';
 import Range from '../../partials/Range';
+import sortMethod from '../../utils/sortMethod';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import Weight from '../../partials/Weight';
@@ -46,6 +47,7 @@ const columns = [
   },
   {
     name: 'cost',
+    sortFields: ['cost', 'value'],
     align: 'right',
     label: 'Cost / Value',
     sx: { minWidth: "15vw" },
@@ -66,26 +68,36 @@ const columns = [
   },
   {
     name: 'attribute',
+    sortFields: ['damage', 'versatile', 'range', 'armor'],
     align: 'right',
-    label: 'Armor / Damage',
+    label: 'Damage / Armor',
     sx: { minWidth: "15vw" },
     render: ({ armor, damage, versatile, range }) => (
       <Grid container>
-        <Grid item xs={12}><Armor {...armor} /></Grid>
         <Grid item xs={12}><Damage damage={damage} versatile={versatile} /></Grid>
         <Grid item xs={12}><Range {...range} /></Grid>
+        <Grid item xs={12}><Armor {...armor} /></Grid>
       </Grid>
     ),
   },
 ];
 
-function order(a, b, orderBy) {
-  if (b[orderBy] < a[orderBy]) {
-    return -1;
+
+function order(a, b, sortFields) {
+  var i, field;
+  for (i = 0, field = sortFields[i]; i < sortFields.length; i++, field = sortFields[i]) {
+    const cmp = field in sortMethod
+      ? sortMethod[field]
+      : sortMethod.default;
+
+    const sort = cmp(a[field], b[field]);
+    if (sort === 0) {
+      continue;
+    }
+
+    return sort
   }
-  if (b[orderBy] > a[orderBy]) {
-    return 1;
-  }
+
   return 0;
 }
 
