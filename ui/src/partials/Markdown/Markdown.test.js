@@ -7,13 +7,14 @@ test('renders nothing', () => {
 });
 
 test('renders markdown', () => {
+  const text = `
+# hello world
+* This
+* works`;
   render(
-    <Markdown description="## hello world
-      * This
-      * works
-    " />
+    <Markdown description={text} />
   );
 
-  const title = screen.getByTitle(/hello world/);
+  const title = screen.getByRole('heading', { text: /hello world/ });
   expect(title).toBeInTheDocument();
 });
