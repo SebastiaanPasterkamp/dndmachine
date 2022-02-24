@@ -53,6 +53,8 @@ func WithSession(repo cache.Repository, required bool) func(next http.Handler) h
 				return
 			}
 
+			http.SetCookie(w, loginCookie(cookie.Value))
+
 			ctx := context.WithValue(r.Context(), CurrentUser, &user)
 			r = r.WithContext(ctx)
 
