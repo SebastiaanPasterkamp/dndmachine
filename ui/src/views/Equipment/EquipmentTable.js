@@ -2,6 +2,8 @@ import * as React from 'react';
 import Armor from '../../partials/Armor';
 import Coinage from '../../partials/Coinage';
 import Damage from '../../partials/Damage';
+import EquipmentFilter from './EquipmentFilter';
+import filterMethod from '../../utils/filterMethod';
 import Grid from '@mui/material/Grid';
 import ListObjects from '../../hoc/ListObjects';
 import Markdown from '../../partials/Markdown';
@@ -101,6 +103,23 @@ function order(a, b, sortFields) {
   return 0;
 }
 
+function filter(filter, row) {
+  if (!filterMethod.text(filter.text, row.name)) return false;
+  if (!filterMethod.text(filter.text, row.description)) return false;
+  if (!(
+    filterMethod.cost(filter.value, row.cost)
+    || filterMethod.cost(filter.value, row.value)
+  )) return false;
+  if (!(
+    filterMethod.damage(filter.damage, row.damage)
+    || filterMethod.damage(filter.damage, row.versatile)
+  )) return false;
+  if (!filterMethod.weight(filter.weight, row.weight)) return false;
+  if (!filterMethod.armor(filter.armor, row.armor)) return false;
+
+  return true;
+}
+
 export default function EquipmentTable() {
   return (
     <ObjectsContext types={['equipment']}>
@@ -113,6 +132,8 @@ export default function EquipmentTable() {
               data={equipment}
               columns={columns}
               order={order}
+              filter={filter}
+              searchForm={EquipmentFilter}
             />
 
           </PolicyContext>

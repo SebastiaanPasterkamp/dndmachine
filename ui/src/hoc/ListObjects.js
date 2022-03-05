@@ -1,6 +1,7 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
+import Collapse from '@mui/material/Collapse';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -17,16 +18,26 @@ import Tooltip from '@mui/material/Tooltip';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { visuallyHidden } from '@mui/utils';
 
-export default function ListObjects({ title, columns, data, order, filter, onClick, openFilter, rowHeight = 85 }) {
+export default function ListObjects({ title, columns, data, order, searchForm: SearchForm, defaultFilters, filter, onClick, rowHeight = 85 }) {
   const [orderDir, setOrderDir] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState({ column: 'id', fields: ['id'] });
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [searchExpanded, setSearchExpanded] = React.useState(false);
+  const [filters, setFilters] = React.useState({});
+
+  const handleToggleSearch = () => {
+    setSearchExpanded(!searchExpanded);
+  };
 
   const handleClick = (e, id) => {
     e.preventDefault();
-    onClick(id);
+    if (onClick) onClick(id);
   };
+
+  const handleCloseFilter = () => {
+    setSearchExpanded(false)
+  }
 
   const handleRequestSort = (e, property) => {
     e.preventDefault();
@@ -58,7 +69,7 @@ export default function ListObjects({ title, columns, data, order, filter, onCli
   if (!data) return null;
 
   const rows = Object.values(data)
-    .filter(filter ? filter : () => true)
+    .filter(filter ? (row) => filter(filters, row) : () => true)
     .sort(order ? (
       orderDir === 'desc'
         ? (a, b) => order(a, b, orderBy.fields)
@@ -71,13 +82,24 @@ export default function ListObjects({ title, columns, data, order, filter, onCli
 
   const colSpan = columns.length;
 
+  const canFilter = filter && SearchForm;
+
   return (
     <Paper sx={{ width: '100%', mb: 2 }}>
 
       <FilterableTableToolbar
         title={title}
-        openFilter={openFilter}
+        toggleSearch={canFilter ? handleToggleSearch : null}
       />
+
+      {canFilter && (
+        <Collapse in={searchExpanded} timeout="auto" unmountOnExit>
+          <SearchForm
+            onFilter={setFilters}
+            onClose={handleCloseFilter}
+          />
+        </Collapse>
+      )}
 
       <TableContainer>
         <Table
@@ -152,9 +174,11 @@ ListObjects.propTypes = {
   columns: PropTypes.arrayOf(PropTypes.object).isRequired,
   data: PropTypes.objectOf(PropTypes.object).isRequired,
   order: PropTypes.func,
+  defaultFilters: PropTypes.object,
+  searchForm: PropTypes.elementType,
   filter: PropTypes.func,
   onClick: PropTypes.func,
-  openFilter: PropTypes.func,
+  toggleSearch: PropTypes.func,
   rowHeight: PropTypes.number,
 };
 
@@ -204,7 +228,7 @@ SortableTableHead.propTypes = {
   orderBy: PropTypes.string.isRequired,
 };
 
-const FilterableTableToolbar = ({ title, openFilter }) => {
+const FilterableTableToolbar = ({ title, toggleSearch }) => {
   return (
     <Toolbar
       sx={{
@@ -221,9 +245,9 @@ const FilterableTableToolbar = ({ title, openFilter }) => {
         {title}
       </Typography>
 
-      {openFilter && (
+      {toggleSearch && (
         <Tooltip title="Filter list">
-          <IconButton>
+          <IconButton onClick={toggleSearch}>
             <FilterListIcon />
           </IconButton>
         </Tooltip>
@@ -234,5 +258,5 @@ const FilterableTableToolbar = ({ title, openFilter }) => {
 
 FilterableTableToolbar.propTypes = {
   title: PropTypes.string.isRequired,
-  openFilter: PropTypes.func,
+  toggleSearch: PropTypes.func,
 };
