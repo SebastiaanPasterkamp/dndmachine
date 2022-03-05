@@ -12,13 +12,13 @@ export default function useFormHelper(initialValues, validate, validateOnChange 
 
   const handleInputChange = async (e) => {
     const { name, value } = e.target
-    setValues({
+    setValues((values) => ({
       ...values,
       [name]: value,
-    })
+    }));
     if (validateOnChange) {
       const newErrors = await validate({ [name]: value });
-      setErrors({ ...errors, ...newErrors });
+      setErrors((errors) => ({ ...errors, ...newErrors }));
     }
   }
 
