@@ -1,34 +1,34 @@
-FROM golang:1.17 as opa
+FROM cromrots/opa:0.37 as opa
 
-WORKDIR /app
+COPY internal/policy/rego rego
 
-RUN go install github.com/open-policy-agent/opa@v0.37.2
-
-COPY internal/policy/rego/ rego/
-
-RUN opa build \
-		--target wasm \
-		--entrypoint authz/auth/allow \
-		--entrypoint authz/character/allow \
-		--entrypoint authz/pages/allow \
-		--entrypoint authz/user/allow \
-		--ignore \*_test.rego \
-		rego/ && \
-	tar \
-        --to-stdout \
-		-xzf ./bundle.tar.gz \
-		/policy.wasm \
-        > policy.wasm
+RUN [ \
+    "/opa", "build", \
+    "--target", "wasm", \
+    "--entrypoint", "authz/auth/allow", \
+    "--entrypoint", "authz/character/allow", \
+    "--entrypoint", "authz/pages/allow", \
+    "--entrypoint", "authz/user/allow", \
+    "--ignore", "\\*_test.rego", \
+    "rego" \
+]
 
 FROM node:17.3-stretch as frontend
 
 WORKDIR /app
 
 COPY ui .
-COPY --from=opa /app/policy.wasm public/
 
 RUN npm install && \
     npm run build
+
+COPY --from=opa /data/bundle.tar.gz .
+
+RUN tar \
+        --to-stdout \
+		-xzf ./bundle.tar.gz \
+		/policy.wasm \
+        > public/policy.wasm
 
 FROM golang:1.17 as backend
 
