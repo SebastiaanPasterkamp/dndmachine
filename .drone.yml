@@ -61,10 +61,18 @@ steps:
   - name: docker:staging
     image: docker-registry.pikube.dev:31443/drone-genuinetools-img
     settings:
-      registry: docker-registry-service.docker-registry:5000
-      repo: dndmachine-go
-      tags: ${DRONE_BRANCH},unstable
-      insecure_registry: true
+      repo: cromrots/dndmachine
+      tags: unstable
+      cache_from: cromrots/dndmachine:cache
+      cache_to: cromrots/dndmachine:cache
+      password:
+        from_secret: docker_pwd
+      username:
+        from_secret: docker_user
+    resources:
+      requests:
+        cpu: 1500
+        memory: 750MiB
 
 ---
 kind: pipeline
@@ -86,10 +94,18 @@ steps:
   - name: docker:staging
     image: docker-registry.pikube.dev:31443/drone-genuinetools-img
     settings:
-      registry: docker-registry-service.docker-registry:5000
-      repo: dndmachine-go
+      repo: cromrots/dndmachine
       auto_tag: true
-      insecure_registry: true
+      cache_from: cromrots/dndmachine:cache
+      cache_to: cromrots/dndmachine:cache
+      password:
+        from_secret: docker_pwd
+      username:
+        from_secret: docker_user
+    resources:
+      requests:
+        cpu: 1500
+        memory: 750MiB
 
 ---
 kind: pipeline
@@ -138,6 +154,6 @@ steps:
         **Message:** {{commit.message}}
 ---
 kind: signature
-hmac: ac4a7e71a9c450f57e9ee98d9146b93a32e60be34341600c53550c291a63ff08
+hmac: 164f7269484314559278e3f35938ef3228acd90bac168a8c193035228577a1c6
 
 ...
