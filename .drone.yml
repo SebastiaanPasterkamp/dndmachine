@@ -8,6 +8,13 @@ platform:
     arch: arm
 
 steps:
+  - name: rego:test
+    image: golang:1.17-stretch
+    commands:
+      - go install github.com/open-policy-agent/opa@v0.37.2
+      - opa test -v internal/policy/rego/
+      - opa test -v internal/policy/testdata/
+
   - name: golang:test
     image: golang:1.17-stretch
     commands:
@@ -19,15 +26,6 @@ steps:
     commands:
       - go test -v -coverprofile cover.out ./...
       - go tool cover -func cover.out
-    depends_on:
-      - golang:test
-
-  - name: rego:test
-    image: golang:1.17-stretch
-    commands:
-      - go install github.com/open-policy-agent/opa@v0.36.1
-      - opa test -v internal/policy/rego/
-      - opa test -v internal/policy/testdata/
 
   - name: react:test
     image: node:17.3-stretch
@@ -42,8 +40,6 @@ steps:
       - cd ui
       - npm install
       - npm run build
-    depends_on:
-      - react:test
 
 ---
 kind: pipeline
@@ -154,6 +150,6 @@ steps:
         **Message:** {{commit.message}}
 ---
 kind: signature
-hmac: 164f7269484314559278e3f35938ef3228acd90bac168a8c193035228577a1c6
+hmac: e1e5ff2db9b69a3b2f51b34a50795cb4c844d9173185dffbba71f64eef5f5c71
 
 ...
