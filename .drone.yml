@@ -65,10 +65,6 @@ steps:
         from_secret: docker_pwd
       username:
         from_secret: docker_user
-    resources:
-      requests:
-        cpu: 1500
-        memory: 750MiB
 
 ---
 kind: pipeline
@@ -98,10 +94,6 @@ steps:
         from_secret: docker_pwd
       username:
         from_secret: docker_user
-    resources:
-      requests:
-        cpu: 1500
-        memory: 750MiB
 
 ---
 kind: pipeline
@@ -150,6 +142,6 @@ steps:
         **Message:** {{commit.message}}
 ---
 kind: signature
-hmac: e1e5ff2db9b69a3b2f51b34a50795cb4c844d9173185dffbba71f64eef5f5c71
+hmac: dad75941d56fbd698df5c838ead0d2012706e4347e520306af86953e9938e05e
 
 ...
