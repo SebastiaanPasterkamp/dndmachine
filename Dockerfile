@@ -1,4 +1,4 @@
-FROM cromrots/opa:0.37 as opa
+FROM cromrots/opa:0.38 as opa
 
 COPY internal/policy/rego rego
 

@@ -11,7 +11,7 @@ steps:
   - name: rego:test
     image: golang:1.17-stretch
     commands:
-      - go install github.com/open-policy-agent/opa@v0.37.2
+      - go install github.com/open-policy-agent/opa@v0.38.0
       - opa test -v internal/policy/rego/
       - opa test -v internal/policy/testdata/
 
@@ -142,6 +142,6 @@ steps:
         **Message:** {{commit.message}}
 ---
 kind: signature
-hmac: 0334efbcf7aa89be7e1e85d7f3dfe5189d82b263b1b2aa05cc05552d48c2fd27
+hmac: 6a7ef6ce4cdf5f5bffd46bc66a5b4f952dbc2e7c161c6d1f5aa02b8dd74ef247
 
 ...
