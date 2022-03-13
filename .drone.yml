@@ -19,12 +19,11 @@ steps:
     image: golang:1.17-stretch
     commands:
       # 'go test -race ...' not supported on ARM
-      - go test -v -count=1 ./...
+      - go test -parallel=2 -v -coverprofile cover.out -count=1 ./...
 
   - name: golang:coverage:report
     image: golang:1.17-stretch
     commands:
-      - go test -v -coverprofile cover.out ./...
       - go tool cover -func cover.out
 
   - name: react:test
@@ -142,6 +141,6 @@ steps:
         **Message:** {{commit.message}}
 ---
 kind: signature
-hmac: 6a7ef6ce4cdf5f5bffd46bc66a5b4f952dbc2e7c161c6d1f5aa02b8dd74ef247
+hmac: 49e9458aca9dd56087d27a84567683237724e61ced9c956b77c8020c401cfa04
 
 ...
