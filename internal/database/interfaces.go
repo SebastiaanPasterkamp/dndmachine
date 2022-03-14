@@ -1,5 +1,9 @@
 package database
 
+import (
+	"context"
+)
+
 // Scanner is an interface that implements the Scan function. Scan is
 // implemented by *sql.Row and *sql.Rows.
 type Scanner interface {
@@ -14,7 +18,13 @@ type Persistable interface {
 	UpdateFromScanner(row Scanner, columns []string) error
 }
 
-// Migratable is an interface for a PErsistable model that has migration code
+// Migrator is an interface to an Operator capable of migrating their models to
+// a newer version.
+type Migrator interface {
+	Migrate(ctx context.Context, db Instance) error
+}
+
+// Migratable is an interface for a Persistable model that has migration code
 // to make structure adjustments between versions.
 type Migratable interface {
 	GetID() int64

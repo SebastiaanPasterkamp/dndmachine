@@ -10,6 +10,15 @@ import (
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/model"
 )
 
+var migrators = []struct {
+	name  string
+	model database.Migrator
+}{
+	{"user", model.UserDB},
+	{"equipment", model.EquipmentDB},
+	{"character", model.CharacterDB},
+}
+
 func (s *Instance) upgrade(db database.Instance, cfg CmdUpgrade) error {
 	ctx := context.Background()
 
@@ -79,12 +88,11 @@ func (s *Instance) upgrade(db database.Instance, cfg CmdUpgrade) error {
 		return fmt.Errorf("failed to commit version upgrades: %w", err)
 	}
 
-	if err := model.UserDB.Migrate(ctx, db); err != nil {
-		return fmt.Errorf("failed to upgrade user modules: %w", err)
-	}
-
-	if err := model.EquipmentDB.Migrate(ctx, db); err != nil {
-		return fmt.Errorf("failed to upgrade equipment modules: %w", err)
+	for _, migrator := range migrators {
+		if err := migrator.model.Migrate(ctx, db); err != nil {
+			return fmt.Errorf("failed to upgrade %q modules: %w",
+				migrator.name, err)
+		}
 	}
 
 	return nil

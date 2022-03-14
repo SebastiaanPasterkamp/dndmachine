@@ -2,13 +2,13 @@ package authz.character
 
 default allow = false
 
-get_one := ["user_id", "name", "level", "config"]
+get_one := ["user_id", "name", "level", "progress", "config"]
 
-get_list := ["user_id", "name", "level"]
+get_list := ["user_id", "name", "level", "progress"]
 
 patch_one := ["name", "config"]
 
-post_one := ["user_id", "name", "level", "config"]
+post_one := ["user_id", "name", "config"]
 
 allow = get_one {
 	input.path = ["api", "character", path_id]
