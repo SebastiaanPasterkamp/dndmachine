@@ -2,9 +2,9 @@ package api_test
 
 import (
 	"context"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/api"
@@ -77,7 +77,7 @@ func TestListObjectsHandler(t *testing.T) {
 			if tt.expectedResponse != "" {
 				response := w.Body.String()
 
-				expected, err := os.ReadFile(tt.expectedResponse)
+				expected, err := ioutil.ReadFile(tt.expectedResponse)
 				if err != nil {
 					t.Fatalf("failed to read expected response body: %v", err)
 				}
