@@ -103,7 +103,7 @@ serve-ui:
 		-u ${UID}:${GID} \
 		-v ${PWD}/ui:/project \
 		-w /project \
-		node:17.6-stretch \
+		node:17.7-stretch \
 			npm start
 
 ui-test-watch:
@@ -112,7 +112,7 @@ ui-test-watch:
 		-u ${UID}:${GID} \
 		-v ${PWD}/ui:/project \
 		-w /project \
-		node:17.6-stretch \
+		node:17.7-stretch \
 			npm test
 
 ui-test:
@@ -121,7 +121,7 @@ ui-test:
 		-u ${UID}:${GID} \
 		-v ${PWD}/ui:/project \
 		-w /project \
-		node:17.6-stretch \
+		node:17.7-stretch \
 			npm test -- --all --watchAll=false
 
 ui-coverage:
@@ -130,7 +130,7 @@ ui-coverage:
 		-u ${UID}:${GID} \
 		-v ${PWD}/ui:/project \
 		-w /project \
-		node:17.6-stretch \
+		node:17.7-stretch \
 			npm test -- --all --watchAll=false --coverage
 
 ui-build:
@@ -139,7 +139,7 @@ ui-build:
 		-u ${UID}:${GID} \
 		-v ${PWD}/ui:/project \
 		-w /project \
-		node:17.6-stretch \
+		node:17.7-stretch \
 			npm run build
 
 ui-shell:
@@ -148,7 +148,7 @@ ui-shell:
 		-u ${UID}:${GID} \
 		-v ${PWD}/ui:/project \
 		-w /project \
-		node:17.6-stretch \
+		node:17.7-stretch \
 			/bin/bash
 
 ui-update:
@@ -157,7 +157,7 @@ ui-update:
 		-u ${UID}:${GID} \
 		-v ${PWD}/ui:/project \
 		-w /project \
-		node:17.6-stretch /bin/bash -c '\
+		node:17.7-stretch /bin/bash -c '\
 			npm install --no-save npm-check-updates ; \
 			./node_modules/.bin/ncu -u ; \
 			npm update ; \
