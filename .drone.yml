@@ -141,6 +141,6 @@ steps:
         **Message:** {{commit.message}}
 ---
 kind: signature
-hmac: 42d1cdc2801b6d395784671ecb4bc237f1c91429bdc4f1ecd91836cd341ef888
+hmac: 2474ce519b8ae6c4ad7ec7bdb5591f79c4ed6cf5b5377c462997bbd3e2305646
 
 ...
