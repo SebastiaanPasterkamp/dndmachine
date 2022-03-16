@@ -30,7 +30,7 @@ RUN tar \
 		/policy.wasm \
         > public/policy.wasm
 
-FROM golang:1.17 as backend
+FROM golang:1.18 as backend
 
 WORKDIR /app
 
