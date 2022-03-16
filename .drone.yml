@@ -9,20 +9,20 @@ platform:
 
 steps:
   - name: rego:test
-    image: golang:1.17-stretch
+    image: golang:1.18-stretch
     commands:
       - go install github.com/open-policy-agent/opa@v0.38.0
       - opa test -v internal/policy/rego/
       - opa test -v internal/policy/testdata/
 
   - name: golang:test
-    image: golang:1.17-stretch
+    image: golang:1.18-stretch
     commands:
       # 'go test -race ...' not supported on ARM
       - go test -parallel=2 -v -coverprofile cover.out -count=1 ./...
 
   - name: golang:coverage:report
-    image: golang:1.17-stretch
+    image: golang:1.18-stretch
     commands:
       - go tool cover -func cover.out
 
