@@ -27,14 +27,14 @@ steps:
       - go tool cover -func cover.out
 
   - name: react:test
-    image: node:17.7-stretch
+    image: node:17.8-stretch
     commands:
       - cd ui
       - npm install
       - npm test -- --all --watchAll=false --coverage
 
   - name: react:build
-    image: node:17.7-stretch
+    image: node:17.8-stretch
     commands:
       - cd ui
       - npm install
