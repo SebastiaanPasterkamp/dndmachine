@@ -12,7 +12,7 @@ require (
 	github.com/open-policy-agent/opa v0.38.1
 	golang.org/x/crypto v0.0.0-20220321153916-2c7772ba3064
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	modernc.org/sqlite v1.15.3
+	modernc.org/sqlite v1.15.4
 )
 
 require (
@@ -37,7 +37,7 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	lukechampine.com/uint128 v1.2.0 // indirect
 	modernc.org/cc/v3 v3.35.24 // indirect
-	modernc.org/ccgo/v3 v3.15.17 // indirect
+	modernc.org/ccgo/v3 v3.15.18 // indirect
 	modernc.org/libc v1.14.12 // indirect
 	modernc.org/mathutil v1.4.1 // indirect
 	modernc.org/memory v1.0.7 // indirect

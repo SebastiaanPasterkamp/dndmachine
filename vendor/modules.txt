@@ -178,7 +178,7 @@ lukechampine.com/uint128
 # modernc.org/cc/v3 v3.35.24
 ## explicit; go 1.15
 modernc.org/cc/v3
-# modernc.org/ccgo/v3 v3.15.17
+# modernc.org/ccgo/v3 v3.15.18
 ## explicit; go 1.16
 modernc.org/ccgo/v3/lib
 # modernc.org/libc v1.14.12
@@ -218,7 +218,7 @@ modernc.org/memory
 # modernc.org/opt v0.1.1
 ## explicit; go 1.13
 modernc.org/opt
-# modernc.org/sqlite v1.15.3
+# modernc.org/sqlite v1.15.4
 ## explicit; go 1.16
 modernc.org/sqlite
 modernc.org/sqlite/lib
