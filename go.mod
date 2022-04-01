@@ -9,7 +9,7 @@ require (
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/google/uuid v1.3.0
-	github.com/open-policy-agent/opa v0.38.1
+	github.com/open-policy-agent/opa v0.39.0
 	golang.org/x/crypto v0.0.0-20220331220935-ae2d96664a29
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	modernc.org/sqlite v1.15.4
@@ -29,7 +29,7 @@ require (
 	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
-	github.com/yashtewari/glob-intersection v0.0.0-20180916065949-5c77d914dd0b // indirect
+	github.com/yashtewari/glob-intersection v0.1.0 // indirect
 	golang.org/x/mod v0.5.1 // indirect
 	golang.org/x/sys v0.0.0-20220209214540-3681064d5158 // indirect
 	golang.org/x/tools v0.1.9 // indirect
