@@ -176,13 +176,13 @@ gopkg.in/yaml.v2
 # lukechampine.com/uint128 v1.2.0
 ## explicit; go 1.12
 lukechampine.com/uint128
-# modernc.org/cc/v3 v3.35.26
+# modernc.org/cc/v3 v3.36.0
 ## explicit; go 1.15
 modernc.org/cc/v3
-# modernc.org/ccgo/v3 v3.16.2
+# modernc.org/ccgo/v3 v3.16.6
 ## explicit; go 1.16
 modernc.org/ccgo/v3/lib
-# modernc.org/libc v1.15.0
+# modernc.org/libc v1.16.1
 ## explicit; go 1.16
 modernc.org/libc
 modernc.org/libc/errno
@@ -213,13 +213,13 @@ modernc.org/libc/wctype
 # modernc.org/mathutil v1.4.1
 ## explicit; go 1.13
 modernc.org/mathutil
-# modernc.org/memory v1.0.7
+# modernc.org/memory v1.1.1
 ## explicit; go 1.16
 modernc.org/memory
 # modernc.org/opt v0.1.1
 ## explicit; go 1.13
 modernc.org/opt
-# modernc.org/sqlite v1.17.0
+# modernc.org/sqlite v1.17.1
 ## explicit; go 1.16
 modernc.org/sqlite
 modernc.org/sqlite/lib
