@@ -13,7 +13,7 @@ RUN [ \
     "rego" \
 ]
 
-FROM node:17.8-stretch as frontend
+FROM node:17.9-stretch as frontend
 
 WORKDIR /app
 
