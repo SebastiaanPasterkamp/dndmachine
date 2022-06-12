@@ -1,2 +1,4 @@
 dndmachine
 ui/public/policy.wasm
+*.bak
+cover.out
