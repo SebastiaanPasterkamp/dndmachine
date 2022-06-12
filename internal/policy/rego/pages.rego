@@ -60,6 +60,10 @@ dm_pages = [
 
 admin_pages = [
 	["admin"],
+	["background"],
+	["characteristics"],
+	["class"],
+	["race"],
 	["user"],
 ]
 
