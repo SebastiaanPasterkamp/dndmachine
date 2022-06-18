@@ -14,6 +14,7 @@ import TranslateIcon from '@mui/icons-material/Translate';
 
 import { faCommentDots } from '@fortawesome/free-solid-svg-icons/faCommentDots';
 import { faDAndD } from '@fortawesome/free-brands-svg-icons/faDAndD';
+import { faSnowflake } from '@fortawesome/free-solid-svg-icons/faSnowflake';
 import { faUserSecret } from '@fortawesome/free-solid-svg-icons/faUserSecret';
 import { faUtensils } from '@fortawesome/free-solid-svg-icons/faUtensils';
 
@@ -33,6 +34,11 @@ const items = [
     title: "Users",
     icon: AccountBoxIcon,
     to: `/user`
+  },
+  {
+    title: "Races",
+    faIcon: faSnowflake,
+    to: `/race`
   },
   {
     title: "Dungeon Master",

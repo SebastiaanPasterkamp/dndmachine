@@ -12,6 +12,7 @@ import Menu from '../../partials/Menu';
 import { useCurrentUserContext } from '../../context/CurrentUserContext';
 
 const EquipmentTable = lazy(() => import('../Equipment/EquipmentTable'));
+const RaceTable = lazy(() => import('../Race/RaceTable'));
 const SignIn = lazy(() => import('../SignIn'));
 const UserCreate = lazy(() => import('../Users/UserCreate'));
 const UserEdit = lazy(() => import('../Users/UserEdit'));
@@ -65,6 +66,12 @@ export default function App() {
                   <Route
                     path="/equipment"
                     element={<EquipmentTable />}
+                  />
+
+                  {/* Race */}
+                  <Route
+                    path="/race"
+                    element={<RaceTable />}
                   />
 
                   {/* Users */}
