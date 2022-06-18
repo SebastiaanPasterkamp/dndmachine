@@ -10,7 +10,7 @@ import Markdown from '../../partials/Markdown';
 import ObjectsContext, { Objects } from '../../context/ObjectsContext';
 import PolicyContext from '../../context/PolicyContext';
 import Range from '../../partials/Range';
-import sortMethod from '../../utils/sortMethod';
+import tableOrder from '../../utils/tableOrder';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import Weight from '../../partials/Weight';
@@ -42,8 +42,7 @@ const columns = [
               <Markdown description={description} />
             </Typography>
           </Tooltip>
-        )
-        }
+        )}
       </>
     ),
   },
@@ -84,25 +83,6 @@ const columns = [
   },
 ];
 
-
-function order(a, b, sortFields) {
-  var i, field;
-  for (i = 0, field = sortFields[i]; i < sortFields.length; i++, field = sortFields[i]) {
-    const cmp = field in sortMethod
-      ? sortMethod[field]
-      : sortMethod.default;
-
-    const sort = cmp(a[field], b[field]);
-    if (sort === 0) {
-      continue;
-    }
-
-    return sort
-  }
-
-  return 0;
-}
-
 function filter(filter, row) {
   if (!filterMethod.text(filter.text, row.name)) return false;
   if (!filterMethod.text(filter.text, row.description)) return false;
@@ -131,7 +111,7 @@ export default function EquipmentTable() {
               title="Equipment"
               data={equipment}
               columns={columns}
-              order={order}
+              order={tableOrder}
               filter={filter}
               searchForm={EquipmentFilter}
             />
