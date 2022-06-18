@@ -1,16 +1,22 @@
-import * as React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import CssBaseline from '@mui/material/CssBaseline';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
 import { createTheme, ThemeProvider, StyledEngineProvider } from '@mui/material/styles';
 
-import { EquipmentTable } from '../Equipment';
-import { UserCreate, UserEdit, UsersDashboard, UserView } from '../Users';
 import Footer from '../../partials/Footer';
 import Header from '../../partials/Header';
 import Menu from '../../partials/Menu';
-import SignIn from '../SignIn';
 import { useCurrentUserContext } from '../../context/CurrentUserContext';
+
+const EquipmentTable = lazy(() => import('../Equipment/EquipmentTable'));
+const SignIn = lazy(() => import('../SignIn'));
+const UserCreate = lazy(() => import('../Users/UserCreate'));
+const UserEdit = lazy(() => import('../Users/UserEdit'));
+const UsersDashboard = lazy(() => import('../Users/UsersDashboard'));
+const UserView = lazy(() => import('../Users/UserView'));
 
 export default function App() {
   const { user } = useCurrentUserContext();
@@ -50,46 +56,50 @@ export default function App() {
             <Menu toggleMenu={toggleMenu} menuOpen={menuOpen} />
           </nav>
 
-          {user ? (
-            <main>
-              <Routes>
-                {/* Equipment */}
-                <Route
-                  path="/equipment"
-                  element={<EquipmentTable />}
-                />
+          <main>
+            {user ? (
+              <Suspense fallback={<Backdrop open={true}> <CircularProgress color="inherit" /> </Backdrop>}>
+                <Routes>
 
-                {/* Users */}
-                <Route
-                  path="/user"
-                  element={<UsersDashboard />}
-                />
-                <Route
-                  path="/user/new"
-                  element={<UserCreate />}
-                />
-                <Route
-                  path="/user/:id"
-                  element={<UserView />}
-                />
-                <Route
-                  path="/user/:id/edit"
-                  element={<UserEdit />}
-                />
-              </Routes>
-            </main>
-          ) : (
-            <main>
-              <SignIn />
-            </main>
-          )}
+                  {/* Equipment */}
+                  <Route
+                    path="/equipment"
+                    element={<EquipmentTable />}
+                  />
+
+                  {/* Users */}
+                  <Route
+                    path="/user"
+                    element={<UsersDashboard />}
+                  />
+                  <Route
+                    path="/user/new"
+                    element={<UserCreate />}
+                  />
+                  <Route
+                    path="/user/:id"
+                    element={<UserView />}
+                  />
+                  <Route
+                    path="/user/:id/edit"
+                    element={<UserEdit />}
+                  />
+
+                </Routes>
+              </Suspense>
+            ) : (
+              <Suspense fallback={<Backdrop open={true}> <CircularProgress color="inherit" /> </Backdrop>}>
+                <SignIn />
+              </Suspense>
+            )}
+          </main>
 
           <footer>
             <Footer />
           </footer>
 
         </BrowserRouter>
-      </ThemeProvider>
-    </StyledEngineProvider>
+      </ThemeProvider >
+    </StyledEngineProvider >
   );
 }
