@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
@@ -45,7 +46,7 @@ func PatchObjectHandler(db database.Instance, op database.Operator) http.Handler
 			return
 		}
 
-		_, err = op.UpdateByQuery(r.Context(), db, obj, columns, clause, values...)
+		id, err := op.UpdateByQuery(r.Context(), db, obj, columns, clause, values...)
 		switch {
 		case errors.Is(err, database.ErrNotFound):
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
@@ -57,6 +58,15 @@ func PatchObjectHandler(db database.Instance, op database.Operator) http.Handler
 			return
 		}
 
-		w.WriteHeader(http.StatusNoContent)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		err = json.NewEncoder(w).Encode(map[string]interface{}{
+			"result": map[string]int64{
+				"id": id,
+			},
+		})
+		if err != nil {
+			log.Printf("error returning object ID %d: %v", id, err)
+		}
 	}
 }

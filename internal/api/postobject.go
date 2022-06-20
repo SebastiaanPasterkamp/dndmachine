@@ -1,7 +1,7 @@
 package api
 
 import (
-	"fmt"
+	"encoding/json"
 	"log"
 	"net/http"
 
@@ -36,8 +36,15 @@ func PostObjectHandler(db database.Instance, create NewPersistable, op database.
 			return
 		}
 
-		newURL := fmt.Sprintf("%s/%d", r.RequestURI, id)
-
-		http.Redirect(w, r, newURL, http.StatusTemporaryRedirect)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		err = json.NewEncoder(w).Encode(map[string]interface{}{
+			"result": map[string]int64{
+				"id": id,
+			},
+		})
+		if err != nil {
+			log.Printf("error returning object ID %d: %v", id, err)
+		}
 	}
 }
