@@ -38,7 +38,7 @@ opa-test:
 opa-coverage:
 	opa test --coverage --verbose internal/policy/rego
 
-dev:
+dev: opa-build
 	USER=${UID}:${GID} \
 	docker-compose up \
 		--build \
