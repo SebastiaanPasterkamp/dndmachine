@@ -25,24 +25,25 @@ func TestPostObjectHandler(t *testing.T) {
 		Values           []interface{}
 		expectedStatus   int
 		verifyID         int64
+		expectedResult   string
 		expectedResponse string
 	}{
 		{"Post user with all fields works", "testdata/post.json", "/api/user",
 			[]string{"username", "password", "role", "email", "google_id", "config"},
 			"", []interface{}{},
-			http.StatusTemporaryRedirect, 2, "testdata/posted.json"},
+			http.StatusOK, 2, "testdata/posted.json", "{\"result\":{\"id\":2}}\n"},
 		{"Post user with limited fields works", "testdata/post.json", "/api/user",
 			[]string{"username", "password", "config"},
 			"", []interface{}{},
-			http.StatusTemporaryRedirect, 2, "testdata/posted-limited-fields.json"},
+			http.StatusOK, 2, "testdata/posted-limited-fields.json", "{\"result\":{\"id\":2}}\n"},
 		{"Bad payload gives 400", "/dev/null", "/api/user",
 			[]string{"username", "role", "email", "google_id", "config"},
 			"", []interface{}{},
-			http.StatusBadRequest, 0, ""},
+			http.StatusBadRequest, 0, "", "Bad Request\n"},
 		{"Bad SQL gives 500", "testdata/post.json", "/api/user",
 			[]string{"username", "role", "email", "google_id", "config"},
 			"foo blah blah", []interface{}{},
-			http.StatusInternalServerError, 0, ""},
+			http.StatusInternalServerError, 0, "", "Internal Server Error\n"},
 	}
 
 	for _, tt := range testCases {
@@ -81,6 +82,11 @@ func TestPostObjectHandler(t *testing.T) {
 					tt.expectedStatus, w.Result().StatusCode)
 			}
 
+			if w.Body.String() != tt.expectedResponse {
+				t.Errorf("Unexpected response body. Expected %q, got %q.",
+					tt.expectedResponse, w.Body.String())
+			}
+
 			if tt.verifyID > 0 {
 				obj, err := model.UserDB.GetByID(ctx, db, verifyColumns, tt.verifyID)
 				if err != nil {
@@ -92,7 +98,7 @@ func TestPostObjectHandler(t *testing.T) {
 					t.Fatalf("obj is not of type %T, but %T", user, obj)
 				}
 
-				input, err := os.Open(tt.expectedResponse)
+				input, err := os.Open(tt.expectedResult)
 				if err != nil {
 					t.Fatalf("failed to open expected response: %v", err)
 				}
