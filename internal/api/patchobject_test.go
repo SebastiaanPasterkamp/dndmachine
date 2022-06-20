@@ -25,28 +25,29 @@ func TestPatchObjectHandler(t *testing.T) {
 		Values           []interface{}
 		expectedStatus   int
 		verifyID         int64
+		expectedResult   string
 		expectedResponse string
 	}{
 		{"Patch user with all fields works", "testdata/patch.json", "/api/user/1",
 			[]string{"username", "password", "role", "email", "google_id", "config"},
 			"id = ?", []interface{}{1},
-			http.StatusNoContent, 1, "testdata/patched.json"},
+			http.StatusOK, 1, "testdata/patched.json", "{\"result\":{\"id\":1}}\n"},
 		{"Patch user with limited fields works", "testdata/patch.json", "/api/user/1",
 			[]string{"config"},
 			"id = ?", []interface{}{1},
-			http.StatusNoContent, 1, "testdata/patched-limited-fields.json"},
+			http.StatusOK, 1, "testdata/patched-limited-fields.json", "{\"result\":{\"id\":1}}\n"},
 		{"Bad payload gives 400", "/dev/null", "/api/user/1",
 			[]string{"username", "role", "email", "google_id", "config"},
 			"id = ?", []interface{}{1},
-			http.StatusBadRequest, 0, ""},
+			http.StatusBadRequest, 0, "", "Bad Request\n"},
 		{"Patch unknown gives 404", "testdata/patch.json", "/api/user/99",
 			[]string{"username", "role", "email", "google_id", "config"},
 			"id = ?", []interface{}{99},
-			http.StatusNotFound, 0, ""},
+			http.StatusNotFound, 0, "", "Not Found\n"},
 		{"Bad SQL gives 500", "testdata/patch.json", "/api/user/1",
 			[]string{"username", "role", "email", "google_id", "config"},
 			"foo blah blah", []interface{}{},
-			http.StatusInternalServerError, 0, ""},
+			http.StatusInternalServerError, 0, "", "Internal Server Error\n"},
 	}
 
 	for _, tt := range testCases {
@@ -85,6 +86,11 @@ func TestPatchObjectHandler(t *testing.T) {
 					tt.expectedStatus, w.Result().StatusCode)
 			}
 
+			if w.Body.String() != tt.expectedResponse {
+				t.Errorf("Unexpected response body. Expected %q, got %q.",
+					tt.expectedResponse, w.Body.String())
+			}
+
 			if tt.verifyID > 0 {
 				obj, err := model.UserDB.GetByID(ctx, db, verifyColumns, tt.verifyID)
 				if err != nil {
@@ -96,7 +102,7 @@ func TestPatchObjectHandler(t *testing.T) {
 					t.Fatalf("obj is not of type %T, but %T", user, obj)
 				}
 
-				input, err := os.Open(tt.expectedResponse)
+				input, err := os.Open(tt.expectedResult)
 				if err != nil {
 					t.Fatalf("failed to open expected response: %v", err)
 				}

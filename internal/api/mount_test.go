@@ -50,7 +50,7 @@ func TestMount(t *testing.T) {
 			http.StatusNotFound, ""},
 		{"Post user as admin works", "POST", "/api/user", "testdata/post.json",
 			&model.User{ID: 1, UserRoles: model.UserRoles{Role: []string{"admin"}}},
-			http.StatusTemporaryRedirect, ""},
+			http.StatusOK, ""},
 		{"Post user as non-admin denied", "POST", "/api/user", "testdata/post.json",
 			&model.User{ID: 2, UserRoles: model.UserRoles{Role: []string{"dm"}}},
 			http.StatusUnauthorized, ""},
