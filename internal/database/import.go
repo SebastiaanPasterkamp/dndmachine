@@ -8,6 +8,7 @@ import (
 	"io"
 )
 
+// Import executes SQL from a reader into the database instance.
 func (i *Instance) Import(fh io.Reader) error {
 	if !i.IsConnected() {
 		return ErrNoConnection
@@ -36,6 +37,7 @@ func (i *Instance) Import(fh io.Reader) error {
 	return nil
 }
 
+// ImportToDB executes SQL from a reader within the database transaction.
 func ImportToDB(db *sql.Tx, fh io.Reader) error {
 	buf := bytes.Buffer{}
 	_, err := io.Copy(&buf, fh)

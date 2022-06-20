@@ -10,6 +10,7 @@ import (
 	"modernc.org/sqlite"
 )
 
+// Connect creates a database.Instance based on the provided Configuration.
 func Connect(cfg Configuration) (Instance, error) {
 	db := Instance{
 		Pool: nil,
@@ -38,6 +39,9 @@ func Connect(cfg Configuration) (Instance, error) {
 	return db, nil
 }
 
+// IsConnected checks the availability of a connection pool on the database
+// Instance and returns true if a connection responds to a Ping command.
+// Otherwise this function returns false.
 func (i *Instance) IsConnected() bool {
 	if i.Pool == nil {
 		return false
@@ -50,6 +54,7 @@ func (i *Instance) IsConnected() bool {
 	return true
 }
 
+// Close terminates a connection pool for a database Instance.
 func (i *Instance) Close() error {
 	if i.Pool == nil {
 		return nil
