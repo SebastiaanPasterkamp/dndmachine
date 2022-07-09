@@ -5,7 +5,7 @@ GID=$(shell id -g)
 GIT_TAG=$(shell git describe master --tags 2> /dev/null || echo -n "v2.0.0")
 GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 GIT_COMMIT=$(shell git rev-parse --short HEAD)
-BUILD_TIME=$(shell date)
+BUILD_TIME=$(shell date -Iseconds)
 
 update: go-update ui-update
 
@@ -85,7 +85,6 @@ docker:
 		--build-arg GIT_BRANCH="$(GIT_BRANCH)" \
 		--build-arg GIT_COMMIT="$(GIT_COMMIT)" \
 		--build-arg GIT_TAG="$(GIT_TAG)" \
-		--build-arg BUILD_TIME="$(BUILD_TIME)" \
 		--tag $(BINARY_NAME) \
 		.
 
