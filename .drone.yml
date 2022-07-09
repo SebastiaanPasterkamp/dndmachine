@@ -56,10 +56,12 @@ steps:
   - name: docker:staging
     image: docker-registry.pikube.dev:31443/drone-genuinetools-img
     settings:
+      build_args: GIT_BRANCH=${DRONE_BRANCH},GIT_COMMIT=${DRONE_COMMIT},GIT_TAG=unstable
       repo: cromrots/dndmachine
       tags: unstable
       cache_from: cromrots/dndmachine:cache
       cache_to: cromrots/dndmachine:cache
+      platform: linux/amd64,linux/arm64,linux/arm/v7
       password:
         from_secret: docker_pwd
       username:
@@ -82,13 +84,15 @@ platform:
   arch: arm
 
 steps:
-  - name: docker:staging
+  - name: docker:production
     image: docker-registry.pikube.dev:31443/drone-genuinetools-img
     settings:
+      build_args: GIT_BRANCH=${DRONE_BRANCH},GIT_COMMIT=${DRONE_COMMIT},GIT_TAG=${DRONE_TAG}
       repo: cromrots/dndmachine
       auto_tag: true
       cache_from: cromrots/dndmachine:cache
       cache_to: cromrots/dndmachine:cache
+      platform: linux/amd64,linux/arm64,linux/arm/v7
       password:
         from_secret: docker_pwd
       username:
@@ -117,7 +121,7 @@ platform:
 
 steps:
   - name: discord:notification
-    image: appleboy/drone-discord
+    image: appleboy/drone-discord:1.2.6
     settings:
       webhook_id:
         from_secret: discord_id
@@ -141,6 +145,6 @@ steps:
         **Message:** {{commit.message}}
 ---
 kind: signature
-hmac: 67aa3f537263fd7982d34a7a078b748afa96a52014e410c22cc513420fd8589d
+hmac: 89b510aeae38bde8a41dda7b08535cc37b6025359889da0b59cdc356ecc6489e
 
 ...
