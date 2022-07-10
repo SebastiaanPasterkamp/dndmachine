@@ -14,15 +14,15 @@ import { maxLength, minLength, numeric, requiredString, validEmail } from '../..
 import { stringToInitials, stringToColor } from '../../utils';
 
 const roles = [
-  { id: 'player', title: 'Player' },
-  { id: 'dm', title: 'Dungeon Master' },
-  { id: 'admin', title: 'Administrator' },
+  { id: 'player', name: 'Player' },
+  { id: 'dm', name: 'Dungeon Master' },
+  { id: 'admin', name: 'Administrator' },
 ];
 
 const themes = [
-  { id: 'auto', title: 'Follow system' },
-  { id: 'light', title: 'Light theme' },
-  { id: 'dark', title: 'Dark theme' },
+  { id: 'auto', name: 'Follow system' },
+  { id: 'light', name: 'Light theme' },
+  { id: 'dark', name: 'Dark theme' },
 ];
 
 const defaultUser = {
