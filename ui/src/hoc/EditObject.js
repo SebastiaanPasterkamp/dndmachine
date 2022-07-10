@@ -4,19 +4,23 @@ import ObjectView from '../partials/ObjectView';
 import ObjectsContext, { Objects, useObjectsContext } from '../context/ObjectsContext';
 import PolicyContext from '../context/PolicyContext';
 
-export default function EditObject({ type, Form }) {
+export default function EditObject({ type, form: Form, context = [] }) {
 
   const ChangeHandler = function ({ [type]: object }) {
     const navigate = useNavigate();
     const { updateObject } = useObjectsContext();
 
-    const handleClose = () => {
-      navigate(`/${type}/${object.id}`);
+    const handleClose = (object) => {
+      if (object) {
+        navigate(`/${type}/${object.id}`);
+      } else {
+        navigate(`/${type}`);
+      }
     }
 
-    const handleDone = () => {
+    const handleDone = (object) => {
       updateObject(type, object.id);
-      handleClose();
+      handleClose(object);
     }
 
     return (
@@ -30,11 +34,15 @@ export default function EditObject({ type, Form }) {
 
   return function () {
     return (
-      <ObjectsContext types={[type]}>
+      <ObjectsContext types={context}>
         <Objects.Consumer>
-          {({ [type]: object }) => (
-            <PolicyContext data={{ [type]: object }} query={`authz/${type}/allow`}>
-              <ObjectView type={type} propName={type} component={ChangeHandler} />
+          {(ctx) => (
+            <PolicyContext data={ctx} query={`authz/${type}/allow`}>
+              <ObjectView
+                type={type}
+                propName={type}
+                component={ChangeHandler}
+              />
             </PolicyContext>
           )}
         </Objects.Consumer>
