@@ -36,6 +36,7 @@ type UserAttributes struct {
 	DCI   string `json:"dci,omitempty"`
 	Name  string `json:"name,omitempty"`
 	Theme string `json:"theme,omitempty"`
+	Avatar string `json:"avatar,omitempty"`
 }
 
 // VerifyCredentials verifies the provided password against the encrypted user

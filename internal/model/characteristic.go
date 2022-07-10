@@ -31,6 +31,9 @@ type Characteristic struct {
 type CharacteristicAttributes struct {
 	// Description is a flavor text explanation of the Characteristic option.
 	Description string `json:"description,omitempty"`
+	// Avatar is a base64 data URI image representation of the Characteristic
+	// option.
+	Avatar string `json:"avatar,omitempty"`
 }
 
 // GetID returns the primary key of the database.Persistable.
