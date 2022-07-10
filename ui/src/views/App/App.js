@@ -12,7 +12,9 @@ import Menu from '../../partials/Menu';
 import { useCurrentUserContext } from '../../context/CurrentUserContext';
 
 const EquipmentTable = lazy(() => import('../Equipment/EquipmentTable'));
-const RaceTable = lazy(() => import('../Race/RaceTable'));
+const RaceCreate = lazy(() => import('../Race/RaceCreate'));
+const RaceDashboard = lazy(() => import('../Race/RaceDashboard'));
+const RaceEdit = lazy(() => import('../Race/RaceEdit'));
 const SignIn = lazy(() => import('../SignIn'));
 const UserCreate = lazy(() => import('../Users/UserCreate'));
 const UserEdit = lazy(() => import('../Users/UserEdit'));
@@ -71,7 +73,15 @@ export default function App() {
                   {/* Race */}
                   <Route
                     path="/race"
-                    element={<RaceTable />}
+                    element={<RaceDashboard />}
+                  />
+                  <Route
+                    path="/race/new"
+                    element={<RaceCreate />}
+                  />
+                  <Route
+                    path="/race/:id/edit"
+                    element={<RaceEdit />}
                   />
 
                   {/* Users */}
