@@ -17,10 +17,10 @@ export default function OutlinedSelect({ helper, label, options, error = null, m
     >
       <InputLabel>{label}</InputLabel>
       <Select {...rest} multiple={multiple}>
-        {allowEmpty && <MenuItem value="">None</MenuItem>}
+        {allowEmpty && <MenuItem value={null}>None</MenuItem>}
         {
           options.map(
-            ({ id, title }) => (<MenuItem key={id} value={id}>{title}</MenuItem>)
+            ({ id, name }) => (<MenuItem key={id} value={id}>{name}</MenuItem>)
           )
         }
       </Select>
@@ -48,7 +48,7 @@ OutlinedSelect.propTypes = {
         PropTypes.number.isRequired,
         PropTypes.string.isRequired,
       ]),
-      title: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
     })
   ),
   onChange: PropTypes.func.isRequired,
