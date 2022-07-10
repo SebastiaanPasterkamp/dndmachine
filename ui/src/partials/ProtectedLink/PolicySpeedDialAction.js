@@ -2,9 +2,10 @@ import * as React from 'react';
 import PropTypes from 'prop-types';
 import { useCurrentUserContext } from '../../context/CurrentUserContext'
 import SpeedDialAction from '@mui/material/SpeedDialAction';
+import { Link } from 'react-router-dom'
 import { usePolicyContext } from '../../context/PolicyContext'
 
-export default function PolicySpeedDialAction({ to, path, query, method = 'GET', ...rest }) {
+export default function PolicySpeedDialAction({ to, path, query, onClick, icon, method = 'GET', ...rest }) {
   const { user } = useCurrentUserContext()
   const { isAllowed } = usePolicyContext()
 
@@ -30,8 +31,18 @@ export default function PolicySpeedDialAction({ to, path, query, method = 'GET',
     return null
   }
 
+  if (!onClick) {
+    icon = (
+      <Link to={to}>{icon}</Link>
+    )
+  }
+
   return (
-    <SpeedDialAction {...rest} />
+    <SpeedDialAction
+      {...rest}
+      icon={icon}
+      onClick={onClick}
+    />
   )
 }
 
