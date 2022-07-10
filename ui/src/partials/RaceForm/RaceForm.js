@@ -1,6 +1,5 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
-import Avatar from '@mui/material/Avatar';
 import BackspaceIcon from '@mui/icons-material/Backspace'
 import Button from '@mui/material/Button';
 import CancelIcon from '@mui/icons-material/Cancel'
@@ -8,20 +7,20 @@ import CharacteristicOption from '../CharacteristicOption';
 import EditIcon from '@mui/icons-material/Edit';
 import Grid from '@mui/material/Grid';
 import { Objects } from '../../context/ObjectsContext';
-import OutlinedForm, { OutlinedInput, OutlinedSelect } from '../OutlinedForm';
+import OutlinedForm, { OutlinedFileUpload, OutlinedInput, OutlinedSelect } from '../OutlinedForm';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import useFormHelper from '../../utils/formHelper';
 
 import { requiredString } from '../../utils/validators';
-import { stringToInitials, stringToColor } from '../../utils';
 
 const defaultRace = {
   name: "",
   sub: null,
+  avatar: "",
   description: "",
 }
 
-export default function RaceForm({ race, onClose, onDone }) {
+export default function RaceForm({ race = {}, onClose, onDone }) {
 
   const validate = async (values) => {
     var errors = {};
@@ -103,19 +102,21 @@ export default function RaceForm({ race, onClose, onDone }) {
   return (
     <OutlinedForm onSubmit={values.id ? handleUpdate : handleCreate}>
       <div style={{ display: "flex", justifyContent: "center" }}>
-        <Avatar
-          sx={{
-            bgcolor: stringToColor(values.name),
-            width: 56, height: 56,
-          }}
-          children={stringToInitials(values.name)}
-          aria-label="name"
-          variant="rounded"
+        <OutlinedFileUpload
+          sx={{ width: 56, height: 56 }}
+          label="Avatar"
+          name="avatar"
+          title={values.name}
+          aria-label="Avatar"
+          value={values.avatar}
+          error={errors.avatar}
+          onChange={handleInputChange}
         />
+
       </div>
 
       <Grid container>
-        <Grid item xs={12}>
+        <Grid item xs={12} md={6}>
           <OutlinedInput
             label="Name"
             name="name"
@@ -125,22 +126,24 @@ export default function RaceForm({ race, onClose, onDone }) {
             onChange={handleInputChange}
             helper="Must be unique"
           />
+        </Grid>
 
-          <Objects.Consumer>
-            {({ race: races }) => {
-              if (!races) {
-                return null;
-              }
+        <Objects.Consumer>
+          {({ race: races }) => {
+            if (!races) {
+              return null;
+            }
 
-              races = Object.values(races)
-                .filter(r => !r.sub)
-                .filter(r => r.id !== race.id);
+            races = Object.values(races)
+              .filter(r => !r.sub)
+              .filter(r => r.id !== race.id);
 
-              if (!races.length) {
-                return null;
-              }
+            if (!races.length) {
+              return null;
+            }
 
-              return (
+            return (
+              <Grid item xs={12} md={6}>
                 <OutlinedSelect
                   label="Main race"
                   name="sub"
@@ -151,10 +154,12 @@ export default function RaceForm({ race, onClose, onDone }) {
                   onChange={handleInputChange}
                   helper="Subrace of ..."
                 />
-              )
-            }}
-          </Objects.Consumer>
+              </Grid>
+            )
+          }}
+        </Objects.Consumer>
 
+        <Grid item xs={12}>
           <OutlinedInput
             label="Description"
             name="description"
