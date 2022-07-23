@@ -13,7 +13,7 @@
     "@mui/icons-material": "5.8.4",
     "@mui/material": "5.9.1",
     "@mui/styles": "5.9.1",
-    "@open-policy-agent/opa-wasm": "1.6.1",
+    "@open-policy-agent/opa-wasm": "1.7.0",
     "@testing-library/jest-dom": "5.16.4",
     "@testing-library/react": "13.0.0-alpha.5",
     "@testing-library/user-event": "14.3.0",
