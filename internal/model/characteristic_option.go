@@ -37,6 +37,9 @@ type CharacteristicOption struct {
 type CharacteristicOptionType string
 
 const (
+	// AbilityScoreType is a CharacteristicOptionType where an ability score is
+	// chosen, bonuses are added, or score increases are chosen.
+	AbilityScoreType CharacteristicOptionType = "ability-score"
 	// ChoiceType is a CharacteristicOptionType where one only one
 	// characteristic can be chosen.
 	ChoiceType CharacteristicOptionType = "choice"
@@ -48,7 +51,7 @@ const (
 	ListType CharacteristicOptionType = "list"
 	// MultipleChoiceType is a CharacteristicOptionType where one or more
 	// characteristics can be chosen.
-	MultipleChoiceType CharacteristicOptionType = "multiplechoice"
+	MultipleChoiceType CharacteristicOptionType = "multiple-choice"
 	// ValueType is a CharacteristicOptionType where a property is set to a
 	//specific value.
 	ValueType CharacteristicOptionType = "value"
@@ -62,6 +65,22 @@ type CharacteristicOptionAttributes struct {
 	// Conditions is an optional list of prerequisites required for the
 	// characteristic option to be available.
 	Conditions []Condition `json:"conditions,omitempty"`
+}
+
+// AbilityScoreCharacteristicOption is a characteristic type where a the ability
+// scores are configured or updated.
+type AbilityScoreCharacteristicOption struct {
+	CharacteristicOptionAttributes
+	// Hidden indicates if the chosen characteristic is displayed in the UI.
+	Hidden bool `json:"hidden,omitempty"`
+	// Increase offers a budget of points to be assigned to increase the base
+	// statistics. Any value of zero or below means no ability score increases
+	// are granted.
+	Increase int `json:"increase,omitempty"`
+	// Bonuses is a dictionary of statistics with a bonus value assigned to the
+	// statistic defined in the key. These bonuses are typically granted as
+	// racial traits.
+	Bonuses map[string]int `json:"bonus,omitempty"`
 }
 
 // ChoiceCharacteristicOption is a characteristic type where one only one
