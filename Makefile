@@ -53,7 +53,7 @@ go-update:
 	go mod vendor
 
 go-coverage:
-	go test -coverprofile cover.out ./...
+	go test -coverprofile cover.out ./cmd/... ./internal/...
 	go tool cover -html=cover.out
 
 lint:
@@ -64,7 +64,7 @@ format:
 	gofmt -s -w internal
 
 go-test:
-	go test -race -count 10 -v ./...
+	go test -race -count 10 -v ./cmd/... ./internal/...
 
 go-build:
 	CGO_ENABLED=0 \
