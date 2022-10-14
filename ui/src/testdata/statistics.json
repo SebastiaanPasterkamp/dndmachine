@@ -1,0 +1,38 @@
+{
+    "strength": {
+        "base": 10,
+        "bonus": 0,
+        "total": 10,
+        "modifier": 0
+    },
+    "dexterity": {
+        "base": 14,
+        "bonus": 1,
+        "total": 14,
+        "modifier": 1
+    },
+    "constitution": {
+        "base": 13,
+        "bonus": 1,
+        "total": 14,
+        "modifier": 2
+    },
+    "intelligence": {
+        "base": 12,
+        "bonus": 0,
+        "total": 12,
+        "modifier": 1
+    },
+    "wisdom": {
+        "base": 8,
+        "bonus": 0,
+        "total": 8,
+        "modifier": -1
+    },
+    "charisma": {
+        "base": 15,
+        "bonus": 0,
+        "total": 15,
+        "modifier": 2
+    }
+}
