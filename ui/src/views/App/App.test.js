@@ -1,14 +1,16 @@
-import { render, screen } from '@testing-library/react';
-import SignIn from './App';
+import { act, render, screen, waitFor } from '@testing-library/react';
+import App from './App';
 
-test('renders email field', () => {
-  render(<SignIn />);
-  const linkElement = screen.getByLabelText(/Username/i);
-  expect(linkElement).toBeInTheDocument();
-});
+test('renders login form', async () => {
+  await act(async () => render(
+    <App />
+  ));
 
-test('renders password field', () => {
-  render(<SignIn />);
-  const linkElement = screen.getByLabelText(/toggle password/i);
-  expect(linkElement).toBeInTheDocument();
+  await waitFor(() => screen.getByTestId("login.username"));
+
+  const usernameField = screen.getByTestId("login.username");
+  expect(usernameField).toBeInTheDocument();
+
+  const passwordField = screen.getByTestId("login.password");
+  expect(passwordField).toBeInTheDocument();
 });
