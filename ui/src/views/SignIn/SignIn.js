@@ -76,6 +76,7 @@ export default function SignIn() {
             autoFocus
             value={username}
             onChange={e => setUserName(e.target.value)}
+            data-testid="login.username"
           />
           <OutlinedInput
             label="Password"
@@ -85,12 +86,14 @@ export default function SignIn() {
             autoComplete="current-password"
             value={password}
             onChange={e => setPassword(e.target.value)}
+            data-testid="login.password"
           />
           <Button
             type="submit"
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
+            data-testid="login.submit"
           >
             Sign In
           </Button>
