@@ -137,13 +137,13 @@ more:
 		format++
 		var arg int64
 		switch mod {
-		case modNone, modL, modLL, mod64:
+		case modL, modLL, mod64:
 			arg = VaInt64(args)
 		case modH:
 			arg = int64(int16(VaInt32(args)))
 		case modHH:
 			arg = int64(int8(VaInt32(args)))
-		case mod32:
+		case mod32, modNone:
 			arg = int64(VaInt32(args))
 		default:
 			panic(todo("", mod))
@@ -406,9 +406,7 @@ more:
 		// The void * pointer argument is printed in hexadecimal (as if by %#x or
 		// %#lx).
 		format++
-		arg := VaUintptr(args)
-		buf.WriteString("0x")
-		buf.WriteString(strconv.FormatInt(int64(arg), 16))
+		fmt.Fprintf(buf, "%#0x", VaUintptr(args))
 	case 'c':
 		// If no l modifier is present, the int argument is converted to an unsigned
 		// char, and the resulting character is written.  If an l modifier is present,
