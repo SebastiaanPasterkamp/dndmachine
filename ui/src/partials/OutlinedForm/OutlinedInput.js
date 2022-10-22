@@ -6,7 +6,8 @@ import IconButton from '@mui/material/IconButton';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
-export default function OutlinedInput({ helper, value, type = null, unit = null, error = null, ...rest }) {
+export default function OutlinedInput({ helper, name, value, onChange, type, unit, error, ...rest }) {
+  const [text, setText] = React.useState(value);
   const [showPassword, setShowPassword] = React.useState(false);
 
   const toggleShowPassword = () => {
@@ -17,13 +18,28 @@ export default function OutlinedInput({ helper, value, type = null, unit = null,
     event.preventDefault();
   };
 
+  const onTextChange = (e) => {
+    setText(e.target.value);
+
+    if (type === "number") {
+      const number = parseInt(e.target.value, 10);
+      if (isNaN(number)) return;
+      e.target = { name: e.target.name, value: number };
+    }
+
+    onChange(e);
+  }
+
   return (
     <TextField
       variant="outlined"
       fullWidth
       margin="normal"
       type={showPassword ? 'text' : type}
-      value={value}
+      data-testid={`input-${type}-${name}`}
+      name={name}
+      value={text}
+      onChange={onTextChange}
       {...rest}
       helperText={helper}
       InputProps={{
@@ -45,6 +61,12 @@ export default function OutlinedInput({ helper, value, type = null, unit = null,
     />
   )
 }
+
+OutlinedInput.defaultProps = {
+  type: "text",
+  unit: null,
+  error: null,
+};
 
 OutlinedInput.propTypes = {
   name: PropTypes.string.isRequired,
