@@ -123,13 +123,15 @@ export default function ListObjects({ title, columns, data, order, searchForm: S
                   onClick={(event) => handleClick(event, row.id)}
                   tabIndex={-1}
                   key={`table-row-${row.id}`}
+                  data-testid={`table-row-${row.id}`}
                   style={{
                     height: `${rowHeight}px`,
                   }}
                 >
                   {columns.map(({ name, align, render, sx }, index) => (
                     <TableCell
-                      key={`table-column-${row.id}-${name}`}
+                      key={`table-cell-${row.id}-${name}`}
+                      data-testid={`table-cell-${row.id}-${name}`}
                       align={align}
                       sx={sx}
                       component={index === 0 ? "th" : "td"}
@@ -209,6 +211,7 @@ function SortableTableHead({ columns, orderBy, orderDir, onRequestSort }) {
               active={orderBy === name}
               direction={orderBy === name ? orderDir : 'asc'}
               onClick={createSortHandler(name)}
+              data-testid={`table-head-${name}`}
             >
               {label}
               {orderBy === name ? (
@@ -250,6 +253,7 @@ const FilterableTableToolbar = ({ title, toggleSearch }) => {
         variant="h6"
         id="tableTitle"
         component="div"
+        data-testid="tableTitle"
       >
         {title}
       </Typography>
