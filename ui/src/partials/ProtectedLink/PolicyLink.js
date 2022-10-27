@@ -9,23 +9,11 @@ export default function PolicyLink({ to, path, query, method = 'GET', ...rest })
   const { user } = useCurrentUserContext()
   const { isAllowed } = usePolicyContext()
 
-  const [allowed, setAllowed] = React.useState(false);
-
-  const mounted = React.useRef(true);
-
-  React.useEffect(() => {
-    mounted.current = true;
-
-    const allowed = isAllowed({
-      path: (path || to).replace(/\/\/+/, '/').replace(/^\/+|\/+$/, '').split('/'),
-      method,
-      user,
-    }, query);
-
-    setAllowed(allowed);
-
-    return () => mounted.current = false;
-  }, [to, path, query, method, user, isAllowed])
+  const allowed = isAllowed({
+    path: (path || to).replace(/\/\/+/, '/').replace(/^\/+|\/+$/, '').split('/'),
+    method,
+    user,
+  }, query);
 
   if (!allowed) {
     return null
