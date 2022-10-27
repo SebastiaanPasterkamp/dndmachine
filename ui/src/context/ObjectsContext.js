@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-export const Objects = React.createContext({});
+const Objects = React.createContext({});
 
 async function getObjects(type) {
   return fetch(`/api/${type}`, {
@@ -80,10 +80,17 @@ export default function ObjectsContext({ types, children }) {
   );
 }
 
-export function useObjectsContext() {
+function useObjectsContext() {
   const context = React.useContext(Objects);
   if (context === undefined) {
     throw new Error("Context must be used within a Provider");
   }
   return context;
+}
+
+export {
+  getObject,
+  getObjects,
+  Objects,
+  useObjectsContext,
 }
