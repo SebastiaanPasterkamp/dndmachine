@@ -5,6 +5,7 @@ import Button from '@mui/material/Button';
 import { Characteristic } from '../CharacterCreate';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { CharacteristicConfigs } from '../CharacteristicOption';
+import CharacterContext from '../../context/CharacterContext';
 import EditIcon from '@mui/icons-material/Edit';
 import Grid from '@mui/material/Grid';
 import { Objects } from '../../context/ObjectsContext';
@@ -65,7 +66,12 @@ export default function RaceForm({ race = {}, onClose, onDone }) {
       },
       body: JSON.stringify(values),
     })
-      .then(response => (response.ok ? response.json() : null))
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        }
+        return Promise.reject(response);
+      })
       .then(response => response.result)
       .catch((error) => console.error('Error:', error));
 
@@ -174,7 +180,6 @@ export default function RaceForm({ race = {}, onClose, onDone }) {
           </Grid>
 
           <Grid item xs={12}>
-            Config:
             <CharacteristicConfigs
               config={values.config}
             />
@@ -182,9 +187,11 @@ export default function RaceForm({ race = {}, onClose, onDone }) {
         </Grid>
 
         <Grid item xs={12} md={6}>
-          <Characteristic
-            {...values}
-          />
+          <CharacterContext>
+            <Characteristic
+              {...values}
+            />
+          </CharacterContext>
         </Grid>
 
         <Grid item xs={12} style={{ display: "flex", justifyContent: "space-evenly", alignItems: "center" }}>
