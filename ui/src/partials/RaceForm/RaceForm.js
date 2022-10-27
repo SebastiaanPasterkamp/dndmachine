@@ -1,7 +1,6 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
 import BackspaceIcon from '@mui/icons-material/Backspace'
-import Button from '@mui/material/Button';
 import { Characteristic } from '../CharacterCreate';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { CharacteristicConfigs } from '../CharacteristicOption';
@@ -11,8 +10,8 @@ import Grid from '@mui/material/Grid';
 import { Objects } from '../../context/ObjectsContext';
 import OutlinedForm, { OutlinedFileUpload, OutlinedInput, OutlinedSelect } from '../OutlinedForm';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import { PolicyButton } from '../ProtectedLink';
 import useFormHelper from '../../utils/formHelper';
-
 import { requiredString } from '../../utils/validators';
 
 const defaultRace = {
@@ -196,7 +195,11 @@ export default function RaceForm({ race = {}, onClose, onDone }) {
 
         <Grid item xs={12} style={{ display: "flex", justifyContent: "space-evenly", alignItems: "center" }}>
           {values.id ? (
-            <Button
+            <PolicyButton
+              path={`/api/race/${race.id}`}
+              method="PATCH"
+              query="authz/race/allow"
+
               variant="contained"
               type="submit"
               color="primary"
@@ -204,9 +207,13 @@ export default function RaceForm({ race = {}, onClose, onDone }) {
               startIcon={<EditIcon />}
             >
               Update
-            </Button>
+            </PolicyButton>
           ) : (
-            <Button
+            <PolicyButton
+              path={`/api/race`}
+              method="POST"
+              query="authz/race/allow"
+
               variant="contained"
               type="submit"
               color="primary"
@@ -214,10 +221,14 @@ export default function RaceForm({ race = {}, onClose, onDone }) {
               startIcon={<PersonAddIcon />}
             >
               Create
-            </Button>
+            </PolicyButton>
           )}
           {onClose && (
-            <Button
+            <PolicyButton
+              path={`/race`}
+              method="GET"
+              query="authz/pages/allow"
+
               variant="contained"
               type="cancel"
               color="secondary"
@@ -225,9 +236,13 @@ export default function RaceForm({ race = {}, onClose, onDone }) {
               startIcon={<CancelIcon />}
             >
               Cancel
-            </Button>
+            </PolicyButton>
           )}
-          <Button
+          <PolicyButton
+            path={`/api/race/${race.id}`}
+            method="GET"
+            query="authz/race/allow"
+
             variant="contained"
             type="reset"
             color="warning"
@@ -235,7 +250,7 @@ export default function RaceForm({ race = {}, onClose, onDone }) {
             startIcon={<BackspaceIcon />}
           >
             Reset
-          </Button>
+          </PolicyButton>
         </Grid>
       </Grid>
     </OutlinedForm >
