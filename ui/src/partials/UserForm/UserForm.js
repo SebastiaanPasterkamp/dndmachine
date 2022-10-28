@@ -2,12 +2,12 @@ import * as React from 'react';
 import PropTypes from 'prop-types';
 import Avatar from '@mui/material/Avatar';
 import BackspaceIcon from '@mui/icons-material/Backspace'
-import Button from '@mui/material/Button';
 import CancelIcon from '@mui/icons-material/Cancel'
 import EditIcon from '@mui/icons-material/Edit';
 import Grid from '@mui/material/Grid';
 import OutlinedForm, { OutlinedInput, OutlinedSelect } from '../OutlinedForm';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import { PolicyButton } from '../ProtectedLink';
 import useFormHelper from '../../utils/formHelper';
 
 import { maxLength, minLength, numeric, requiredString, validEmail } from '../../utils/validators';
@@ -212,7 +212,11 @@ export default function UserForm({ user, onClose, onDone }) {
 
         <Grid item xs={12} style={{ display: "flex", justifyContent: "space-evenly", alignItems: "center" }}>
           {values.id ? (
-            <Button
+            <PolicyButton
+              path={`/api/user/${user.id}`}
+              method="PATCH"
+              query="authz/user/allow"
+
               variant="contained"
               type="submit"
               color="primary"
@@ -220,9 +224,13 @@ export default function UserForm({ user, onClose, onDone }) {
               startIcon={<EditIcon />}
             >
               Update
-            </Button>
+            </PolicyButton>
           ) : (
-            <Button
+            <PolicyButton
+              path={`/api/user`}
+              method="POST"
+              query="authz/user/allow"
+
               variant="contained"
               type="submit"
               color="primary"
@@ -230,10 +238,14 @@ export default function UserForm({ user, onClose, onDone }) {
               startIcon={<PersonAddIcon />}
             >
               Create
-            </Button>
+            </PolicyButton>
           )}
           {onClose && (
-            <Button
+            <PolicyButton
+              path={`/user/${user.id}`}
+              method="POST"
+              query="authz/pages/allow"
+
               variant="contained"
               type="cancel"
               color="secondary"
@@ -241,9 +253,13 @@ export default function UserForm({ user, onClose, onDone }) {
               startIcon={<CancelIcon />}
             >
               Cancel
-            </Button>
+            </PolicyButton>
           )}
-          <Button
+          <PolicyButton
+            path={`/api/user/${user.id}`}
+            method="GET"
+            query="authz/user/allow"
+
             variant="contained"
             type="reset"
             color="warning"
@@ -251,7 +267,7 @@ export default function UserForm({ user, onClose, onDone }) {
             startIcon={<BackspaceIcon />}
           >
             Reset
-          </Button>
+          </PolicyButton>
         </Grid>
       </Grid>
     </OutlinedForm >
