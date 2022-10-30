@@ -2,8 +2,9 @@ import * as React from 'react';
 import PropTypes from 'prop-types';
 import BackspaceIcon from '@mui/icons-material/Backspace'
 import Button from '@mui/material/Button';
-import CancelIcon from '@mui/icons-material/Cancel'
-import CharacteristicOption from '../CharacteristicOption';
+import { Characteristic } from '../CharacterCreate';
+import CancelIcon from '@mui/icons-material/Cancel';
+import { CharacteristicConfigs } from '../CharacteristicOption';
 import EditIcon from '@mui/icons-material/Edit';
 import Grid from '@mui/material/Grid';
 import { Objects } from '../../context/ObjectsContext';
@@ -18,6 +19,7 @@ const defaultRace = {
   sub: null,
   avatar: "",
   description: "",
+  config: [],
 }
 
 export default function RaceForm({ race = {}, onClose, onDone }) {
@@ -101,80 +103,87 @@ export default function RaceForm({ race = {}, onClose, onDone }) {
 
   return (
     <OutlinedForm onSubmit={values.id ? handleUpdate : handleCreate}>
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        <OutlinedFileUpload
-          sx={{ width: 56, height: 56 }}
-          label="Avatar"
-          name="avatar"
-          title={values.name}
-          aria-label="Avatar"
-          value={values.avatar}
-          error={errors.avatar}
-          onChange={handleInputChange}
-        />
-
-      </div>
-
       <Grid container>
         <Grid item xs={12} md={6}>
-          <OutlinedInput
-            label="Name"
-            name="name"
-            required
-            value={values.name}
-            error={errors.name}
-            onChange={handleInputChange}
-            helper="Must be unique"
-          />
+
+          <Grid item xs={12}>
+            <OutlinedFileUpload
+              sx={{ width: 56, height: 56 }}
+              label="Avatar"
+              name="avatar"
+              title={values.name}
+              aria-label="Avatar"
+              value={values.avatar}
+              error={errors.avatar}
+              onChange={handleInputChange}
+            />
+
+            <OutlinedInput
+              label="Name"
+              name="name"
+              required
+              value={values.name}
+              error={errors.name}
+              onChange={handleInputChange}
+              helper="Must be unique"
+            />
+          </Grid>
+
+          <Objects.Consumer>
+            {({ race: races }) => {
+              if (!races) {
+                return null;
+              }
+
+              races = Object.values(races)
+                .filter(r => !r.sub)
+                .filter(r => r.id !== race.id);
+
+              if (!races.length) {
+                return null;
+              }
+
+              return (
+                <Grid item xs={12} >
+                  <OutlinedSelect
+                    label="Main race"
+                    name="sub"
+                    allowEmpty={true}
+                    options={races}
+                    value={values.sub || ""}
+                    error={errors.sub}
+                    onChange={handleInputChange}
+                    helper="Subrace of ..."
+                  />
+                </Grid>
+              )
+            }}
+          </Objects.Consumer>
+
+          <Grid item xs={12}>
+            <OutlinedInput
+              label="Description"
+              name="description"
+              multiline
+              maxRows={10}
+              value={values.description}
+              error={errors.description}
+              onChange={handleInputChange}
+              helper="Describe the race"
+            />
+          </Grid>
+
+          <Grid item xs={12}>
+            Config:
+            <CharacteristicConfigs
+              config={values.config}
+            />
+          </Grid>
         </Grid>
 
-        <Objects.Consumer>
-          {({ race: races }) => {
-            if (!races) {
-              return null;
-            }
-
-            races = Object.values(races)
-              .filter(r => !r.sub)
-              .filter(r => r.id !== race.id);
-
-            if (!races.length) {
-              return null;
-            }
-
-            return (
-              <Grid item xs={12} md={6}>
-                <OutlinedSelect
-                  label="Main race"
-                  name="sub"
-                  allowEmpty={true}
-                  options={races}
-                  value={values.sub || ""}
-                  error={errors.sub}
-                  onChange={handleInputChange}
-                  helper="Subrace of ..."
-                />
-              </Grid>
-            )
-          }}
-        </Objects.Consumer>
-
-        <Grid item xs={12}>
-          <OutlinedInput
-            label="Description"
-            name="description"
-            multiline
-            maxRows={10}
-            value={values.description}
-            error={errors.description}
-            onChange={handleInputChange}
-            helper="Describe the race"
-          />
-        </Grid>
-
-        <Grid item xs={4}>
-          <CharacteristicOption
-            onChange={handleInputChange}
+        <Grid item xs={12} md={6}>
+          <Characteristic
+            {...values}
           />
         </Grid>
 
