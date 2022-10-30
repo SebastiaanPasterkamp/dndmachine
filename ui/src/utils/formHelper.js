@@ -10,12 +10,30 @@ export default function useFormHelper(initialValues, validate, validateOnChange 
     return Object.values(newErrors).every(f => !f);
   }
 
+  const handleChangeCallback = async (field, callback) => setValues((values) => {
+    const { [field]: original } = values;
+    const update = callback(original);
+
+    if (validateOnChange) {
+      const newErrors = validate({ [field]: update });
+      setErrors((errors) => ({ ...errors, ...newErrors }));
+    }
+
+    return {
+      ...values,
+      [field]: update,
+    };
+  });
+
   const handleInputChange = async (e) => {
-    const { name, value } = e.target
+    e.preventDefault();
+    const { name, value } = e.target;
+
     setValues((values) => ({
       ...values,
       [name]: value,
     }));
+
     if (validateOnChange) {
       const newErrors = await validate({ [name]: value });
       setErrors((errors) => ({ ...errors, ...newErrors }));
@@ -32,6 +50,7 @@ export default function useFormHelper(initialValues, validate, validateOnChange 
     setValues,
     errors,
     setErrors,
+    handleChangeCallback,
     handleInputChange,
     isValid,
     resetForm,
