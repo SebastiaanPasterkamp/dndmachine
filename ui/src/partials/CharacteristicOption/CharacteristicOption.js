@@ -1,27 +1,31 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { OutlinedInput } from '../OutlinedForm';
-import { uuidv4 } from '../../utils';
+import { useCharacteristicsContext } from '../../context/CharacteristicsContext';
 
 import types from './types';
 
-export default function CharacteristicOption({ uuid, name, type, config, onChange }) {
-  const mounted = React.useRef(true);
+export default function CharacteristicOption({ uuid }) {
+  const { getCharacteristic, updateCharacteristic } = useCharacteristicsContext();
 
-  useEffect(() => {
-    mounted.current = true;
+  const {
+    loading,
+    characteristic: { name = "", description = "", type, ...config },
+  } = getCharacteristic(uuid);
 
-    if (uuid) return
+  console.log({ loading, name, description, type, config, uuid });
 
-    if (mounted.current) onChange({ target: { name: 'uuid', value: uuidv4() } });
-
-    return () => mounted.current = false;
-  }, [uuid]);
+  if (loading) return null;
 
   const Component = types[type]?.component;
-
   if (!Component) {
     return null;
+  }
+
+  const onChange = async (e) => {
+    const { name, value } = e.target;
+
+    updateCharacteristic(uuid, name, () => value);
   }
 
   return (
@@ -30,22 +34,24 @@ export default function CharacteristicOption({ uuid, name, type, config, onChang
         label="Name"
         name="name"
         required
-        value={name || ""}
+        value={name}
         onChange={onChange}
       />
 
-      <Component
-        {...config}
+      <OutlinedInput
+        label="Description"
+        name="description"
+        multiline
+        maxRows={10}
+        value={description}
         onChange={onChange}
       />
+
+      <Component {...config} onChange={onChange} />
     </span>
   );
 }
 
 CharacteristicOption.propTypes = {
-  onChange: PropTypes.func.isRequired,
-  type: PropTypes.string.isRequired,
-  uuid: PropTypes.string,
-  name: PropTypes.string,
-  config: PropTypes.object,
+  uuid: PropTypes.string.isRequired,
 };
