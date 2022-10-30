@@ -5,6 +5,7 @@ import { Characteristic } from '../CharacterCreate';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { CharacteristicConfigs } from '../CharacteristicOption';
 import CharacterContext from '../../context/CharacterContext';
+import CharacteristicsContext from '../../context/CharacteristicsContext';
 import EditIcon from '@mui/icons-material/Edit';
 import Grid from '@mui/material/Grid';
 import { Objects } from '../../context/ObjectsContext';
@@ -38,6 +39,7 @@ export default function RaceForm({ race = {}, onClose, onDone }) {
   const {
     values,
     errors,
+    handleChangeCallback,
     handleInputChange,
     isValid,
     resetForm,
@@ -106,153 +108,158 @@ export default function RaceForm({ race = {}, onClose, onDone }) {
     }
   }
 
+  const changeConfig = (change) => handleChangeCallback('config', change);
+
   return (
     <OutlinedForm onSubmit={values.id ? handleUpdate : handleCreate}>
-      <Grid container>
-        <Grid item xs={12} md={6}>
+      <CharacteristicsContext>
+        <Grid container>
+          <Grid item xs={12} md={6}>
 
-          <Grid item xs={12}>
-            <OutlinedFileUpload
-              sx={{ width: 56, height: 56 }}
-              label="Avatar"
-              name="avatar"
-              title={values.name}
-              aria-label="Avatar"
-              value={values.avatar}
-              error={errors.avatar}
-              onChange={handleInputChange}
-            />
+            <Grid item xs={12}>
+              <OutlinedFileUpload
+                sx={{ width: 56, height: 56 }}
+                label="Avatar"
+                name="avatar"
+                title={values.name}
+                aria-label="Avatar"
+                value={values.avatar}
+                error={errors.avatar}
+                onChange={handleInputChange}
+              />
 
-            <OutlinedInput
-              label="Name"
-              name="name"
-              required
-              value={values.name}
-              error={errors.name}
-              onChange={handleInputChange}
-              helper="Must be unique"
-            />
+              <OutlinedInput
+                label="Name"
+                name="name"
+                required
+                value={values.name}
+                error={errors.name}
+                onChange={handleInputChange}
+                helper="Must be unique"
+              />
+            </Grid>
+
+            <Objects.Consumer>
+              {({ race: races }) => {
+                if (!races) {
+                  return null;
+                }
+
+                races = Object.values(races)
+                  .filter(r => !r.sub)
+                  .filter(r => r.id !== race.id);
+
+                if (!races.length) {
+                  return null;
+                }
+
+                return (
+                  <Grid item xs={12} >
+                    <OutlinedSelect
+                      label="Main race"
+                      name="sub"
+                      allowEmpty={true}
+                      options={races}
+                      value={values.sub || ""}
+                      error={errors.sub}
+                      onChange={handleInputChange}
+                      helper="Subrace of ..."
+                    />
+                  </Grid>
+                )
+              }}
+            </Objects.Consumer>
+
+            <Grid item xs={12}>
+              <OutlinedInput
+                label="Description"
+                name="description"
+                multiline
+                maxRows={10}
+                value={values.description}
+                error={errors.description}
+                onChange={handleInputChange}
+                helper="Describe the race"
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <CharacteristicConfigs
+                config={values.config}
+                onChange={changeConfig}
+              />
+            </Grid>
           </Grid>
 
-          <Objects.Consumer>
-            {({ race: races }) => {
-              if (!races) {
-                return null;
-              }
-
-              races = Object.values(races)
-                .filter(r => !r.sub)
-                .filter(r => r.id !== race.id);
-
-              if (!races.length) {
-                return null;
-              }
-
-              return (
-                <Grid item xs={12} >
-                  <OutlinedSelect
-                    label="Main race"
-                    name="sub"
-                    allowEmpty={true}
-                    options={races}
-                    value={values.sub || ""}
-                    error={errors.sub}
-                    onChange={handleInputChange}
-                    helper="Subrace of ..."
-                  />
-                </Grid>
-              )
-            }}
-          </Objects.Consumer>
-
-          <Grid item xs={12}>
-            <OutlinedInput
-              label="Description"
-              name="description"
-              multiline
-              maxRows={10}
-              value={values.description}
-              error={errors.description}
-              onChange={handleInputChange}
-              helper="Describe the race"
-            />
+          <Grid item xs={12} md={6}>
+            <CharacterContext>
+              <Characteristic
+                {...values}
+              />
+            </CharacterContext>
           </Grid>
 
-          <Grid item xs={12}>
-            <CharacteristicConfigs
-              config={values.config}
-            />
-          </Grid>
-        </Grid>
+          <Grid item xs={12} style={{ display: "flex", justifyContent: "space-evenly", alignItems: "center" }}>
+            {values.id ? (
+              <PolicyButton
+                path={`/api/race/${race.id}`}
+                method="PATCH"
+                query="authz/race/allow"
 
-        <Grid item xs={12} md={6}>
-          <CharacterContext>
-            <Characteristic
-              {...values}
-            />
-          </CharacterContext>
-        </Grid>
+                variant="contained"
+                type="submit"
+                color="primary"
+                onClick={handleUpdate}
+                startIcon={<EditIcon />}
+              >
+                Update
+              </PolicyButton>
+            ) : (
+              <PolicyButton
+                path={`/api/race`}
+                method="POST"
+                query="authz/race/allow"
 
-        <Grid item xs={12} style={{ display: "flex", justifyContent: "space-evenly", alignItems: "center" }}>
-          {values.id ? (
+                variant="contained"
+                type="submit"
+                color="primary"
+                onClick={handleCreate}
+                startIcon={<PersonAddIcon />}
+              >
+                Create
+              </PolicyButton>
+            )}
+            {onClose && (
+              <PolicyButton
+                path={`/race`}
+                method="GET"
+                query="authz/pages/allow"
+
+                variant="contained"
+                type="cancel"
+                color="secondary"
+                onClick={handleCancel}
+                startIcon={<CancelIcon />}
+              >
+                Cancel
+              </PolicyButton>
+            )}
             <PolicyButton
               path={`/api/race/${race.id}`}
-              method="PATCH"
-              query="authz/race/allow"
-
-              variant="contained"
-              type="submit"
-              color="primary"
-              onClick={handleUpdate}
-              startIcon={<EditIcon />}
-            >
-              Update
-            </PolicyButton>
-          ) : (
-            <PolicyButton
-              path={`/api/race`}
-              method="POST"
-              query="authz/race/allow"
-
-              variant="contained"
-              type="submit"
-              color="primary"
-              onClick={handleCreate}
-              startIcon={<PersonAddIcon />}
-            >
-              Create
-            </PolicyButton>
-          )}
-          {onClose && (
-            <PolicyButton
-              path={`/race`}
               method="GET"
-              query="authz/pages/allow"
+              query="authz/race/allow"
 
               variant="contained"
-              type="cancel"
-              color="secondary"
-              onClick={handleCancel}
-              startIcon={<CancelIcon />}
+              type="reset"
+              color="warning"
+              onClick={resetForm}
+              startIcon={<BackspaceIcon />}
             >
-              Cancel
+              Reset
             </PolicyButton>
-          )}
-          <PolicyButton
-            path={`/api/race/${race.id}`}
-            method="GET"
-            query="authz/race/allow"
-
-            variant="contained"
-            type="reset"
-            color="warning"
-            onClick={resetForm}
-            startIcon={<BackspaceIcon />}
-          >
-            Reset
-          </PolicyButton>
+          </Grid>
         </Grid>
-      </Grid>
+      </CharacteristicsContext>
     </OutlinedForm >
   )
 }
