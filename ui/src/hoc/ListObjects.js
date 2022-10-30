@@ -18,11 +18,11 @@ import Tooltip from '@mui/material/Tooltip';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { visuallyHidden } from '@mui/utils';
 
-export default function ListObjects({ title, columns, data, order, searchForm: SearchForm, defaultFilters, filter, onClick, rowHeight = 85 }) {
+export default function ListObjects({ title, columns, data, order, searchForm: SearchForm, defaultFilters, filter, onClick, rowHeight, rowsPerPageOptions }) {
   const [orderDir, setOrderDir] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState({ column: 'id', fields: ['id'] });
   const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [rowsPerPage, setRowsPerPage] = React.useState(rowsPerPageOptions[0]);
   const [searchExpanded, setSearchExpanded] = React.useState(false);
   const [filters, setFilters] = React.useState({});
 
@@ -68,7 +68,7 @@ export default function ListObjects({ title, columns, data, order, searchForm: S
 
   if (!data) return null;
 
-  const rows = Object.values(data)
+  const rows = (Array.isArray(data) ? data : Object.values(data))
     .filter(filter ? (row) => filter(filters, row) : () => true)
     .sort(order ? (
       orderDir === 'desc'
@@ -155,7 +155,7 @@ export default function ListObjects({ title, columns, data, order, searchForm: S
         </Table>
       </TableContainer>
 
-      <TablePagination
+      {rows.length > rowsPerPage && <TablePagination
         rowsPerPageOptions={[5, 10, 25]}
         component="div"
         count={rows.length}
@@ -163,16 +163,24 @@ export default function ListObjects({ title, columns, data, order, searchForm: S
         page={page}
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
-      />
+      />}
 
     </Paper>
   );
 };
 
+ListObjects.defaultProps = {
+  rowsPerPageOptions: [5, 10, 25],
+  rowHeight: 85,
+}
+
 ListObjects.propTypes = {
   title: PropTypes.string.isRequired,
   columns: PropTypes.arrayOf(PropTypes.object).isRequired,
-  data: PropTypes.objectOf(PropTypes.object).isRequired,
+  data: PropTypes.oneOfType([
+    PropTypes.objectOf(PropTypes.object),
+    PropTypes.arrayOf(PropTypes.object),
+  ]).isRequired,
   order: PropTypes.func,
   defaultFilters: PropTypes.object,
   searchForm: PropTypes.elementType,
@@ -180,6 +188,7 @@ ListObjects.propTypes = {
   onClick: PropTypes.func,
   toggleSearch: PropTypes.func,
   rowHeight: PropTypes.number,
+  rowsPerPageOptions: PropTypes.arrayOf(PropTypes.number),
 };
 
 
@@ -219,7 +228,7 @@ SortableTableHead.propTypes = {
   columns: PropTypes.arrayOf(PropTypes.shape({
     name: PropTypes.string.isRequired,
     label: PropTypes.string.isRequired,
-    align: PropTypes.oneOf(['left', 'right']),
+    align: PropTypes.oneOf(['left', 'center', 'right']),
     render: PropTypes.func.isRequired,
     sx: PropTypes.object,
   })).isRequired,
