@@ -1,23 +1,29 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import Box from '@mui/material/Box';
+import CheckIcon from '@mui/icons-material/Check';
+import CircularProgress from '@mui/material/CircularProgress';
+import EditIcon from '@mui/icons-material/Edit';
+import IconButton from '@mui/material/IconButton';
+import Markdown from '../Markdown';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
 import { OutlinedInput } from '../OutlinedForm';
 import { useCharacteristicsContext } from '../../context/CharacteristicsContext';
 
 import types from './types';
 
 export default function CharacteristicOption({ uuid }) {
-  const { getCharacteristic, updateCharacteristic } = useCharacteristicsContext();
+  const {
+    focus, setFocus, getCharacteristic, updateCharacteristic,
+  } = useCharacteristicsContext();
 
   const {
     loading,
-    characteristic: { name = "", description = "", type, ...config },
+    characteristic: { name = "", description = "", type, config },
   } = getCharacteristic(uuid);
 
-  console.log({ loading, name, description, type, config, uuid });
-
-  if (loading) return null;
-
-  const Component = types[type]?.component;
+  const { name: label, component: Component } = types[type] || {};
   if (!Component) {
     return null;
   }
@@ -28,26 +34,76 @@ export default function CharacteristicOption({ uuid }) {
     updateCharacteristic(uuid, name, () => value);
   }
 
+  const onComponentChange = async (change) => {
+    updateCharacteristic(uuid, 'config', change);
+  }
+
+  const editing = uuid === focus;
+  const props = (!!config && config.constructor === Object) ? config : { config };
+
   return (
     <span>
-      <OutlinedInput
-        label="Name"
-        name="name"
-        required
-        value={name}
-        onChange={onChange}
-      />
+      <Toolbar>
+        <Typography
+          variant="h6"
+          noWrap
+          component="div"
+        >
+          {label}: {name}
+        </Typography>
+        <Box sx={{ flexGrow: 1 }} />
+        <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
+          {loading ? (
+            <CircularProgress />
+          ) : null}
+          {!editing ? (
+            <IconButton
+              variant="outlined"
+              aria-label="edit"
+              onClick={() => setFocus(uuid)}
+            >
+              <EditIcon />
+            </IconButton>
+          ) : (
+            <IconButton
+              variant="outlined"
+              aria-label="done"
+              onClick={() => setFocus(undefined)}
+            >
+              <CheckIcon />
+            </IconButton>
+          )}
+        </Box>
+      </Toolbar>
 
-      <OutlinedInput
-        label="Description"
-        name="description"
-        multiline
-        maxRows={10}
-        value={description}
-        onChange={onChange}
-      />
+      {editing ? (
+        <OutlinedInput
+          label="Name"
+          name="name"
+          required
+          value={name}
+          onChange={onChange}
+        />
+      ) : null}
 
-      <Component {...config} onChange={onChange} />
+      {editing ? (
+        <OutlinedInput
+          label="Description"
+          name="description"
+          multiline
+          maxRows={10}
+          value={description}
+          onChange={onChange}
+        />
+      ) : (
+        <Markdown description={description} />
+      )}
+
+      <Component
+        {...props}
+        editing={editing}
+        onChange={onComponentChange}
+      />
     </span>
   );
 }

@@ -8,22 +8,26 @@ import { useCharacteristicsContext } from '../../context/CharacteristicsContext'
 import types from './types';
 
 const CharacteristicConfigs = ({ config, onChange }) => {
-  const { updateCharacteristic } = useCharacteristicsContext();
+  const { setFocus, updateCharacteristic } = useCharacteristicsContext();
 
   const onAdd = (e) => {
     e.preventDefault();
     const { name, value } = e.target;
     const uuid = uuidv4();
 
-    onChange((config) => ([...config, uuid]));
+    onChange((config) => ([...(config || []), uuid]));
     updateCharacteristic(uuid, name, () => value);
+    setFocus(uuid);
   }
 
   return (
     <span>
-      {config.map(uuid => (
-        <CharacteristicOption key={uuid} uuid={uuid} />)
-      )}
+      {config ? config.map(uuid => (
+        <CharacteristicOption
+          key={uuid}
+          uuid={uuid}
+        />
+      )) : null}
 
       <OutlinedSelect
         label="Add"
@@ -36,8 +40,12 @@ const CharacteristicConfigs = ({ config, onChange }) => {
   )
 };
 
+CharacteristicConfigs.defaultProps = {
+  config: [],
+}
+
 CharacteristicConfigs.propTypes = {
-  config: PropTypes.arrayOf(PropTypes.string).isRequired,
+  config: PropTypes.arrayOf(PropTypes.string),
   onChange: PropTypes.func.isRequired,
 };
 

@@ -2,28 +2,40 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { OutlinedInput, OutlinedCheckbox } from '../OutlinedForm';
 
-const AbilityScore = ({ onChange, hidden, increase }) => (
-  <span>
-    <OutlinedCheckbox
-      label="Hidden"
-      name="hidden"
-      value={hidden}
-      onChange={onChange}
-      helper="Only makes sense when granting flat bonuses."
-    />
+const AbilityScore = ({ onChange, hidden, increase }) => {
 
-    <OutlinedInput
-      label="Increase"
-      name="increase"
-      type="number"
-      min={0}
-      max={20}
-      value={increase || ""}
-      onChange={onChange}
-      helper="Allow for one or more ability score increases."
-    />
-  </span>
-);
+  const updateField = async (e) => {
+    const { name, value } = e.target;
+
+    onChange((original) => ({
+      ...original,
+      [name]: value,
+    }));
+  };
+
+  return (
+    <span>
+      <OutlinedCheckbox
+        label="Hidden"
+        name="hidden"
+        value={hidden}
+        onChange={updateField}
+        helper="Only makes sense when granting flat bonuses."
+      />
+
+      <OutlinedInput
+        label="Increase"
+        name="increase"
+        type="number"
+        min={0}
+        max={20}
+        value={increase || ""}
+        onChange={updateField}
+        helper="Allow for one or more ability score increases."
+      />
+    </span>
+  );
+}
 
 AbilityScore.propTypes = {
   onChange: PropTypes.func.isRequired,
