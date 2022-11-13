@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import BackspaceIcon from '@mui/icons-material/Backspace'
 import { Characteristic } from '../CharacterCreate';
 import CancelIcon from '@mui/icons-material/Cancel';
-import { CharacteristicConfigs } from '../CharacteristicOption';
+import { Phases } from '../CharacteristicOption';
 import CharacterContext from '../../context/CharacterContext';
 import CharacteristicsContext from '../../context/CharacteristicsContext';
 import EditIcon from '@mui/icons-material/Edit';
@@ -20,10 +20,11 @@ const defaultRace = {
   sub: null,
   avatar: "",
   description: "",
-  config: [],
+  phases: [],
 }
 
-export default function RaceForm({ race = {}, onClose, onDone }) {
+export default function RaceForm({ race, onClose, onDone }) {
+  const [phase, setPhase] = React.useState((race?.phases || [])[0]);
 
   const validate = async (values) => {
     var errors = {};
@@ -108,7 +109,7 @@ export default function RaceForm({ race = {}, onClose, onDone }) {
     }
   }
 
-  const changeConfig = (change) => handleChangeCallback('config', change);
+  const changePhases = (change) => handleChangeCallback('phases', change);
 
   return (
     <OutlinedForm onSubmit={values.id ? handleUpdate : handleCreate}>
@@ -184,19 +185,22 @@ export default function RaceForm({ race = {}, onClose, onDone }) {
             </Grid>
 
             <Grid item xs={12}>
-              <CharacteristicConfigs
-                config={values.config}
-                onChange={changeConfig}
+              <Phases
+                phases={values.phases || []}
+                onChange={changePhases}
+                onSwitch={setPhase}
               />
             </Grid>
           </Grid>
 
           <Grid item xs={12} md={6}>
-            <CharacterContext>
-              <Characteristic
-                {...values}
-              />
-            </CharacterContext>
+            {phase ? (
+              <CharacterContext>
+                <Characteristic
+                  {...values}
+                />
+              </CharacterContext>
+            ) : null}
           </Grid>
 
           <Grid item xs={12} style={{ display: "flex", justifyContent: "space-evenly", alignItems: "center" }}>
@@ -262,6 +266,10 @@ export default function RaceForm({ race = {}, onClose, onDone }) {
       </CharacteristicsContext>
     </OutlinedForm >
   )
+}
+
+RaceForm.defaultProps = {
+  race: {},
 }
 
 RaceForm.propTypes = {
