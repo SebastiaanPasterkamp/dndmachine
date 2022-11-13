@@ -3,8 +3,7 @@ import * as React from 'react';
 export const Characteristics = React.createContext({});
 
 export default function CharacteristicsContext({ children }) {
-  const mounted = React.useRef(true);
-
+  const [focus, setFocus] = React.useState();
   const [characteristics, setCharacteristics] = React.useState({});
   const [loadings, setLoadings] = React.useState({});
 
@@ -19,8 +18,6 @@ export default function CharacteristicsContext({ children }) {
     const { [field]: original } = characteristic || {};
     const update = change(original);
 
-    console.log({ uuid, field, original, update })
-
     return {
       ...characteristics,
       [uuid]: {
@@ -31,7 +28,12 @@ export default function CharacteristicsContext({ children }) {
   });
 
   return (
-    <Characteristics.Provider value={{ getCharacteristic, updateCharacteristic }}>
+    <Characteristics.Provider value={{
+      focus,
+      setFocus,
+      getCharacteristic,
+      updateCharacteristic,
+    }}>
       {children}
     </Characteristics.Provider>
   );
