@@ -1,48 +1,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import types from './types';
-import Typography from '@mui/material/Typography';
-import Markdown from '../Markdown';
-import { useCharacteristicsContext } from '../../context/CharacteristicsContext';
+import CharacteristicOption from './CharacteristicOption';
 
-const CharacteristicConfigs = ({ config }) => {
-  const { getCharacteristic } = useCharacteristicsContext();
+const CharacteristicConfigs = ({ config }) => config.map(uuid => (
+  <CharacteristicOption
+    key={uuid}
+    uuid={uuid}
+  />
+))
 
-  return (
-    <span>
-      {config.map((uuid) => {
-        const {
-          loading,
-          characteristic: { name = "", description = "", type, ...config },
-        } = getCharacteristic(uuid);
-
-        console.log({ loading, name, description, type, config, uuid });
-
-        if (loading) return null;
-
-        const Component = types[type];
-        if (!Component) return null;
-
-        return (
-          <span key={uuid} >
-            {name ? (
-              <Typography
-                variant="h6"
-                component="div"
-              >
-                {name}
-              </Typography>
-            ) : null}
-
-            <Markdown description={description} />
-
-            <Component {...config} />
-          </span>
-        )
-      })}
-    </span>
-  );
+CharacteristicConfigs.defaultProps = {
+  config: [],
 }
 
 CharacteristicConfigs.propTypes = {

@@ -2,12 +2,12 @@ import * as React from 'react';
 import PropTypes from 'prop-types';
 import { useObjectsContext } from '../../context/ObjectsContext';
 import BadgedAvatar from '../BadgedAvatar';
-import CharacteristicConfigs from './CharacteristicConfigs';
+import CharacteristicOption from './CharacteristicOption';
 import CardHeader from '@mui/material/CardHeader';
 import Markdown from '../../partials/Markdown';
 import Paper from '@mui/material/Paper';
 
-export default function Characteristic({ sub, name, description, avatar, config }) {
+export default function Characteristic({ sub, name, description, avatar, phases }) {
   const mounted = React.useRef(true);
   const { race: races } = useObjectsContext();
   const [parent, setParent] = React.useState(null);
@@ -44,15 +44,19 @@ export default function Characteristic({ sub, name, description, avatar, config 
 
       <Markdown description={description} />
 
-      <CharacteristicConfigs config={config} />
+      {phases ? (
+        <CharacteristicOption
+          uuid={phases[0]}
+        />
+      ) : null}
     </Paper>
   )
 }
 
 Characteristic.propTypes = {
-  sub: PropTypes.number,
   name: PropTypes.string,
+  sub: PropTypes.number,
   description: PropTypes.string,
   avatar: PropTypes.string,
-  config: PropTypes.arrayOf(PropTypes.string),
+  phases: PropTypes.arrayOf(PropTypes.string),
 };
