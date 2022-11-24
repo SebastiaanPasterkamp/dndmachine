@@ -12,7 +12,7 @@ require (
 	github.com/open-policy-agent/opa v0.46.1
 	golang.org/x/crypto v0.2.0
 	golang.org/x/sync v0.1.0
-	modernc.org/sqlite v1.19.4
+	modernc.org/sqlite v1.19.5
 )
 
 require (
@@ -41,7 +41,7 @@ require (
 	lukechampine.com/uint128 v1.2.0 // indirect
 	modernc.org/cc/v3 v3.40.0 // indirect
 	modernc.org/ccgo/v3 v3.16.13 // indirect
-	modernc.org/libc v1.21.4 // indirect
+	modernc.org/libc v1.21.5 // indirect
 	modernc.org/mathutil v1.5.0 // indirect
 	modernc.org/memory v1.4.0 // indirect
 	modernc.org/opt v0.1.3 // indirect
