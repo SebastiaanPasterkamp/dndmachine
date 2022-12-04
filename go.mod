@@ -7,7 +7,7 @@ require (
 	github.com/coreos/go-semver v0.3.0
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/go-redis/redis/v8 v8.11.5
-	github.com/go-sql-driver/mysql v1.6.0
+	github.com/go-sql-driver/mysql v1.7.0
 	github.com/google/uuid v1.3.0
 	github.com/open-policy-agent/opa v0.46.1
 	golang.org/x/crypto v0.3.0
