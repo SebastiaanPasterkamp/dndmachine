@@ -9,19 +9,26 @@ import Markdown from '../Markdown';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import { OutlinedInput } from '../OutlinedForm';
-import { useCharacteristicsContext } from '../../context/CharacteristicsContext';
+import { useSmartCharacteristicsContext } from '../../context/CharacteristicsContext';
 
 import types from './types';
 
 export default function CharacteristicOption({ uuid }) {
-  const {
-    focus, setFocus, getCharacteristic, updateCharacteristic,
-  } = useCharacteristicsContext();
+  const [loading, setLoading] = React.useState({ name = "", description = "", type, config });
+  const [characteristic, setCharacteristic] = React.useState({ name = "", description = "", type, config });
+  const { name, description, type, config } = characteristic;
 
-  const {
-    loading,
-    characteristic: { name = "", description = "", type, config },
-  } = getCharacteristic(uuid);
+  React.useEffect(() => {
+    const {
+      unsubscribe,
+      characteristic,
+    } = useSmartCharacteristicsContext(uuid);
+
+    setCharacteristic(characteristic);
+    setLoading(loading);
+
+    return unsubscribe;
+  }, [uuid]);
 
   const { name: label, component: Component } = types[type] || {};
   if (!Component) {
