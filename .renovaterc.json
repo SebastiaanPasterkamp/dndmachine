@@ -1,14 +1,31 @@
 {
   "extends": [
-    "config:base"
+    "config:base",
+    "group:fortawesome",
+    "group:jestPlusTSJest",
+    "group:jestPlusTypes",
+    "group:babelMonorepo",
+    "group:jestMonorepo",
+    "group:material-uiMonorepo",
+    "group:mdc-reactMonorepo",
+    "group:reactMonorepo",
+    "packages:eslint",
+    "packages:jsUnitTest",
+    "packages:react"
   ],
   "packageRules": [
     {
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "digest"
+      ],
       "automerge": true
     }
   ],
   "dockerfile": {
-    "fileMatch": ["^\.Dockerfile\.(react|go)\.dev$"]
+    "fileMatch": ["^\.Dockerfile\.(react|go)\.dev$"
+    ]
   }
 }
