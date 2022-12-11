@@ -4,10 +4,10 @@ github.com/OneOfOne/xxhash
 # github.com/agnivade/levenshtein v1.1.1
 ## explicit; go 1.13
 github.com/agnivade/levenshtein
-# github.com/alexflint/go-arg v1.4.3 => github.com/SebastiaanPasterkamp/go-arg v1.4.3-0.20220102141709-a87d80089a78
-## explicit; go 1.13
+# github.com/alexflint/go-arg v1.4.3 => github.com/SebastiaanPasterkamp/go-arg v1.4.3-0.20221029192907-727f8533acca
+## explicit; go 1.18
 github.com/alexflint/go-arg
-# github.com/alexflint/go-scalar v1.1.0
+# github.com/alexflint/go-scalar v1.2.0
 ## explicit; go 1.15
 github.com/alexflint/go-scalar
 # github.com/cespare/xxhash/v2 v2.1.2
@@ -244,4 +244,4 @@ modernc.org/strutil
 # modernc.org/token v1.0.1
 ## explicit
 modernc.org/token
-# github.com/alexflint/go-arg => github.com/SebastiaanPasterkamp/go-arg v1.4.3-0.20220102141709-a87d80089a78
+# github.com/alexflint/go-arg => github.com/SebastiaanPasterkamp/go-arg v1.4.3-0.20221029192907-727f8533acca
