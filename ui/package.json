@@ -11,7 +11,7 @@
     "@fortawesome/free-solid-svg-icons": "6.2.1",
     "@fortawesome/react-fontawesome": "0.2.0",
     "@mui/icons-material": "5.10.16",
-    "@mui/material": "5.10.16",
+    "@mui/material": "5.10.17",
     "@mui/styles": "5.10.16",
     "@open-policy-agent/opa-wasm": "1.8.0",
     "@testing-library/jest-dom": "5.16.5",
