@@ -18,7 +18,7 @@ require (
 require (
 	github.com/OneOfOne/xxhash v1.2.8 // indirect
 	github.com/agnivade/levenshtein v1.1.1 // indirect
-	github.com/alexflint/go-scalar v1.1.0 // indirect
+	github.com/alexflint/go-scalar v1.2.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
@@ -49,4 +49,4 @@ require (
 	modernc.org/token v1.0.1 // indirect
 )
 
-replace github.com/alexflint/go-arg => github.com/SebastiaanPasterkamp/go-arg v1.4.3-0.20220102141709-a87d80089a78
+replace github.com/alexflint/go-arg => github.com/SebastiaanPasterkamp/go-arg v1.4.3-0.20221029192907-727f8533acca
