@@ -12,7 +12,7 @@ require (
 	github.com/open-policy-agent/opa v0.49.0
 	golang.org/x/crypto v0.6.0
 	golang.org/x/sync v0.1.0
-	modernc.org/sqlite v1.20.3
+	modernc.org/sqlite v1.20.4
 )
 
 require (
