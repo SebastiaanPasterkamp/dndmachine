@@ -4,8 +4,8 @@
   "homepage": "/ui",
   "private": true,
   "dependencies": {
-    "@emotion/react": "11.10.5",
-    "@emotion/styled": "11.10.5",
+    "@emotion/react": "11.10.6",
+    "@emotion/styled": "11.10.6",
     "@fortawesome/fontawesome-free": "6.3.0",
     "@fortawesome/free-brands-svg-icons": "6.3.0",
     "@fortawesome/free-solid-svg-icons": "6.3.0",
