@@ -61,8 +61,8 @@ github.com/kballard/go-shellquote
 # github.com/mattn/go-isatty v0.0.16
 ## explicit; go 1.15
 github.com/mattn/go-isatty
-# github.com/open-policy-agent/opa v0.49.0
-## explicit; go 1.17
+# github.com/open-policy-agent/opa v0.49.2
+## explicit; go 1.18
 github.com/open-policy-agent/opa/ast
 github.com/open-policy-agent/opa/ast/internal/scanner
 github.com/open-policy-agent/opa/ast/internal/tokens
