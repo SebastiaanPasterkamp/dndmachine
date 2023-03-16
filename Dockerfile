@@ -2,8 +2,7 @@ FROM cromrots/opa:0.52 as opa
 
 COPY internal/policy/rego rego
 
-RUN [ \
-    "/opa", "build", \
+RUN [ "/opa", "build", \
     "--target", "wasm", \
     "--entrypoint", "authz/auth/allow", \
     "--entrypoint", "authz/character/allow", \
@@ -17,17 +16,20 @@ FROM node:17.9-stretch as frontend
 
 WORKDIR /app
 
+COPY ui/package.json  ui/package-lock.json ./
+
+RUN npm install
+
 COPY ui .
 
-RUN npm install && \
-    npm run build
+RUN npm run build
 
 COPY --from=opa /data/bundle.tar.gz .
 
 RUN tar \
         --to-stdout \
-		-xzf ./bundle.tar.gz \
-		/policy.wasm \
+        -xzf ./bundle.tar.gz \
+        /policy.wasm \
         > public/policy.wasm
 
 FROM golang:1.20 as backend
