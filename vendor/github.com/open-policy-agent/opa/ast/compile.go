@@ -2171,28 +2171,6 @@ func (c *Compiler) rewriteLocalVars() {
 		gen := c.localvargen
 
 		WalkRules(mod, func(rule *Rule) bool {
-			// Rewrite assignments contained in head of rule. Assignments can
-			// occur in rule head if they're inside a comprehension. Note,
-			// assigned vars in comprehensions in the head will be rewritten
-			// first to preserve scoping rules. For example:
-			//
-			// p = [x | x := 1] { x := 2 } becomes p = [__local0__ | __local0__ = 1] { __local1__ = 2 }
-			//
-			// This behaviour is consistent scoping inside the body. For example:
-			//
-			// p = xs { x := 2; xs = [x | x := 1] } becomes p = xs { __local0__ = 2; xs = [__local1__ | __local1__ = 1] }
-			nestedXform := &rewriteNestedHeadVarLocalTransform{
-				gen:           gen,
-				RewrittenVars: c.RewrittenVars,
-				strict:        c.strict,
-			}
-
-			NewGenericVisitor(nestedXform.Visit).Walk(rule.Head)
-
-			for _, err := range nestedXform.errs {
-				c.err(err)
-			}
-
 			argsStack := newLocalDeclaredVars()
 
 			args := NewVarVisitor()
@@ -2235,6 +2213,28 @@ func (c *Compiler) rewriteLocalVars() {
 }
 
 func (c *Compiler) rewriteLocalVarsInRule(rule *Rule, unusedArgs VarSet, argsStack *localDeclaredVars, gen *localVarGenerator) (*localDeclaredVars, Errors) {
+	// Rewrite assignments contained in head of rule. Assignments can
+	// occur in rule head if they're inside a comprehension. Note,
+	// assigned vars in comprehensions in the head will be rewritten
+	// first to preserve scoping rules. For example:
+	//
+	// p = [x | x := 1] { x := 2 } becomes p = [__local0__ | __local0__ = 1] { __local1__ = 2 }
+	//
+	// This behaviour is consistent scoping inside the body. For example:
+	//
+	// p = xs { x := 2; xs = [x | x := 1] } becomes p = xs { __local0__ = 2; xs = [__local1__ | __local1__ = 1] }
+	nestedXform := &rewriteNestedHeadVarLocalTransform{
+		gen:           gen,
+		RewrittenVars: c.RewrittenVars,
+		strict:        c.strict,
+	}
+
+	NewGenericVisitor(nestedXform.Visit).Walk(rule.Head)
+
+	for _, err := range nestedXform.errs {
+		c.err(err)
+	}
+
 	// Rewrite assignments in body.
 	used := NewVarSet()
 
@@ -4800,11 +4800,11 @@ func rewriteDeclaredVarsInBody(g *localVarGenerator, stack *localDeclaredVars, u
 		cpy.Append(NewExpr(BooleanTerm(true)))
 	}
 
-	errs = checkUnusedAssignedVars(body[0].Loc(), stack, used, errs, strict)
+	errs = checkUnusedAssignedVars(body, stack, used, errs, strict)
 	return cpy, checkUnusedDeclaredVars(body, stack, used, cpy, errs)
 }
 
-func checkUnusedAssignedVars(loc *Location, stack *localDeclaredVars, used VarSet, errs Errors, strict bool) Errors {
+func checkUnusedAssignedVars(body Body, stack *localDeclaredVars, used VarSet, errs Errors, strict bool) Errors {
 
 	if !strict || len(errs) > 0 {
 		return errs
@@ -4833,7 +4833,17 @@ func checkUnusedAssignedVars(loc *Location, stack *localDeclaredVars, used VarSe
 	unused = unused.Diff(rewrittenUsed)
 
 	for _, gv := range unused.Sorted() {
-		errs = append(errs, NewError(CompileErr, loc, "assigned var %v unused", dvs.reverse[gv]))
+		found := false
+		for i := range body {
+			if body[i].Vars(VarVisitorParams{}).Contains(gv) {
+				errs = append(errs, NewError(CompileErr, body[i].Loc(), "assigned var %v unused", dvs.reverse[gv]))
+				found = true
+				break
+			}
+		}
+		if !found {
+			errs = append(errs, NewError(CompileErr, body[0].Loc(), "assigned var %v unused", dvs.reverse[gv]))
+		}
 	}
 
 	return errs
