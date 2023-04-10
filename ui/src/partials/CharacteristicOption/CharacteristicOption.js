@@ -2,33 +2,45 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
 import CheckIcon from '@mui/icons-material/Check';
-import CircularProgress from '@mui/material/CircularProgress';
 import EditIcon from '@mui/icons-material/Edit';
 import IconButton from '@mui/material/IconButton';
 import Markdown from '../Markdown';
+import Skeleton from '@mui/material/Skeleton';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import { OutlinedInput } from '../OutlinedForm';
-import { useSmartCharacteristicsContext } from '../../context/CharacteristicsContext';
-
+import { useCharacteristicsContext } from '../../context/CharacteristicsContext';
 import types from './types';
 
 export default function CharacteristicOption({ uuid }) {
-  const [loading, setLoading] = React.useState({ name = "", description = "", type, config });
-  const [characteristic, setCharacteristic] = React.useState({ name = "", description = "", type, config });
-  const { name, description, type, config } = characteristic;
+  const {
+    subscribe, focus, getCharacteristic, updateCharacteristic, setFocus,
+  } = useCharacteristicsContext();
+  const [state, updateState] = React.useState({
+    loading: false,
+    characteristic: {},
+  });
+  const setState = React.useCallback(
+    update => updateState(original => ({ ...original, ...update })),
+    [updateState],
+  );
+
+  const callback = React.useCallback(
+    (updated, update) => {
+      console.log('callback', { updated, update, uuid });
+      if (uuid !== updated) return;
+      setState(update);
+    },
+    [uuid, setState],
+  );
 
   React.useEffect(() => {
-    const {
-      unsubscribe,
-      characteristic,
-    } = useSmartCharacteristicsContext(uuid);
+    setState(getCharacteristic(uuid));
+    return subscribe(callback);
+  }, [uuid, setState, getCharacteristic, subscribe, callback]);
 
-    setCharacteristic(characteristic);
-    setLoading(loading);
-
-    return unsubscribe;
-  }, [uuid]);
+  const { loading, characteristic } = state;
+  const { name = "", description = "", type, config } = characteristic;
 
   const { name: label, component: Component } = types[type] || {};
   if (!Component) {
@@ -51,27 +63,23 @@ export default function CharacteristicOption({ uuid }) {
   return (
     <span>
       <Toolbar>
-        <Typography
-          variant="h6"
-          noWrap
-          component="div"
-        >
-          {label}: {name}
-        </Typography>
+        {loading ? (
+          <Skeleton animation="wave" />
+        ) : (
+
+          <Typography
+            variant="h6"
+            noWrap
+            component="div"
+          >
+            {label}: {name}
+          </Typography>
+        )}
         <Box sx={{ flexGrow: 1 }} />
         <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
           {loading ? (
-            <CircularProgress />
-          ) : null}
-          {!editing ? (
-            <IconButton
-              variant="outlined"
-              aria-label="edit"
-              onClick={() => setFocus(uuid)}
-            >
-              <EditIcon />
-            </IconButton>
-          ) : (
+            <Skeleton variant="circular" />
+          ) : editing ? (
             <IconButton
               variant="outlined"
               aria-label="done"
@@ -79,7 +87,17 @@ export default function CharacteristicOption({ uuid }) {
             >
               <CheckIcon />
             </IconButton>
-          )}
+          ) : (
+            <IconButton
+              variant="outlined"
+              aria-label="edit"
+              onClick={() => setFocus(uuid)}
+            >
+              <EditIcon />
+            </IconButton>
+
+          )
+          }
         </Box>
       </Toolbar>
 

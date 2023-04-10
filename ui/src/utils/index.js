@@ -4,6 +4,7 @@ import stringToColor from './stringToColor';
 import sortMethod from './sortMethod';
 import tableOrder from './tableOrder';
 import uuidv4 from './uuidv4';
+import useStateObject from './useStateObject'
 
 export {
     filterMethod,
@@ -12,4 +13,5 @@ export {
     stringToColor,
     tableOrder,
     uuidv4,
+    useStateObject,
 }

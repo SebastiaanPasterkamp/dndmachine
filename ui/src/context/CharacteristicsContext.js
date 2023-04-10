@@ -1,4 +1,4 @@
-import React, { useSyncExternalStore, useCallback } from 'react';
+import React from 'react';
 
 export const Characteristics = React.createContext({});
 
@@ -7,18 +7,21 @@ export default function CharacteristicsContext({ children }) {
   const [characteristics, setCharacteristics] = React.useState({});
   const [loadings, setLoadings] = React.useState({});
 
-  const listeners = Set();
+  const listeners = new Set();
 
   const subscribe = (callback) => {
-    listeners.add();
-    return () => listeners.remove(callback);
+    listeners.add(callback);
+    return () => listeners.delete(callback);
   };
 
-  const getCharacteristic = (uuid) => {
-    const { [uuid]: characteristic = {} } = characteristics;
-    const { [uuid]: loading = false } = loadings;
-    return { characteristic, loading };
-  }
+  const getCharacteristic = React.useCallback(
+    (uuid) => {
+      const { [uuid]: characteristic = {} } = characteristics;
+      const { [uuid]: loading = false } = loadings;
+      return { characteristic, loading, focus };
+    },
+    [characteristics, loadings, focus],
+  );
 
   const updateCharacteristic = async (uuid, field, change) => setCharacteristics(characteristics => {
     const { [uuid]: characteristic } = characteristics;
@@ -26,7 +29,9 @@ export default function CharacteristicsContext({ children }) {
     const update = change(original);
     const final = { ...characteristic, [field]: update, };
 
-    listeners.forEach((callback) => callback(uuid, final));
+    listeners.forEach((callback) => callback(uuid, {
+      characteristic: final,
+    }));
 
     return {
       ...characteristics,
@@ -55,15 +60,3 @@ export function useCharacteristicsContext() {
   return context;
 }
 
-export function useSmartCharacteristicsContext(uuid) {
-  const { subscribe } = useCharacteristicsContext();
-
-  const callback = useCallback(
-    (updated, characteristic) => uuid === updated
-      ? characteristic
-      : undefined,
-    uuid,
-  );
-
-  return useSyncExternalStore(subscribe, callback);
-}
