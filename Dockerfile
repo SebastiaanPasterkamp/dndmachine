@@ -1,4 +1,4 @@
-FROM cromrots/opa:0.50 as opa
+FROM --platform=${BUILDOS}/${BUILDARCH} cromrots/opa:0.50 as opa
 
 COPY internal/policy/rego rego
 
@@ -13,7 +13,7 @@ RUN [ \
     "rego" \
 ]
 
-FROM node:17.9-stretch as frontend
+FROM --platform=${BUILDPLATFORM} node:17.9-stretch as frontend
 
 WORKDIR /app
 
@@ -30,18 +30,22 @@ RUN tar \
 		/policy.wasm \
         > public/policy.wasm
 
-FROM golang:1.20 as backend
+FROM --platform=${BUILDPLATFORM} golang:1.20 as backend
 
 WORKDIR /app
-
-ENV CGO_ENABLED=0
-ENV GO111MODULE=on
-ENV GOFLAGS=-mod=vendor
 
 ARG GIT_TAG
 ARG GIT_COMMIT
 ARG GIT_BRANCH
 ARG BUILD_TIME
+ARG TARGETOS
+ARG TARGETARCH
+
+ENV CGO_ENABLED=0
+ENV GO111MODULE=on
+ENV GOFLAGS=-mod=vendor
+ENV GOOS=${TARGETOS}
+ENV GOARCH=${TARGETARCH}
 
 COPY go.mod go.sum /app/
 COPY cmd/ /app/cmd/
@@ -59,7 +63,7 @@ RUN go build \
     " \
     cmd/dndmachine/main.go
 
-FROM alpine AS nonroot
+FROM --platform=${BUILDPLATFORM} alpine:3.17.0 AS nonroot
 
 ENV USER=dndmachine
 ENV UID=1000

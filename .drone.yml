@@ -60,6 +60,7 @@ steps:
       tags: unstable
       cache_from: cromrots/dndmachine:cache
       cache_to: cromrots/dndmachine:cache
+      platform: linux/amd64,linux/arm64
       password:
         from_secret: docker_pwd
       username:
@@ -89,6 +90,7 @@ steps:
       auto_tag: true
       cache_from: cromrots/dndmachine:cache
       cache_to: cromrots/dndmachine:cache
+      platform: linux/amd64,linux/arm64
       password:
         from_secret: docker_pwd
       username:
@@ -141,6 +143,6 @@ steps:
         **Message:** {{commit.message}}
 ---
 kind: signature
-hmac: 67aa3f537263fd7982d34a7a078b748afa96a52014e410c22cc513420fd8589d
+hmac: 2c8ab1c59a407ce7b60efec204ce35d3253c2ca870b7c17630ac0d7f608db5b6
 
 ...
