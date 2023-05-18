@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -170,7 +169,7 @@ func initialize(db *sql.Tx) error {
 func ListSchemaDir(dir string) ([]*SchemaChange, error) {
 	schemas := []*SchemaChange{}
 
-	files, err := ioutil.ReadDir(dir)
+	files, err := os.ReadDir(dir)
 	if err != nil {
 		return schemas, fmt.Errorf("failed to read dir %q: %w", dir, err)
 	}

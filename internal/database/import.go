@@ -1,11 +1,11 @@
 package database
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"fmt"
 	"io"
-	"io/ioutil"
 )
 
 func (i *Instance) Import(fh io.Reader) error {
@@ -37,12 +37,13 @@ func (i *Instance) Import(fh io.Reader) error {
 }
 
 func ImportToDB(db *sql.Tx, fh io.Reader) error {
-	data, err := ioutil.ReadAll(fh)
+	buf := bytes.Buffer{}
+	_, err := io.Copy(&buf, fh)
 	if err != nil {
 		return fmt.Errorf("error while reading sql code to import: %w", err)
 	}
 
-	if _, err = db.Exec(string(data)); err != nil {
+	if _, err = db.Exec(buf.String()); err != nil {
 		return fmt.Errorf("%w: %q", ErrImportFailed, err)
 	}
 

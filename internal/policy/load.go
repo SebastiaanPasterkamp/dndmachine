@@ -2,7 +2,7 @@ package policy
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"path"
 	"strings"
 
@@ -10,7 +10,7 @@ import (
 )
 
 func loadDir(dir string) (*ast.Compiler, error) {
-	rules, err := ioutil.ReadDir(dir)
+	rules, err := os.ReadDir(dir)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read rules directory %q: %w", dir, err)
 	}
@@ -21,7 +21,7 @@ func loadDir(dir string) (*ast.Compiler, error) {
 			continue
 		}
 
-		data, err := ioutil.ReadFile(path.Join(dir, rule.Name()))
+		data, err := os.ReadFile(path.Join(dir, rule.Name()))
 		if err != nil {
 			return nil, fmt.Errorf("failed to read rule from file %q: %w",
 				rule.Name(), err)
