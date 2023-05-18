@@ -3,7 +3,6 @@ package api_test
 import (
 	"context"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -100,7 +99,7 @@ func TestMount(t *testing.T) {
 
 			response := w.Body.String()
 
-			expected, err := ioutil.ReadFile(tt.expectedResponse)
+			expected, err := os.ReadFile(tt.expectedResponse)
 			if err != nil {
 				t.Fatalf("failed to read expected response body: %v", err)
 			}
