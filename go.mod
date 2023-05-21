@@ -11,7 +11,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/open-policy-agent/opa v0.52.0
 	golang.org/x/crypto v0.9.0
-	golang.org/x/sync v0.1.0
+	golang.org/x/sync v0.2.0
 	modernc.org/sqlite v1.21.1
 )
 
