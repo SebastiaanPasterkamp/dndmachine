@@ -113,6 +113,8 @@ github.com/SebastiaanPasterkamp/go-arg v1.4.3-0.20220102141709-a87d80089a78 h1:Y
 github.com/SebastiaanPasterkamp/go-arg v1.4.3-0.20220102141709-a87d80089a78/go.mod h1:b0KVE9XeM1yDDb5NU4/X6zgZVyEKM19+AdEmmjEwx0Y=
 github.com/SebastiaanPasterkamp/go-arg v1.4.3-0.20221029192907-727f8533acca h1:iePTT6Gtz9gGIqtA1rGwoVOuaV8CQWOmCbRNw8kUNBg=
 github.com/SebastiaanPasterkamp/go-arg v1.4.3-0.20221029192907-727f8533acca/go.mod h1:2WzCs3MJkpNStBPfFfvH9/ZwFFL/ZwLg9EiKbk2p3BA=
+github.com/SebastiaanPasterkamp/go-arg v1.4.3-0.20230208145656-e25b4707a7d6 h1:AM59Z4FLVIHOeTCq+vIACN00wkwaKnHNpfuKJ8zzWBU=
+github.com/SebastiaanPasterkamp/go-arg v1.4.3-0.20230208145656-e25b4707a7d6/go.mod h1:2WzCs3MJkpNStBPfFfvH9/ZwFFL/ZwLg9EiKbk2p3BA=
 github.com/Shopify/logrus-bugsnag v0.0.0-20171204204709-577dee27f20d/go.mod h1:HI8ITrYtUY+O+ZhtlqUnD8+KwNPOyugEhfP9fdUIaEQ=
 github.com/agnivade/levenshtein v1.0.1 h1:3oJU7J3FGFmyhn8KHjmVaZCN5hxTr7GxgRue+sxIXdQ=
 github.com/agnivade/levenshtein v1.0.1/go.mod h1:CURSv5d9Uaml+FovSIICkLbAUZ9S4RqaHDIsdSBg7lM=
