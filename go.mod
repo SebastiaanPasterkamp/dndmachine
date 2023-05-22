@@ -51,4 +51,4 @@ require (
 	modernc.org/token v1.0.1 // indirect
 )
 
-replace github.com/alexflint/go-arg => github.com/SebastiaanPasterkamp/go-arg v1.4.3-0.20221029192907-727f8533acca
+replace github.com/alexflint/go-arg => github.com/SebastiaanPasterkamp/go-arg v1.4.3-0.20230208145656-e25b4707a7d6
