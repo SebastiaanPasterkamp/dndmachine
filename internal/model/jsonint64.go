@@ -9,7 +9,7 @@ import (
 type JSONInt64 int64
 
 // UnmarshalJSON for the JSONInt64 sets the int64 value back to 0 if the key
-// wa set to value null
+// was set to value null
 func (i *JSONInt64) UnmarshalJSON(data []byte) error {
 	*i = 0
 
