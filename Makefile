@@ -16,20 +16,28 @@ coverage: opa-coverage go-coverage ui-coverage
 build: opa-build go-build ui-build
 
 opa-build:
-	opa build \
-		--target wasm \
-		--entrypoint authz/auth/allow \
-		--entrypoint authz/character/allow \
-		--entrypoint authz/pages/allow \
-		--entrypoint authz/user/allow \
-		--entrypoint authz \
-		--ignore \*_test.rego \
-		internal/policy/rego/
+	mkdir -p ${PWD}/build
+	docker run \
+		--rm -it \
+		--user ${UID}:${GID} \
+		-v ${PWD}/internal/policy/rego:/rego \
+		-v ${PWD}/build:/build \
+		cromrots/opa:0.50.1 \
+		build \
+			--target wasm \
+			--entrypoint authz/auth/allow \
+			--entrypoint authz/character/allow \
+			--entrypoint authz/pages/allow \
+			--entrypoint authz/user/allow \
+			--entrypoint authz \
+			--ignore \*_test.rego \
+			--output /build/bundle.tar.gz \
+			/rego
 	tar -xzvf \
-		./bundle.tar.gz \
+		build/bundle.tar.gz \
 		--directory=ui/public \
 		/policy.wasm
-	rm bundle.tar.gz
+	rm build/bundle.tar.gz
 
 opa-test:
 	opa test --verbose internal/policy/rego
@@ -38,7 +46,7 @@ opa-test:
 opa-coverage:
 	opa test --coverage --verbose internal/policy/rego
 
-dev:
+dev: opa-build
 	USER=${UID}:${GID} \
 	docker-compose up \
 		--build \
@@ -52,7 +60,7 @@ go-update:
 	go mod vendor
 
 go-coverage:
-	go test -coverprofile cover.out ./...
+	go test -coverprofile cover.out ./cmd/... ./internal/...
 	go tool cover -html=cover.out
 
 lint:
@@ -63,7 +71,7 @@ format:
 	gofmt -s -w internal
 
 go-test:
-	go test -race -count 10 -v ./...
+	go test -race -count 10 -v ./cmd/... ./internal/...
 
 go-build:
 	CGO_ENABLED=0 \
