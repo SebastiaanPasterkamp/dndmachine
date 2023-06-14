@@ -8,9 +8,11 @@ USER air
 
 WORKDIR /air/code
 
-RUN go install github.com/cosmtrek/air@latest
+RUN echo "go run cmd/dndmachine/main.go storage upgrade && air" \
+    > /air/entrypoint.sh \
+    && chmod +x /air/entrypoint.sh
 
-COPY . .
+RUN go install github.com/cosmtrek/air@latest
 
 ENV CGO_ENABLED=0
 ENV GO111MODULE=on
@@ -19,4 +21,8 @@ ENV GOFLAGS=-mod=vendor
 EXPOSE 8080
 EXPOSE 4000
 
-CMD [ "air" ]
+COPY . .
+
+ENTRYPOINT [ "/bin/sh" ]
+
+CMD [ "/air/entrypoint.sh" ]

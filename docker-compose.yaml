@@ -1,17 +1,17 @@
 version: "3.9"
 
 services:
-
   golang:
     build:
       dockerfile: .Dockerfile.go.dev
       context: .
     user: "${USER}"
     volumes:
-    - ./:/air/code
+      - ./:/air/code
     links:
-    - redis
+      - redis
     environment:
+      - DNDMACHINE_DSN=sqlite:///air/machine.db
       - DNDMACHINE_REDIS_ADDRESS=redis:6379
 
   react:
@@ -20,9 +20,12 @@ services:
       context: .
     user: "${USER}"
     ports:
-    - "3000:3000"
+      - "3000:3000"
     volumes:
-    - ./ui:/code
+      - ./ui/package.json:/app/package.json
+      - ./ui/package-lock.json:/app/package-lock.json
+      - ./ui/public:/app/public
+      - ./ui/src:/app/src
 
   redis:
     image: redis:alpine
