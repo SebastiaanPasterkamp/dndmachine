@@ -38,6 +38,7 @@ opa-build:
 		--directory=ui/public \
 		/policy.wasm
 	rm build/bundle.tar.gz
+	cp -v ui/public/policy.wasm ui/src/testdata
 
 opa-test:
 	opa test --verbose internal/policy/rego
@@ -103,69 +104,77 @@ clean:
 		ui/build \
 		ui/public/policy.wasm
 
-serve-ui:
+npm-install:
+	docker run \
+		--rm -it \
+		-u ${UID}:${GID} \
+		-v ${PWD}/ui:/project \
+		-w /project \
+		node:17.9-stretch \
+			npm install --no-save npm-check-updates
+
+serve-ui: npm-install
 	docker run \
 		--rm -it \
 		-p 3000:3000 \
 		-u ${UID}:${GID} \
 		-v ${PWD}/ui:/project \
 		-w /project \
-		node:17.8-stretch \
+		node:17.9-stretch \
 			npm start
 
-ui-test-watch:
+ui-test-watch: opa-build npm-install
 	docker run \
 		--rm -it \
 		-u ${UID}:${GID} \
 		-v ${PWD}/ui:/project \
 		-w /project \
-		node:17.8-stretch \
-			npm test
+		node:17.9-stretch \
+			 npm test
 
-ui-test:
+ui-test: opa-build npm-install
 	docker run \
 		--rm -it \
 		-u ${UID}:${GID} \
 		-v ${PWD}/ui:/project \
 		-w /project \
-		node:17.8-stretch \
+		node:17.9-stretch \
 			npm test -- --all --watchAll=false
 
-ui-coverage:
+ui-coverage: npm-install
 	docker run \
 		--rm -it \
 		-u ${UID}:${GID} \
 		-v ${PWD}/ui:/project \
 		-w /project \
-		node:17.8-stretch \
+		node:17.9-stretch \
 			npm test -- --all --watchAll=false --coverage
 
-ui-build:
+ui-build: npm-install
 	docker run \
 		--rm -it \
 		-u ${UID}:${GID} \
 		-v ${PWD}/ui:/project \
 		-w /project \
-		node:17.8-stretch \
+		node:17.9-stretch \
 			npm run build
 
-ui-shell:
+ui-shell: npm-install
 	docker run \
 		--rm -it \
 		-u ${UID}:${GID} \
 		-v ${PWD}/ui:/project \
 		-w /project \
-		node:17.8-stretch \
+		node:17.9-stretch \
 			/bin/bash
 
-ui-update:
+ui-update: npm-install
 	docker run \
 		--rm -it \
 		-u ${UID}:${GID} \
 		-v ${PWD}/ui:/project \
 		-w /project \
-		node:17.8-stretch /bin/bash -c '\
-			npm install --no-save npm-check-updates ; \
+		node:17.9-stretch /bin/bash -c '\
 			./node_modules/.bin/ncu -u ; \
 			npm update ; \
 		'

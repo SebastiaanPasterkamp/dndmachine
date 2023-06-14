@@ -30,8 +30,8 @@ COPY --from=opa /data/bundle.tar.gz .
 
 RUN tar \
     --to-stdout \
-        -xzf ./bundle.tar.gz \
-        /policy.wasm \
+    -xzf ./bundle.tar.gz \
+    /policy.wasm \
     > public/policy.wasm
 
 FROM --platform=${BUILDPLATFORM} golang:1.20 as backend

@@ -1,6 +1,14 @@
 FROM node:17.9-stretch
 
-WORKDIR /code
+WORKDIR /app
+
+COPY ui/package.json  ui/package-lock.json ./
+
+RUN chown -R node.node /app
+
+USER node
+
+RUN npm install
 
 COPY ui .
 
