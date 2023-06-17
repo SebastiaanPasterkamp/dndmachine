@@ -9,7 +9,7 @@ platform:
 
 steps:
   - name: rego:test
-    image: cromrots/opa:0.52
+    image: cromrots/opa:0.53
     commands:
       - /opa test -v internal/policy/rego/
       - /opa test -v internal/policy/testdata/
