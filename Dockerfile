@@ -91,6 +91,8 @@ EXPOSE 8080
 
 WORKDIR /app
 
+ENV DNDMACHINE_PUBLIC_PATH=/app/public
+
 COPY --from=security /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=security /etc/passwd /etc/passwd
 
@@ -111,4 +113,4 @@ LABEL build.sha=${GIT_COMMIT}
 
 ENTRYPOINT [ "/app/dndmachine" ]
 
-CMD ["serve", "--public-path", "/app/public"]
+CMD ["serve"]

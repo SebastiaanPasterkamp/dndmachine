@@ -20,5 +20,5 @@ type Arguments struct {
 // Common are the settings used for all commands.
 type Common struct {
 	// ConfigPath is the path to the configuration file to get default values from.
-	ConfigPath string `arg:"--config-path,env:DNDMACHINE_CONFIGPATH" help:"Path to configuration file"`
+	ConfigPath string `arg:"--config-path,env:DNDMACHINE_CONFIG_PATH" help:"Path to configuration file"`
 }
