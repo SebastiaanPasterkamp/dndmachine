@@ -53,16 +53,16 @@ func TestIsConnected(t *testing.T) {
 	testCases := []struct {
 		name             string
 		DSN              func() string
-		expectConnection bool
+		expectConnection error
 	}{
 		{"Working", func() string {
 			return fmt.Sprintf("sqlite://file:working-connect-%d.db?mode=memory&cache=shared", rand.Int())
 		},
-			true},
+			nil},
 		{"Working alternative", func() string { return fmt.Sprintf("sqlite3://file:memory-%d.db?mode=memory&cache=shared", rand.Int()) },
-			true},
+			nil},
 		{"Unreachable database", func() string { return "mysql://foo:bar@tcp(127.0.0.1:3306)/connected?timeout=1s" },
-			false},
+			database.ErrNoConnection},
 	}
 
 	for _, tt := range testCases {
@@ -87,10 +87,10 @@ func TestIsConnected(t *testing.T) {
 				}
 			}()
 
-			ping := db.IsConnected()
-			if ping != tt.expectConnection {
+			err = db.Ping()
+			if !errors.Is(err, tt.expectConnection) {
 				t.Errorf("Unexpected connection result. Expected %v, got %v",
-					tt.expectConnection, ping)
+					tt.expectConnection, err)
 			}
 		})
 	}

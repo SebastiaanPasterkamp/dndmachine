@@ -39,19 +39,19 @@ func Connect(cfg Configuration) (Instance, error) {
 	return db, nil
 }
 
-// IsConnected checks the availability of a connection pool on the database
+// Ping checks the availability of a connection pool on the database
 // Instance and returns true if a connection responds to a Ping command.
 // Otherwise this function returns false.
-func (i *Instance) IsConnected() bool {
+func (i *Instance) Ping() error {
 	if i.Pool == nil {
-		return false
+		return ErrNoConnection
 	}
 
 	if err := i.Pool.Ping(); err != nil {
-		return false
+		return fmt.Errorf("%w: %w", ErrNoConnection, err)
 	}
 
-	return true
+	return nil
 }
 
 // Close terminates a connection pool for a database Instance.

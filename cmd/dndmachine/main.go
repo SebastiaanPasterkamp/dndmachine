@@ -30,8 +30,8 @@ func main() {
 	}
 	defer db.Close()
 
-	if !db.IsConnected() {
-		log.Fatalf("failed to establish a connection to the database")
+	if err := db.Ping(); err != nil {
+		log.Fatalf("failed to establish a connection to the database: %v", err)
 	}
 
 	switch {

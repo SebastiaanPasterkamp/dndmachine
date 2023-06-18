@@ -10,8 +10,8 @@ import (
 
 // Import executes SQL from a reader into the database instance.
 func (i *Instance) Import(fh io.Reader) error {
-	if !i.IsConnected() {
-		return ErrNoConnection
+	if err := i.Ping(); err != nil {
+		return err
 	}
 
 	ctx := context.Background()
