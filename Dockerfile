@@ -32,7 +32,7 @@ RUN tar \
     --to-stdout \
     -xzf ./bundle.tar.gz \
     /policy.wasm \
-    > public/policy.wasm
+    > build/policy.wasm
 
 FROM --platform=${BUILDPLATFORM} golang:1.20 as backend
 
