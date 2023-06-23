@@ -23,7 +23,7 @@ func TestHandleCurrentUser(t *testing.T) {
 	}{
 		{"No current user yields 404x", nil,
 			http.StatusNotFound, "Not Found\n"},
-		{"Active session gives user", &model.User{ID: 1, Username: "user", UserRoles: model.UserRoles{Role: []string{"player"}}},
+		{"Active session gives user", &model.User{ID: 1, Username: "user", Password: "hide me", UserRoles: model.UserRoles{Role: []string{"player"}}},
 			http.StatusOK, "{\"role\":[\"player\"],\"id\":1,\"username\":\"user\"}\n"},
 	}
 

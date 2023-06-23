@@ -19,6 +19,9 @@ func HandleCurrentUser() http.HandlerFunc {
 			return
 		}
 
+		// Don't need to include this in the output
+		user.Password = ""
+
 		w.Header().Set("Content-Type", "application/json")
 
 		err := json.NewEncoder(w).Encode(user)
