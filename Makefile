@@ -158,7 +158,7 @@ ui-update:
 		-w /project \
 		node:17.8-stretch /bin/bash -c '\
 			npm install --no-save npm-check-updates ; \
-			./node_modules/.bin/ncu -u ; \
+			./node_modules/.bin/ncu --target minor -u ; \
 			npm update ; \
 		'
 
