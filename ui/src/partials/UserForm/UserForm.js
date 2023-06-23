@@ -1,6 +1,7 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
 import Avatar from '@mui/material/Avatar';
+import Button from '@mui/material/Button';
 import BackspaceIcon from '@mui/icons-material/Backspace'
 import CancelIcon from '@mui/icons-material/Cancel'
 import EditIcon from '@mui/icons-material/Edit';
@@ -85,7 +86,7 @@ export default function UserForm({ user, onClose, onDone }) {
       return;
     }
 
-    const success = await fetch(`/api/user/${values.id}`, {
+    const result = await fetch(`/api/user/${values.id}`, {
       method: 'PATCH',
       credentials: 'same-origin',
       headers: {
@@ -93,12 +94,18 @@ export default function UserForm({ user, onClose, onDone }) {
       },
       body: JSON.stringify(values),
     })
-      .then(response => response.ok)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+      })
+      .then(data => data.result)
       .catch((error) => console.error('Error:', error));
 
-    if (success) {
+    if (result) {
       resetForm();
-      if (onDone) onDone();
+      if (onDone) onDone(result);
     }
   }
 
@@ -109,7 +116,7 @@ export default function UserForm({ user, onClose, onDone }) {
       return;
     }
 
-    const newUser = await fetch(`/api/user`, {
+    const result = await fetch(`/api/user`, {
       method: 'POST',
       credentials: 'same-origin',
       headers: {
@@ -117,13 +124,18 @@ export default function UserForm({ user, onClose, onDone }) {
       },
       body: JSON.stringify(values),
     })
-      .then(response => (response.ok ? response.json() : null))
-      .then(({ result }) => result)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+      })
+      .then(data => data.result)
       .catch((error) => console.error('Error:', error));
 
-    if (newUser) {
+    if (result) {
       resetForm();
-      if (onDone) onDone(newUser);
+      if (onDone) onDone(result);
     }
   }
 
@@ -152,7 +164,7 @@ export default function UserForm({ user, onClose, onDone }) {
             value={values.username}
             error={errors.username}
             onChange={handleInputChange}
-            helper="Must be unique"
+            helper="Must be unique."
           />
 
           <OutlinedInput
@@ -173,7 +185,7 @@ export default function UserForm({ user, onClose, onDone }) {
             value={values.email}
             error={errors.email}
             onChange={handleInputChange}
-            helper="Will not be shared. Only used to recover lost credentials."
+            helper="Will not be shared. Only used to recover lost credentials. Must be unique."
           />
         </Grid>
 
@@ -213,7 +225,7 @@ export default function UserForm({ user, onClose, onDone }) {
         <Grid item xs={12} style={{ display: "flex", justifyContent: "space-evenly", alignItems: "center" }}>
           {values.id ? (
             <PolicyButton
-              path={`/api/user/${user.id}`}
+              path={`/api/user/${values.id}`}
               method="PATCH"
               query="authz/user/allow"
 
@@ -240,26 +252,16 @@ export default function UserForm({ user, onClose, onDone }) {
               Create
             </PolicyButton>
           )}
-          {onClose && (
-            <PolicyButton
-              path={`/user/${user.id}`}
-              method="POST"
-              query="authz/pages/allow"
-
-              variant="contained"
-              type="cancel"
-              color="secondary"
-              onClick={handleCancel}
-              startIcon={<CancelIcon />}
-            >
-              Cancel
-            </PolicyButton>
-          )}
-          <PolicyButton
-            path={`/api/user/${user.id}`}
-            method="GET"
-            query="authz/user/allow"
-
+          <Button
+            variant="contained"
+            type="cancel"
+            color="secondary"
+            onClick={handleCancel}
+            startIcon={<CancelIcon />}
+          >
+            Cancel
+          </Button>
+          <Button
             variant="contained"
             type="reset"
             color="warning"
@@ -267,7 +269,7 @@ export default function UserForm({ user, onClose, onDone }) {
             startIcon={<BackspaceIcon />}
           >
             Reset
-          </PolicyButton>
+          </Button>
         </Grid>
       </Grid>
     </OutlinedForm >
