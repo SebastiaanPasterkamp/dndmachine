@@ -9,11 +9,12 @@ export default function PolicyLink({ to, path, query, method = 'GET', ...rest })
   const { user } = useCurrentUserContext()
   const { isAllowed } = usePolicyContext()
 
-  const allowed = isAllowed({
+  const input = {
     path: (path || to).replace(/\/\/+/, '/').replace(/^\/+|\/+$/, '').split('/'),
     method,
     user,
-  }, query);
+  }
+  const allowed = isAllowed(input, query);
 
   if (!allowed) {
     return null

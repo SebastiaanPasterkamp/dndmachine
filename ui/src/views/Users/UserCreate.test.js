@@ -8,24 +8,22 @@ import opa from "@open-policy-agent/opa-wasm";
 
 import { MockUserContext } from '../../context/CurrentUserContext';
 import { MockPolicyEngineContext } from '../../context/PolicyEngineContext';
-import UsersDashboard from './UsersDashboard';
+import UserCreate from './UserCreate';
 
 const server = setupServer(
-  rest.get('/api/user', (_, res, ctx) => {
-    return res(ctx.json({
-      results: [
-        { id: 1, role: ["admin"], name: "admin" },
-        { id: 2, role: ["player"], name: "player" },
-      ]
-    }))
-  }),
+  rest.get('/api/user', (_, res, ctx) => res(ctx.json({
+    results: [
+      { id: 1, role: ["admin"], name: "admin" },
+      { id: 2, role: ["player"], name: "player" },
+    ]
+  }))),
 )
 
 beforeAll(() => server.listen())
 afterEach(() => server.resetHandlers())
 afterAll(() => server.close())
 
-test('renders UsersDashboard', async () => {
+test('renders UserCreate', async () => {
   const wasmPath = path.resolve(__dirname, '../../testdata/policy.wasm');
   const wasm = fs.readFileSync(wasmPath);
   const policy = await opa.loadPolicy(wasm);
@@ -33,15 +31,15 @@ test('renders UsersDashboard', async () => {
   await act(async () => render(
     <MockPolicyEngineContext policy={policy}>
       <MockUserContext user={{
-        id: 2,
-        role: ["player"],
-        name: "player",
+        id: 1,
+        role: ["admin"],
+        name: "admin",
       }}>
-        <MemoryRouter initialEntries={['/user']} >
+        <MemoryRouter initialEntries={['/user/new']} >
           <Routes>
             <Route
-              path='/user'
-              element={<UsersDashboard />}
+              path='/user/new'
+              element={<UserCreate />}
             />
           </Routes>
         </MemoryRouter>
@@ -49,8 +47,8 @@ test('renders UsersDashboard', async () => {
     </MockPolicyEngineContext>
   ));
 
-  await waitFor(() => screen.getAllByText('admin'))
+  await waitFor(() => screen.getByText('Create'))
 
-  const usernameElement = screen.getAllByText('admin')[0];
-  expect(usernameElement).toBeInTheDocument();
+  const createButton = screen.getByText('Create');
+  expect(createButton).toBeInTheDocument();
 });
