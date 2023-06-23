@@ -34,7 +34,7 @@ export default function EditObject({ type, form: Form, context = [] }) {
 
   return function () {
     return (
-      <ObjectsContext types={context}>
+      <ObjectsContext types={[type, ...context]}>
         <Objects.Consumer>
           {(ctx) => (
             <PolicyContext data={ctx} query={`authz/${type}/allow`}>
