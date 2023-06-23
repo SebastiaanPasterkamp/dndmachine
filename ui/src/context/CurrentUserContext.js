@@ -43,6 +43,15 @@ export default function CurrentUserContext({ children }) {
   );
 }
 
+export function MockUserContext({ children, user: initial }) {
+  const [user, setUser] = React.useState(initial);
+  return (
+    <CurrentUser.Provider value={{ user, setUser }}>
+      {children}
+    </CurrentUser.Provider>
+  );
+}
+
 export function useCurrentUserContext() {
   const context = React.useContext(CurrentUser);
   if (context === undefined) {
