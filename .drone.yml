@@ -4,8 +4,8 @@ type: kubernetes
 name: Test
 
 platform:
-    os: linux
-    arch: arm
+  os: linux
+  arch: arm
 
 steps:
   - name: rego:test
@@ -15,13 +15,13 @@ steps:
       - /opa test -v internal/policy/testdata/
 
   - name: golang:test
-    image: golang:1.18-stretch
+    image: golang:1.20
     commands:
       # 'go test -race ...' not supported on ARM
       - go test -parallel=2 -v -coverprofile cover.out -count=1 ./...
 
   - name: golang:coverage:report
-    image: golang:1.18-stretch
+    image: golang:1.20
     commands:
       - go tool cover -func cover.out
 
@@ -45,7 +45,7 @@ type: kubernetes
 name: Image Staging
 
 depends_on:
-- Test
+  - Test
 
 platform:
   os: linux
@@ -73,10 +73,10 @@ name: Image Production
 
 trigger:
   event:
-  - tag
+    - tag
 
 depends_on:
-- Image Staging
+  - Image Staging
 
 platform:
   os: linux
@@ -107,12 +107,12 @@ clone:
 
 trigger:
   status:
-  - success
-  - failure
+    - success
+    - failure
 
 depends_on:
-- Image Staging
-- Image Production
+  - Image Staging
+  - Image Production
 
 platform:
   os: linux
@@ -144,6 +144,6 @@ steps:
         **Message:** {{commit.message}}
 ---
 kind: signature
-hmac: a94d542fbbbd6723b04c06c7a459575f059585dadb48fb3087b4b3508635619b
+hmac: b367adf61c9e438df97bf02c557e76437173e43d562a67c93a82c9722e2c582f
 
 ...
