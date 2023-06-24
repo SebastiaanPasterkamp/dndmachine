@@ -97,12 +97,26 @@ docker:
 		--tag $(BINARY_NAME) \
 		.
 
+docker-run: docker
+	docker volume create $(BINARY_NAME)
+	docker run \
+		-v $(BINARY_NAME):/database \
+		-e DNDMACHINE_DSN=sqlite:///database/machine.db \
+		$(BINARY_NAME) \
+		storage upgrade
+	docker run \
+		-v $(BINARY_NAME):/database \
+		-e DNDMACHINE_DSN=sqlite:///database/machine.db \
+		-p 8080:8080 \
+		$(BINARY_NAME)
+
 clean:
 	rm \
 		$(BINARY_NAME) \
 		cover.out \
 		ui/build \
 		ui/public/policy.wasm
+	docker volume rm $(BINARY_NAME)
 
 npm-install:
 	docker run \
