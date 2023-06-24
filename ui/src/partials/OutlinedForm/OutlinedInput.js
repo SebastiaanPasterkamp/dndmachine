@@ -7,7 +7,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
 export default function OutlinedInput({ helper, name, value, onChange, type, unit, error, ...rest }) {
-  const [text, setText] = React.useState(value);
+  const [state, setState] = React.useState({ text: value, valid: true });
   const [showPassword, setShowPassword] = React.useState(false);
 
   const toggleShowPassword = () => {
@@ -19,14 +19,19 @@ export default function OutlinedInput({ helper, name, value, onChange, type, uni
   };
 
   const onTextChange = (e) => {
-    setText(e.target.value);
-
-    if (type === "number") {
-      const number = parseInt(e.target.value, 10);
-      if (isNaN(number)) return;
-      e.target = { name: e.target.name, value: number };
+    if (type !== "number") {
+      onChange(e);
+      return;
     }
 
+    const number = parseInt(e.target.value, 10);
+    if (isNaN(number)) {
+      setState({ text: e.target.value, valid: false });
+      return;
+    }
+
+    setState({ text: e.target.value, valid: true });
+    e.target = { name: e.target.name, value: number };
     onChange(e);
   }
 
@@ -38,10 +43,10 @@ export default function OutlinedInput({ helper, name, value, onChange, type, uni
       type={showPassword ? 'text' : type}
       data-testid={`input-${type}-${name}`}
       name={name}
-      value={text}
+      value={state.valid ? value : state.text}
       onChange={onTextChange}
       {...rest}
-      helperText={helper}
+      helperText={error ? error : helper}
       InputProps={{
         startAdornment: unit && <InputAdornment position="start">{unit}</InputAdornment>,
         endAdornment: type === 'password' && (
@@ -57,7 +62,7 @@ export default function OutlinedInput({ helper, name, value, onChange, type, uni
           </InputAdornment>
         )
       }}
-      {...(error && { error: true, helperText: error })}
+      error={!state.valid || error}
     />
   )
 }
