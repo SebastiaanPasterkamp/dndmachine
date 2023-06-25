@@ -27,8 +27,6 @@ test('renders UserForm', async () => {
     </MockPolicyEngineContext>
   ));
 
-  await waitFor(() => screen.getByText('Reset'))
-
-  const resetButton = screen.getByText('Reset');
+  const resetButton = await waitFor(() => screen.getByText('Reset'))
   expect(resetButton).toBeInTheDocument();
 });

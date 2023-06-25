@@ -6,11 +6,9 @@ test('renders login form', async () => {
     <App />
   ));
 
-  await waitFor(() => screen.getByTestId("login.username"));
-
-  const usernameField = screen.getByTestId("login.username");
+  const usernameField = await waitFor(() => screen.getByTestId("login.username"));
   expect(usernameField).toBeInTheDocument();
 
-  const passwordField = screen.getByTestId("login.password");
+  const passwordField = await waitFor(() => screen.getByTestId("login.password"));
   expect(passwordField).toBeInTheDocument();
 });
