@@ -47,8 +47,6 @@ test('renders UserCreate', async () => {
     </MockPolicyEngineContext>
   ));
 
-  await waitFor(() => screen.getByText('Create'))
-
-  const createButton = screen.getByText('Create');
+  const createButton = await waitFor(() => screen.getByText('Create'))
   expect(createButton).toBeInTheDocument();
 });

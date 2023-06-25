@@ -4,6 +4,10 @@ import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import fs from 'fs';
 import path from 'path';
+import opa from "@open-policy-agent/opa-wasm";
+
+import { MockUserContext } from '../../context/CurrentUserContext';
+import { MockPolicyEngineContext } from '../../context/PolicyEngineContext';
 import UserView from './UserView';
 
 const server = setupServer(
@@ -17,16 +21,6 @@ const server = setupServer(
       result: { id: 1, name: "hello" },
     }))
   }),
-  rest.get('/ui/policy.wasm', (_, res, ctx) => {
-    const wasmPath = path.resolve(__dirname, '../../testdata/policy.wasm');
-    const wasm = fs.readFileSync(wasmPath);
-
-    return res(
-      ctx.set('Content-Length', wasm.byteLength.toString()),
-      ctx.set('Content-Type', 'application/wasm'),
-      ctx.body(wasm),
-    )
-  })
 )
 
 beforeAll(() => server.listen())
@@ -34,19 +28,28 @@ afterEach(() => server.resetHandlers())
 afterAll(() => server.close())
 
 test('renders UserView', async () => {
+  const wasmPath = path.resolve(__dirname, '../../testdata/policy.wasm');
+  const wasm = fs.readFileSync(wasmPath);
+  const policy = await opa.loadPolicy(wasm);
+
   await act(async () => render(
-    <MemoryRouter initialEntries={['/user/1']} >
-      <Routes>
-        <Route
-          path='/user/:id'
-          element={<UserView />}
-        />
-      </Routes>
-    </MemoryRouter >
+    <MockPolicyEngineContext policy={policy}>
+      <MockUserContext user={{
+        id: 1,
+        name: "hello",
+      }}>
+        <MemoryRouter initialEntries={['/user/1']} >
+          <Routes>
+            <Route
+              path='/user/:id'
+              element={<UserView />}
+            />
+          </Routes>
+        </MemoryRouter >
+      </MockUserContext>
+    </MockPolicyEngineContext>
   ));
 
-  await waitFor(() => screen.getByText('hello'))
-
-  const linkElement = screen.getByText('hello');
+  const linkElement = await waitFor(() => screen.getByText('hello'))
   expect(linkElement).toBeInTheDocument();
 });

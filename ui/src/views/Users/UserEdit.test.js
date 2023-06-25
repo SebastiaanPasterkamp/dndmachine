@@ -87,8 +87,6 @@ test('renders UserEdit to modify as Admin', async () => {
     </MockPolicyEngineContext>
   ));
 
-  await waitFor(() => screen.getByText('Update'))
-
-  const createButton = screen.getByText('Update');
+  const createButton = await waitFor(() => screen.getByText('Update'))
   expect(createButton).toBeInTheDocument();
 });
