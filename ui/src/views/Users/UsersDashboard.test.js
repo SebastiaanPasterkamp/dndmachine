@@ -49,8 +49,6 @@ test('renders UsersDashboard', async () => {
     </MockPolicyEngineContext>
   ));
 
-  await waitFor(() => screen.getAllByText('admin'))
-
-  const usernameElement = screen.getAllByText('admin')[0];
-  expect(usernameElement).toBeInTheDocument();
+  const usernameElement = await waitFor(() => screen.getAllByText('admin'))
+  expect(usernameElement[0]).toBeInTheDocument();
 });
