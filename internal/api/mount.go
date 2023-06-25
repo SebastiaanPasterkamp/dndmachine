@@ -6,6 +6,7 @@ import (
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/auth"
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/database"
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/model"
+	"github.com/SebastiaanPasterkamp/dndmachine/internal/model/character"
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/policy"
 	"github.com/go-chi/chi/v5"
 )
@@ -26,10 +27,10 @@ func Mount(db database.Instance, e *policy.Enforcer) http.Handler {
 	r.Route("/character", func(r chi.Router) {
 		r.Use(auth.IfPossible(e, "authz.character.allow", []string{"character"}))
 
-		r.Get("/", ListObjectsHandler(db, model.CharacterDB))
-		r.Post("/", PostObjectHandler(db, model.CharacterFromReader, model.CharacterDB))
-		r.Get("/{objID:[0-9]+}", GetObjectHandler(db, model.CharacterDB))
-		r.Patch("/{objID:[0-9]+}", PatchObjectHandler(db, model.CharacterDB))
+		r.Get("/", ListObjectsHandler(db, character.DB))
+		r.Post("/", PostObjectHandler(db, character.FromReader, character.DB))
+		r.Get("/{objID:[0-9]+}", GetObjectHandler(db, character.DB))
+		r.Patch("/{objID:[0-9]+}", PatchObjectHandler(db, character.DB))
 	})
 
 	r.Route("/equipment", func(r chi.Router) {
