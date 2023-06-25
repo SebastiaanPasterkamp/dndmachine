@@ -6,7 +6,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import FormHelperText from '@mui/material/FormHelperText';
 import Checkbox from '@mui/material/Checkbox';
 
-export default function OutlinedCheckbox({ helper, label, value = false, error = null, onChange, ...rest }) {
+export default function OutlinedCheckbox({ helper, label, name, value = false, error = null, onChange, ...rest }) {
   const onToggle = (e) => {
     const { name, checked: value } = e.target;
     onChange({ ...e, target: { name, value } })
@@ -20,11 +20,15 @@ export default function OutlinedCheckbox({ helper, label, value = false, error =
       {...(error && { error: true })}
     >
       <FormControlLabel
-        control={<Checkbox
-          checked={value}
-          {...rest}
-          onChange={onToggle}
-        />}
+        control={
+          <Checkbox
+            checked={value}
+            data-testid={`input-checkbox-${name}`}
+            name={name}
+            {...rest}
+            onChange={onToggle}
+          />
+        }
         label={label}
       />
       {(error || helper) && (
