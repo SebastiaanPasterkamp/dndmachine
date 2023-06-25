@@ -27,8 +27,6 @@ test('renders result using ObjectContext', async () => {
     </ObjectsContext>
   ));
 
-  await waitFor(() => screen.getByRole('heading'))
-
-  const linkElement = screen.getByText(/hello/i);
+  const linkElement = await waitFor(() => screen.getByText(/hello/i))
   expect(linkElement).toBeInTheDocument();
 });
