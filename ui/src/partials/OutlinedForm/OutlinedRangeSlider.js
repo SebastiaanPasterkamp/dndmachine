@@ -4,7 +4,7 @@ import FormHelperText from '@mui/material/FormHelperText';
 import InputLabel from '@mui/material/InputLabel';
 import Slider from '@mui/material/Slider';
 
-export default function OutlinedRangeSlider({ helper, label, options, error = null, multiple = false, allowEmpty = false, ...rest }) {
+export default function OutlinedRangeSlider({ helper, label, options, name, error = null, multiple = false, allowEmpty = false, ...rest }) {
   return (
     <FormControl
       variant="outlined"
@@ -14,7 +14,7 @@ export default function OutlinedRangeSlider({ helper, label, options, error = nu
       {...(error && { error: true })}
     >
       <InputLabel>{label}</InputLabel>
-      <Slider {...rest} />
+      <Slider data-testid={`input-slider-${name}`} name={name} {...rest} />
       {(error || helper) && (
         < FormHelperText > {error || helper}</FormHelperText >
       )}
