@@ -4,7 +4,7 @@ character := {
 	{
 		"id": 1,
 		"user_id": "alice",
-		"party": {"members": [
+		"party": {"member": [
 			{"id": 1, "user_id": "alice"},
 			{"id": 2, "user_id": "bob"},
 		]},
@@ -12,7 +12,7 @@ character := {
 	{
 		"id": 2,
 		"user_id": "bob",
-		"party": {"members": [
+		"party": {"member": [
 			{"id": 1, "user_id": "alice"},
 			{"id": 2, "user_id": "bob"},
 		]},

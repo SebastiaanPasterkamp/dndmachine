@@ -1,16 +1,18 @@
-import React, { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import CssBaseline from '@mui/material/CssBaseline';
-import useMediaQuery from '@mui/material/useMediaQuery';
 import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
-import { createTheme, ThemeProvider, StyledEngineProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import { createTheme, StyledEngineProvider, ThemeProvider } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import React, { lazy, Suspense } from 'react';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
+import { useCurrentUserContext } from '../../context/CurrentUserContext';
 import Footer from '../../partials/Footer';
 import Header from '../../partials/Header';
 import Menu from '../../partials/Menu';
-import { useCurrentUserContext } from '../../context/CurrentUserContext';
 
+const CharacterView = lazy(() => import('../Characters/CharacterView'));
+const CharactersDashboard = lazy(() => import('../Characters/CharactersDashboard'));
 const EquipmentTable = lazy(() => import('../Equipment/EquipmentTable'));
 const SignIn = lazy(() => import('../SignIn'));
 const UserCreate = lazy(() => import('../Users/UserCreate'));
@@ -60,6 +62,23 @@ export default function App() {
             {user ? (
               <Suspense fallback={<Backdrop open={true}> <CircularProgress color="inherit" /> </Backdrop>}>
                 <Routes>
+                  {/* Characters */}
+                  <Route
+                    path="/character"
+                    element={<CharactersDashboard />}
+                  />
+                  <Route
+                    path="/character/new"
+                    element={<CharacterView />}
+                  />
+                  <Route
+                    path="/character/:id"
+                    element={<CharacterView />}
+                  />
+                  <Route
+                    path="/character/:id/edit"
+                    element={<CharacterView />}
+                  />
 
                   {/* Equipment */}
                   <Route

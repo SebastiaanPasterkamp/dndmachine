@@ -102,7 +102,7 @@ func TestPartial(t *testing.T) {
 			true,
 			`(character.user_id = ? AND character.id = ?) OR (members.user_id = ? AND character.id = ?)`,
 			[]interface{}{int64(2), int64(1), int64(2), int64(1)},
-			[]string{"user_id", "name", "level", "config"},
+			[]string{"user_id", "name", "level", "config", "result"},
 		},
 		{"GET list of character allowed", map[string]interface{}{
 			"path":   []string{"api", "character"},
@@ -116,7 +116,7 @@ func TestPartial(t *testing.T) {
 			true,
 			`character.user_id = ? OR members.user_id = ?`,
 			[]interface{}{int64(2), int64(2)},
-			[]string{"user_id", "name", "level"},
+			[]string{"user_id", "name", "level", "result"},
 		},
 		{"GET some others character will not work", map[string]interface{}{
 			"path":   []string{"api", "character", "1"},
@@ -130,7 +130,7 @@ func TestPartial(t *testing.T) {
 			true,
 			`(character.user_id = ? AND character.id = ?) OR (members.user_id = ? AND character.id = ?)`,
 			[]interface{}{int64(6), int64(1), int64(6), int64(1)},
-			[]string{"user_id", "name", "level", "config"},
+			[]string{"user_id", "name", "level", "config", "result"},
 		},
 		{"GET party character possible", map[string]interface{}{
 			"path":   []string{"api", "character", "1"},
@@ -144,7 +144,7 @@ func TestPartial(t *testing.T) {
 			true,
 			`(character.user_id = ? AND character.id = ?) OR (members.user_id = ? AND character.id = ?)`,
 			[]interface{}{int64(3), int64(1), int64(3), int64(1)},
-			[]string{"user_id", "name", "level", "config"},
+			[]string{"user_id", "name", "level", "config", "result"},
 		},
 		{"GET character as admin allowed", map[string]interface{}{
 			"path":   []string{"api", "character", "1"},
@@ -158,7 +158,7 @@ func TestPartial(t *testing.T) {
 			true,
 			`character.id = ?`,
 			[]interface{}{int64(1)},
-			[]string{"user_id", "name", "level", "config"},
+			[]string{"user_id", "name", "level", "config", "result"},
 		},
 		{"PATCH own character allowed", map[string]interface{}{
 			"path":   []string{"api", "character", "1"},

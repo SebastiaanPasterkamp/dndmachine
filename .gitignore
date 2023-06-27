@@ -1,2 +1,2 @@
 dndmachine
-ui/public/policy.wasm
+*.wasm

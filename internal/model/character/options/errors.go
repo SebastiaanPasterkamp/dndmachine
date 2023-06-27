@@ -13,4 +13,10 @@ var (
 	// ErrMalformedChoice is the error returned if the option choice in the
 	// character could not be read.
 	ErrMalformedChoice = fmt.Errorf("malformed choice configuration")
+	// ErrMissingOption is the error returned if the option could not be
+	// obtained from a provider.
+	ErrMissingOption = fmt.Errorf("missing choice configuration")
+	// ErrFailedToApply is the error returned if the option could not be applied
+	// to the character.
+	ErrFailedToApply = fmt.Errorf("failed to apply choice")
 )

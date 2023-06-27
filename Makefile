@@ -5,6 +5,7 @@ GID=$(shell id -g)
 GIT_TAG=$(shell git describe master --tags 2> /dev/null || echo -n "v2.0.0")
 GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 GIT_COMMIT=$(shell git rev-parse --short HEAD)
+GOROOT=$(shell go env GOROOT)
 BUILD_TIME=$(shell date -Iseconds)
 
 update: go-update ui-update
@@ -27,6 +28,7 @@ opa-build:
 			--target wasm \
 			--entrypoint authz/auth/allow \
 			--entrypoint authz/character/allow \
+			--entrypoint authz/character_option/allow \
 			--entrypoint authz/pages/allow \
 			--entrypoint authz/user/allow \
 			--entrypoint authz \
@@ -56,7 +58,7 @@ opa-coverage:
 		cromrots/opa:0.50.1 \
 			test --coverage --verbose /code
 
-dev: opa-build
+dev: opa-build wasm-build
 	USER=${UID}:${GID} \
 	docker-compose up \
 		--build \
@@ -89,14 +91,31 @@ go-build:
 	GOFLAGS=-mod=vendor \
 	go build \
 		-o $(BINARY_NAME) \
-		-a \
 		-ldflags "\
+			-s -w \
 			-X 'github.com/SebastiaanPasterkamp/dndmachine/internal/build.Version=$(GIT_TAG)' \
 			-X 'github.com/SebastiaanPasterkamp/dndmachine/internal/build.Commit=$(GIT_COMMIT)' \
 			-X 'github.com/SebastiaanPasterkamp/dndmachine/internal/build.Branch=$(GIT_BRANCH)' \
 			-X 'github.com/SebastiaanPasterkamp/dndmachine/internal/build.Timestamp=$(BUILD_TIME)' \
 		" \
 		cmd/$(BINARY_NAME)/main.go
+
+wasm-build:
+	cp "$(GOROOT)/misc/wasm/wasm_exec.js" ui/src/context
+	GOOS=js \
+	GOARCH=wasm \
+	go build \
+		-ldflags "\
+			-s -w \
+			-X 'github.com/SebastiaanPasterkamp/dndmachine/internal/build.Version=$(GIT_TAG)' \
+			-X 'github.com/SebastiaanPasterkamp/dndmachine/internal/build.Commit=$(GIT_COMMIT)' \
+			-X 'github.com/SebastiaanPasterkamp/dndmachine/internal/build.Branch=$(GIT_BRANCH)' \
+			-X 'github.com/SebastiaanPasterkamp/dndmachine/internal/build.Timestamp=$(BUILD_TIME)' \
+		" \
+		-o ui/public/$(BINARY_NAME).wasm \
+		cmd/wasm/main.go
+	chmod -x ui/public/$(BINARY_NAME).wasm
+	cp -v ui/public/$(BINARY_NAME).wasm ui/src/testdata
 
 docker:
 	docker build \
@@ -109,11 +128,13 @@ docker:
 docker-run: docker
 	docker volume create $(BINARY_NAME)
 	docker run \
+		--rm -it \
 		-v $(BINARY_NAME):/database \
 		-e DNDMACHINE_DSN=sqlite:///database/machine.db \
 		$(BINARY_NAME) \
 		storage upgrade
 	docker run \
+		--rm -it \
 		-v $(BINARY_NAME):/database \
 		-e DNDMACHINE_DSN=sqlite:///database/machine.db \
 		-p 8080:8080 \
@@ -146,7 +167,7 @@ serve-ui: npm-install
 		node:17.9-stretch \
 			npm start
 
-ui-test-watch: opa-build npm-install
+ui-test-watch: opa-build wasm-build npm-install
 	docker run \
 		--rm -it \
 		-u ${UID}:${GID} \
@@ -155,7 +176,7 @@ ui-test-watch: opa-build npm-install
 		node:17.9-stretch \
 			 npm test
 
-ui-test: opa-build npm-install
+ui-test: opa-build wasm-build npm-install
 	docker run \
 		--rm -it \
 		-u ${UID}:${GID} \

@@ -14,20 +14,62 @@ steps:
       - /opa test -v internal/policy/rego/
       - /opa test -v internal/policy/testdata/
 
+  - name: rego:build
+    image: cromrots/opa:0.53
+    commands:
+      - |
+        /opa build \
+          --target wasm \
+          --entrypoint authz/auth/allow \
+          --entrypoint authz/character/allow \
+          --entrypoint authz/character_option/allow \
+          --entrypoint authz/pages/allow \
+          --entrypoint authz/user/allow \
+          --entrypoint authz \
+          --ignore \*_test.rego \
+          --output bundle.tar.gz \
+          internal/policy/rego
+
   - name: golang:test
     image: golang:1.20
     commands:
       # 'go test -race ...' not supported on ARM
-      - go test -parallel=2 -v -coverprofile cover.out -count=1 ./...
+      - go test -parallel=2 -v -coverprofile cover.out -count=1 ./internal/...
 
   - name: golang:coverage:report
     image: golang:1.20
     commands:
       - go tool cover -func cover.out
 
+  - name: golang:build
+    image: golang:1.20
+    environment:
+      CGO_ENABLED: 0
+      GO111MODULE: on
+      GOFLAGS: -mod=vendor
+    commands:
+      - |
+        go build \
+          -o dndmachine \
+          -ldflags "\
+            -X 'github.com/SebastiaanPasterkamp/dndmachine/internal/build.Version=unstable' \
+            -X 'github.com/SebastiaanPasterkamp/dndmachine/internal/build.Commit=${DRONE_COMMIT}' \
+            -X 'github.com/SebastiaanPasterkamp/dndmachine/internal/build.Branch=${DRONE_BRANCH}' \
+            -X 'github.com/SebastiaanPasterkamp/dndmachine/internal/build.Timestamp=$(date -Iseconds)' \
+          " \
+          cmd/dndmachine/main.go
+      - cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" ui/src/context
+      - |
+        GOOS=js \
+        GOARCH=wasm \
+        go build \
+          -o dndmachine.wasm \
+          cmd/wasm/main.go
+
   - name: react:test
     image: node:17.9-stretch
     commands:
+      - tar -xzvf bundle.tar.gz --directory=ui/public /policy.wasm
       - cd ui
       - npm install
       - npm test -- --all --watchAll=false --coverage
@@ -144,6 +186,6 @@ steps:
         **Message:** {{commit.message}}
 ---
 kind: signature
-hmac: b367adf61c9e438df97bf02c557e76437173e43d562a67c93a82c9722e2c582f
+hmac: 08e4e6849adfa43614fe84f8aaaea651d59ab1e0601ed0ca721a70c03d16e29a
 
 ...

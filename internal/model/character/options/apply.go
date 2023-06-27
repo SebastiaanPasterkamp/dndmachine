@@ -7,23 +7,31 @@ import (
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/model/character"
 )
 
-func (i Object) Apply(c *character.Object) error {
+func (i *Object) Apply(c *character.Object) (*[]character.UUID, error) {
 	var (
 		a   Applicator
 		err error
 	)
 	switch i.Type {
+	case ClassType:
+		o := ClassOption{}
+		err = json.Unmarshal(*i.Config, &o)
+		a = o
 	case DescriptionType:
-		d := DescriptionOption{}
-		err = json.Unmarshal(*i.Config, &d)
-		a = d
+		o := DescriptionOption{}
+		err = json.Unmarshal(*i.Config, &o)
+		a = o
+	case TabType:
+		o := TabOption{}
+		err = json.Unmarshal(*i.Config, &o)
+		a = o
 	default:
-		return fmt.Errorf("%w %d:%q: %q",
+		return nil, fmt.Errorf("%w %d:%q: %q",
 			ErrUnknownOption, i.ID, i.UUID, i.Type)
 	}
 
 	if err != nil {
-		return fmt.Errorf("%w: %q %d:%q: %w",
+		return nil, fmt.Errorf("%w: %q %d:%q: %w",
 			ErrMalformedOption, i.Type, i.ID, i.UUID, err)
 	}
 
@@ -31,6 +39,8 @@ func (i Object) Apply(c *character.Object) error {
 	if !ok {
 		choices = emptyChoice
 	}
+
+	fmt.Printf("Apply %q with %q and %q\n", i.Type, a, choices)
 
 	return a.Apply(c, choices)
 }

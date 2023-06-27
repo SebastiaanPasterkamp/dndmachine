@@ -13,9 +13,13 @@ var emptyChoice json.RawMessage = []byte(`{}`)
 type OptionType string
 
 const (
+	// ClassType is a OptionType to configure the character class choice.
+	ClassType OptionType = "class"
 	// DescriptionType is a OptionType to configure the base character
 	// description.
-	DescriptionType OptionType = "character-description"
+	DescriptionType OptionType = "description"
+	// TabType is a OptionType to pick a class, race, or background.
+	TabType OptionType = "tab"
 )
 
 // Object represents choices for a character concerning their

@@ -2,9 +2,9 @@ package authz.character
 
 default allow = false
 
-get_one := ["user_id", "name", "level", "config"]
+get_one := ["user_id", "name", "level", "config", "result"]
 
-get_list := ["user_id", "name", "level"]
+get_list := ["user_id", "name", "level", "result"]
 
 patch_one := ["name", "config"]
 
@@ -13,7 +13,6 @@ post_one := ["user_id", "name", "level", "config"]
 allow = get_one {
 	input.path = ["api", "character", path_id]
 	input.method == "GET"
-	input.user.id
 	any_role
 	character_id := to_number(path_id)
 	allowed[char]
@@ -23,7 +22,6 @@ allow = get_one {
 allow = get_list {
 	input.path == ["api", "character"]
 	input.method == "GET"
-	input.user.id
 	any_role
 	allowed[char]
 }
@@ -31,7 +29,6 @@ allow = get_list {
 allow = patch_one {
 	input.path = ["api", "character", path_id]
 	input.method == "PATCH"
-	input.user.id
 	character_id := to_number(path_id)
 	allowed[char]
 	char.id == character_id
@@ -40,7 +37,6 @@ allow = patch_one {
 allow {
 	input.path = ["api", "character", path_id]
 	input.method == "DELETE"
-	input.user.id
 	character_id := to_number(path_id)
 	allowed[char]
 	char.id == character_id
@@ -49,8 +45,7 @@ allow {
 allow = post_one {
 	input.path == ["api", "character"]
 	input.method == "POST"
-	input.user.id
-	input.user.role[_] = "player"
+	is_player
 }
 
 any_role {
@@ -101,6 +96,6 @@ readable[char] {
 	not is_dm
 	is_player
 	char = data.character[_]
-	member = char.party.members[_]
+	member = char.party.member[_]
 	member.user_id == input.user.id
 }

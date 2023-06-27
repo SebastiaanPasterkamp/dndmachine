@@ -9,30 +9,11 @@ RUN [ \
     "--ignore", "\\*_test.rego", \
     "--entrypoint", "authz/auth/allow", \
     "--entrypoint", "authz/character/allow", \
+    "--entrypoint", "authz/character_option/allow", \
     "--entrypoint", "authz/pages/allow", \
     "--entrypoint", "authz/user/allow", \
     "rego" \
 ]
-
-FROM --platform=${BUILDPLATFORM} node:17.9-stretch as frontend
-
-WORKDIR /app
-
-COPY ui/package.json ui/package-lock.json ./
-
-RUN npm install
-
-COPY ui .
-
-RUN npm run build
-
-COPY --from=opa /data/bundle.tar.gz .
-
-RUN tar \
-    --to-stdout \
-    -xzf ./bundle.tar.gz \
-    /policy.wasm \
-    > build/policy.wasm
 
 FROM --platform=${BUILDPLATFORM} golang:1.20 as backend
 
@@ -56,17 +37,54 @@ COPY vendor vendor
 COPY cmd cmd
 COPY internal internal
 
-RUN BUILD_TIME=$(date -Iseconds) \
+RUN export BUILD_TIME=$(date -Iseconds) \
+    && go build \
+        -o /app/dndmachine \
+        -ldflags "\
+            -s -w \
+            -X 'github.com/SebastiaanPasterkamp/dndmachine/internal/build.Version=${GIT_TAG}' \
+            -X 'github.com/SebastiaanPasterkamp/dndmachine/internal/build.Commit=${GIT_COMMIT}' \
+            -X 'github.com/SebastiaanPasterkamp/dndmachine/internal/build.Branch=${GIT_BRANCH}' \
+            -X 'github.com/SebastiaanPasterkamp/dndmachine/internal/build.Timestamp=${BUILD_TIME}' \
+        " \
+        cmd/dndmachine/main.go \
+    && GOOS=js \
+    GOARCH=wasm \
     go build \
-    -o /app/dndmachine \
-    -ldflags "\
-        -s -w \
-        -X 'github.com/SebastiaanPasterkamp/dndmachine/internal/build.Version=${GIT_TAG}' \
-        -X 'github.com/SebastiaanPasterkamp/dndmachine/internal/build.Commit=${GIT_COMMIT}' \
-        -X 'github.com/SebastiaanPasterkamp/dndmachine/internal/build.Branch=${GIT_BRANCH}' \
-        -X 'github.com/SebastiaanPasterkamp/dndmachine/internal/build.Timestamp=${BUILD_TIME}' \
-    " \
-    cmd/dndmachine/main.go
+        -o /app/dndmachine.wasm \
+        -ldflags "\
+            -s -w \
+            -X 'github.com/SebastiaanPasterkamp/dndmachine/internal/build.Version=${GIT_TAG}' \
+            -X 'github.com/SebastiaanPasterkamp/dndmachine/internal/build.Commit=${GIT_COMMIT}' \
+            -X 'github.com/SebastiaanPasterkamp/dndmachine/internal/build.Branch=${GIT_BRANCH}' \
+            -X 'github.com/SebastiaanPasterkamp/dndmachine/internal/build.Timestamp=${BUILD_TIME}' \
+        " \
+        cmd/wasm/main.go \
+    && chmod -x /app/dndmachine.wasm
+
+FROM --platform=${BUILDPLATFORM} node:17.9-stretch as frontend
+
+WORKDIR /app
+
+COPY ui/package.json ui/package-lock.json ./
+
+RUN npm install
+
+COPY ui .
+
+COPY --from=backend \
+    /usr/local/go/misc/wasm/wasm_exec.js \
+    src/context
+
+RUN npm run build
+
+COPY --from=opa /data/bundle.tar.gz .
+
+RUN tar \
+    --to-stdout \
+    -xzf ./bundle.tar.gz \
+    /policy.wasm \
+    > build/policy.wasm
 
 FROM --platform=${BUILDPLATFORM} golang:1.20 AS security
 
@@ -100,6 +118,7 @@ COPY LICENSE /app/
 COPY schema/ /app/schema/
 
 COPY --from=frontend /app/build/ /app/public/
+COPY --from=backend /app/dndmachine.wasm /app/public/
 COPY --from=backend /app/dndmachine /app/
 
 ARG GIT_TAG

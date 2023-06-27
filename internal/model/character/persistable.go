@@ -29,6 +29,13 @@ func (o Object) ExtractFields(columns []string) ([]interface{}, error) {
 			}
 
 			fields[i] = config
+		case "result":
+			config, err := json.Marshal(o.Result)
+			if err != nil {
+				return fields, fmt.Errorf("failed to serialize %q: %w", column, err)
+			}
+
+			fields[i] = config
 		default:
 			return fields, fmt.Errorf("%w: %q", model.ErrUnknownColumn, column)
 		}
@@ -54,6 +61,9 @@ func (o *Object) UpdateFromScanner(row model.Scanner, columns []string) error {
 		case "config":
 			config := []byte{}
 			fields[i] = &config
+		case "result":
+			result := []byte{}
+			fields[i] = &result
 		default:
 			return fmt.Errorf("%w: %q", model.ErrUnknownColumn, column)
 		}
@@ -71,6 +81,14 @@ func (o *Object) UpdateFromScanner(row model.Scanner, columns []string) error {
 				continue
 			}
 			if err := json.Unmarshal(config, &o.Attributes); err != nil {
+				return fmt.Errorf("failed to unmarshal %q: %w", column, err)
+			}
+		case "result":
+			result := *fields[i].(*[]byte)
+			if len(result) < 2 {
+				continue
+			}
+			if err := json.Unmarshal(result, &o.Result); err != nil {
 				return fmt.Errorf("failed to unmarshal %q: %w", column, err)
 			}
 		}

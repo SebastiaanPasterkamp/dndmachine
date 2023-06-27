@@ -1,15 +1,16 @@
 import filterMethod from './filterMethod';
-import stringToInitials from './stringToInitials';
-import stringToColor from './stringToColor';
 import sortMethod from './sortMethod';
+import stringToColor from './stringToColor';
+import stringToInitials from './stringToInitials';
 import tableOrder from './tableOrder';
 import uuidv4 from './uuidv4';
 
 export {
     filterMethod,
     sortMethod,
-    stringToInitials,
     stringToColor,
+    stringToInitials,
     tableOrder,
-    uuidv4,
-}
+    uuidv4
+};
+

@@ -11,28 +11,29 @@ import (
 
 func TestDescriptionOption_Apply(t *testing.T) {
 	testCases := []struct {
-		name          string
-		option        options.OptionType
-		config        []byte
-		choice        []byte
-		expectedError error
-		expectedName  string
+		name           string
+		option         options.OptionType
+		config         []byte
+		choice         []byte
+		expectedError  error
+		expectedAvatar string
+		expectedName   string
 	}{
 		{
-			"Working", options.DescriptionType, []byte(`{}`), []byte(`{"name":"Testy McTestFace"}`),
-			nil, "Testy McTestFace",
+			"Working", options.DescriptionType, []byte(`{}`), []byte(`{"name":"Testy McTestFace", "avatar": "b1n4ry-d4t4"}`),
+			nil, "b1n4ry-d4t4", "Testy McTestFace",
 		},
 		{
 			"Unknown Option", "unknown", []byte(`{}`), []byte(`{}`),
-			options.ErrUnknownOption, "",
+			options.ErrUnknownOption, "","",
 		},
 		{
 			"Malformed Option", options.DescriptionType, []byte(`{`), []byte(`{}`),
-			options.ErrMalformedOption, "",
+			options.ErrMalformedOption, "","",
 		},
 		{
 			"Malformed Choice", options.DescriptionType, []byte(`{}`), []byte(`{`),
-			options.ErrMalformedChoice, "",
+			options.ErrMalformedChoice, "","",
 		},
 	}
 
@@ -54,9 +55,18 @@ func TestDescriptionOption_Apply(t *testing.T) {
 				},
 			}
 
-			err := o.Apply(&c)
+			_, err := o.Apply(&c)
 			if !errors.Is(err, tt.expectedError) {
 				t.Errorf("Unexpected error: Expected %q, got %q", tt.expectedError, err)
+			}
+
+			if tt.expectedError != nil {
+				return
+			}
+
+			if c.Avatar != tt.expectedAvatar {
+				t.Errorf("Unexpected avatar: Expected %q, got %q",
+					tt.expectedAvatar, c.Avatar)
 			}
 
 			if c.Name != tt.expectedName {

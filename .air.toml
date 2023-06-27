@@ -16,7 +16,7 @@ full_bin = "/tmp/main serve --shutdown-deadline=0s"
 # Watch these filename extensions.
 include_ext = ["go", "tpl", "tmpl", "html", "repo"]
 # Ignore these filename extensions or directories.
-exclude_dir = ["assets", "vendor", "ui"]
+exclude_dir = ["assets", "vendor", "ui", "cmd/wasm"]
 # Watch these directories if you specified.
 include_dir = []
 # Exclude files.
