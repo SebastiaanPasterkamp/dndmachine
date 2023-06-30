@@ -2,7 +2,10 @@ package database
 
 import (
 	"database/sql"
+	"io"
 	"time"
+
+	"github.com/SebastiaanPasterkamp/dndmachine/internal/model"
 )
 
 // Configuration is the structure with database settings.
@@ -30,6 +33,8 @@ type Instance struct {
 // Operator provides a collection of functions to store and retrieve a
 // Persistable in the database.
 type Operator struct {
-	Table          string
-	NewPersistable func() Persistable
+	DB     Instance
+	Table  string
+	Create func() model.Persistable
+	Read   func(io.Reader) (model.Persistable, error)
 }

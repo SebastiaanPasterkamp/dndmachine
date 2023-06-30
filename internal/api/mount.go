@@ -1,6 +1,7 @@
 package api
 
 import (
+	"io"
 	"net/http"
 
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/auth"
@@ -18,28 +19,67 @@ func Mount(db database.Instance, e *policy.Enforcer) http.Handler {
 	r.Route("/user", func(r chi.Router) {
 		r.Use(auth.IfPossible(e, "authz.user.allow", []string{"user"}))
 
-		r.Get("/", ListObjectsHandler(db, model.UserDB))
-		r.Post("/", PostObjectHandler(db, model.UserFromReader, model.UserDB))
-		r.Get("/{objID:[0-9]+}", GetObjectHandler(db, model.UserDB))
-		r.Patch("/{objID:[0-9]+}", PatchObjectHandler(db, model.UserDB))
+		op := database.Operator{
+			DB:    db,
+			Table: "user",
+			Create: func() model.Persistable {
+				return &model.User{}
+			},
+			Read: func(r io.Reader) (model.Persistable, error) {
+				p := model.User{}
+				err := p.UnmarshalFromReader(r)
+				return &p, err
+			},
+		}
+
+		r.Get("/", ListObjectsHandler(op))
+		r.Post("/", PostObjectHandler(op))
+		r.Get("/{objID:[0-9]+}", GetObjectHandler(op))
+		r.Patch("/{objID:[0-9]+}", PatchObjectHandler(op))
 	})
 
 	r.Route("/character", func(r chi.Router) {
 		r.Use(auth.IfPossible(e, "authz.character.allow", []string{"character"}))
 
-		r.Get("/", ListObjectsHandler(db, character.DB))
-		r.Post("/", PostObjectHandler(db, character.FromReader, character.DB))
-		r.Get("/{objID:[0-9]+}", GetObjectHandler(db, character.DB))
-		r.Patch("/{objID:[0-9]+}", PatchObjectHandler(db, character.DB))
+		op := database.Operator{
+			DB:    db,
+			Table: "character",
+			Create: func() model.Persistable {
+				return &character.Object{}
+			},
+			Read: func(r io.Reader) (model.Persistable, error) {
+				p := character.Object{}
+				err := p.UnmarshalFromReader(r)
+				return &p, err
+			},
+		}
+
+		r.Get("/", ListObjectsHandler(op))
+		r.Post("/", PostObjectHandler(op))
+		r.Get("/{objID:[0-9]+}", GetObjectHandler(op))
+		r.Patch("/{objID:[0-9]+}", PatchObjectHandler(op))
 	})
 
 	r.Route("/equipment", func(r chi.Router) {
 		r.Use(auth.IfPossible(e, "authz.equipment.allow", []string{"equipment"}))
 
-		r.Get("/", ListObjectsHandler(db, model.EquipmentDB))
-		r.Post("/", PostObjectHandler(db, model.EquipmentFromReader, model.EquipmentDB))
-		r.Get("/{objID:[0-9]+}", GetObjectHandler(db, model.EquipmentDB))
-		r.Patch("/{objID:[0-9]+}", PatchObjectHandler(db, model.EquipmentDB))
+		op := database.Operator{
+			DB:    db,
+			Table: "equipment",
+			Create: func() model.Persistable {
+				return &model.Equipment{}
+			},
+			Read: func(r io.Reader) (model.Persistable, error) {
+				p := model.Equipment{}
+				err := p.UnmarshalFromReader(r)
+				return &p, err
+			},
+		}
+
+		r.Get("/", ListObjectsHandler(op))
+		r.Post("/", PostObjectHandler(op))
+		r.Get("/{objID:[0-9]+}", GetObjectHandler(op))
+		r.Patch("/{objID:[0-9]+}", PatchObjectHandler(op))
 	})
 
 	return r

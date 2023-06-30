@@ -2,6 +2,7 @@ package api_test
 
 import (
 	"context"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/api"
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/auth"
+	"github.com/SebastiaanPasterkamp/dndmachine/internal/database"
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/model"
 )
 
@@ -58,7 +60,20 @@ func TestPatchObjectHandler(t *testing.T) {
 				t.Fatalf("failed to create mock db: %v", err)
 			}
 
-			h := api.PatchObjectHandler(db, model.UserDB)
+			op := database.Operator{
+				DB:    db,
+				Table: "user",
+				Create: func() model.Persistable {
+					return &model.User{}
+				},
+				Read: func(r io.Reader) (model.Persistable, error) {
+					p := model.User{}
+					err := p.UnmarshalFromReader(r)
+					return &p, err
+				},
+			}
+
+			h := api.PatchObjectHandler(op)
 
 			payload, err := os.Open(tt.payload)
 			if err != nil {
@@ -92,7 +107,7 @@ func TestPatchObjectHandler(t *testing.T) {
 			}
 
 			if tt.verifyID > 0 {
-				obj, err := model.UserDB.GetByID(ctx, db, verifyColumns, tt.verifyID)
+				obj, err := op.GetByID(ctx, verifyColumns, tt.verifyID)
 				if err != nil {
 					t.Fatalf("failed to retrieve verify object: %v", err)
 				}
@@ -110,7 +125,7 @@ func TestPatchObjectHandler(t *testing.T) {
 					_ = payload.Close()
 				}()
 
-				expected, err := model.UserFromReader(input)
+				expected, err := op.Read(input)
 
 				if user.Password == "" || len(user.Password) < 7 || user.Password[:7] != "$2a$10$" {
 					t.Fatalf("failed to open expected response: %v", err)

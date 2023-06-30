@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-
-	"github.com/SebastiaanPasterkamp/dndmachine/internal/database"
 )
 
 // Equipment is the database.Persistable and api.JSONable implementation of a
@@ -95,7 +93,7 @@ func (e Equipment) ExtractFields(columns []string) ([]interface{}, error) {
 
 			fields[i] = config
 		default:
-			return fields, fmt.Errorf("%w: %q", database.ErrUnknownColumn, column)
+			return fields, fmt.Errorf("%w: %q", ErrUnknownColumn, column)
 		}
 	}
 
@@ -104,7 +102,7 @@ func (e Equipment) ExtractFields(columns []string) ([]interface{}, error) {
 
 // UpdateFromScanner updates the equipment object with values contained in the
 // database.Scanner.
-func (e *Equipment) UpdateFromScanner(row database.Scanner, columns []string) error {
+func (e *Equipment) UpdateFromScanner(row Scanner, columns []string) error {
 	fields := make([]interface{}, len(columns))
 	for i, column := range columns {
 		switch column {
@@ -118,7 +116,7 @@ func (e *Equipment) UpdateFromScanner(row database.Scanner, columns []string) er
 			config := []byte{}
 			fields[i] = &config
 		default:
-			return fmt.Errorf("%w: %q", database.ErrUnknownColumn, column)
+			return fmt.Errorf("%w: %q", ErrUnknownColumn, column)
 		}
 	}
 
@@ -144,7 +142,7 @@ func (e *Equipment) UpdateFromScanner(row database.Scanner, columns []string) er
 
 // Migrate adjusts an Equipment object to migrate fields from the UserAttributes
 // struct to the main User struct.
-func (e *Equipment) Migrate(row database.Scanner, columns []string) error {
+func (e *Equipment) Migrate(row Scanner, columns []string) error {
 	fields := make([]interface{}, len(columns))
 	for i, column := range columns {
 		switch column {
@@ -158,7 +156,7 @@ func (e *Equipment) Migrate(row database.Scanner, columns []string) error {
 			config := []byte{}
 			fields[i] = &config
 		default:
-			return fmt.Errorf("%w: %q", database.ErrUnknownColumn, column)
+			return fmt.Errorf("%w: %q", ErrUnknownColumn, column)
 		}
 	}
 
@@ -191,27 +189,7 @@ func (e *Equipment) Migrate(row database.Scanner, columns []string) error {
 	return nil
 }
 
-// EquipmentDB is a database Operator to store / retrieve equipment item models.
-var EquipmentDB = database.Operator{
-	Table: "equipment",
-	NewPersistable: func() database.Persistable {
-		return &Equipment{}
-	},
-}
-
-// EquipmentFromReader returns a equipment item model created from a json stream.
-func EquipmentFromReader(r io.Reader) (database.Persistable, error) {
-	e := Equipment{}
-	err := e.UnmarshalFromReader(r)
-	return &e, err
-}
-
 // UnmarshalFromReader updates an equipment item object from a JSON stream.
 func (e *Equipment) UnmarshalFromReader(r io.Reader) error {
 	return json.NewDecoder(r).Decode(e)
-}
-
-// MarshalToWriter writes an equipment item object as a JSON stream.
-func (e *Equipment) MarshalToWriter(w io.Writer) error {
-	return json.NewEncoder(w).Encode(e)
 }

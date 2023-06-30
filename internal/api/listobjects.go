@@ -12,14 +12,14 @@ import (
 // ListObjectsHandler returns zero or more object from the provided
 // database.Operator using the columns, queries, and values provided by the
 // IfPossible middleware.
-func ListObjectsHandler(db database.Instance, op database.Operator) http.HandlerFunc {
+func ListObjectsHandler(op database.Operator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		columns := ctx.Value(auth.SQLColumns).([]string)
 		clause := ctx.Value(auth.SQLClause).(string)
 		values := ctx.Value(auth.SQLValues).([]interface{})
 
-		objs, err := op.GetByQuery(ctx, db, columns, clause, values...)
+		objs, err := op.GetByQuery(ctx, columns, clause, values...)
 		if err != nil {
 			log.Printf("Error: failed to get objects columns %q with clause %q and values %q: %v",
 				columns, clause, values, err)

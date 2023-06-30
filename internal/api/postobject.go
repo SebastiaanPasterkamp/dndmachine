@@ -12,11 +12,11 @@ import (
 // PostObjectHandler inserts specific columns of a single object using the
 // provided database.Operator using the columns, queries, and values provided by
 // the IfPossible middleware.
-func PostObjectHandler(db database.Instance, create NewPersistable, op database.Operator) http.HandlerFunc {
+func PostObjectHandler(op database.Operator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
 
-		obj, err := create(r.Body)
+		obj, err := op.Read(r.Body)
 		if err != nil {
 			log.Printf("Error: failed to create object: %v", err)
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
@@ -28,7 +28,7 @@ func PostObjectHandler(db database.Instance, create NewPersistable, op database.
 		clause := ctx.Value(auth.SQLClause).(string)
 		values := ctx.Value(auth.SQLValues).([]interface{})
 
-		id, err := op.InsertByQuery(ctx, db, obj, columns, clause, values...)
+		id, err := op.InsertByQuery(ctx, obj, columns, clause, values...)
 		if err != nil {
 			log.Printf("Error: failed to insert object for %q (%q): %v",
 				clause, values, err)

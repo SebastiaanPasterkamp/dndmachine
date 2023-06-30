@@ -6,15 +6,17 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/SebastiaanPasterkamp/dndmachine/internal/model"
 )
 
 // GetByID returns a persistable model by the primary key.
-func (o Operator) GetByID(ctx context.Context, db Instance, columns []string, id int64) (Persistable, error) {
-	return o.GetOneByQuery(ctx, db, columns, "id = ?", id)
+func (o Operator) GetByID(ctx context.Context, columns []string, id int64) (model.Persistable, error) {
+	return o.GetOneByQuery(ctx, columns, "id = ?", id)
 }
 
 // GetOneByQuery returns a single persistable model by the provided query.
-func (o Operator) GetOneByQuery(ctx context.Context, db Instance, columns []string, clause string, args ...interface{}) (Persistable, error) {
+func (o Operator) GetOneByQuery(ctx context.Context, columns []string, clause string, args ...interface{}) (model.Persistable, error) {
 	var query strings.Builder
 
 	columns = append(columns, "id")
@@ -23,7 +25,7 @@ func (o Operator) GetOneByQuery(ctx context.Context, db Instance, columns []stri
 		fmt.Fprintf(&query, " WHERE %s", clause)
 	}
 
-	stmt, err := db.Pool.PrepareContext(ctx, query.String())
+	stmt, err := o.DB.Pool.PrepareContext(ctx, query.String())
 	if err != nil {
 		return nil, fmt.Errorf("%w: failed to prepare %q: %v",
 			ErrQueryFailed, query.String(), err)
@@ -32,7 +34,7 @@ func (o Operator) GetOneByQuery(ctx context.Context, db Instance, columns []stri
 
 	r := stmt.QueryRowContext(ctx, args...)
 
-	obj := o.NewPersistable()
+	obj := o.Create()
 
 	err = obj.UpdateFromScanner(r, columns)
 	switch {
@@ -46,9 +48,9 @@ func (o Operator) GetOneByQuery(ctx context.Context, db Instance, columns []stri
 }
 
 // GetByQuery returns zero or persistables by the provided query.
-func (o Operator) GetByQuery(ctx context.Context, db Instance, columns []string, clause string, args ...interface{}) ([]Persistable, error) {
+func (o Operator) GetByQuery(ctx context.Context, columns []string, clause string, args ...interface{}) ([]model.Persistable, error) {
 	var (
-		objs  = []Persistable{}
+		objs  = []model.Persistable{}
 		query = strings.Builder{}
 	)
 
@@ -58,7 +60,7 @@ func (o Operator) GetByQuery(ctx context.Context, db Instance, columns []string,
 		fmt.Fprintf(&query, " WHERE %s", clause)
 	}
 
-	stmt, err := db.Pool.PrepareContext(ctx, query.String())
+	stmt, err := o.DB.Pool.PrepareContext(ctx, query.String())
 	if err != nil {
 		return objs, fmt.Errorf("%w: failed to prepare %q: %v",
 			ErrQueryFailed, query.String(), err)
@@ -77,7 +79,7 @@ func (o Operator) GetByQuery(ctx context.Context, db Instance, columns []string,
 	defer r.Close()
 
 	for r.Next() {
-		obj := o.NewPersistable()
+		obj := o.Create()
 
 		err := obj.UpdateFromScanner(r, columns)
 		if err != nil {
@@ -96,7 +98,7 @@ func (o Operator) GetByQuery(ctx context.Context, db Instance, columns []string,
 
 // InsertByQuery adds a persistable to the database, with an optional query, and
 // returns the newly inserted id.
-func (o Operator) InsertByQuery(ctx context.Context, db Instance, obj Persistable, columns []string, clause string, args ...interface{}) (int64, error) {
+func (o Operator) InsertByQuery(ctx context.Context, obj model.Persistable, columns []string, clause string, args ...interface{}) (int64, error) {
 	var query strings.Builder
 	fmt.Fprintf(&query, "INSERT INTO %s (%s) VALUES (%s)",
 		o.Table, columnSQL(columns), placeholderSQL(columns))
@@ -104,7 +106,7 @@ func (o Operator) InsertByQuery(ctx context.Context, db Instance, obj Persistabl
 		fmt.Fprintf(&query, " WHERE %s", clause)
 	}
 
-	stmt, err := db.Pool.PrepareContext(ctx, query.String())
+	stmt, err := o.DB.Pool.PrepareContext(ctx, query.String())
 	if err != nil {
 		return 0, fmt.Errorf("%w: failed to prepare %q: %v",
 			ErrQueryFailed, query.String(), err)
@@ -133,14 +135,14 @@ func (o Operator) InsertByQuery(ctx context.Context, db Instance, obj Persistabl
 }
 
 // UpdateByQuery updates one model in the database, and returns the affected id.
-func (o Operator) UpdateByQuery(ctx context.Context, db Instance, obj Persistable, columns []string, clause string, args ...interface{}) (int64, error) {
+func (o Operator) UpdateByQuery(ctx context.Context, obj model.Persistable, columns []string, clause string, args ...interface{}) (int64, error) {
 	var query strings.Builder
 	fmt.Fprintf(&query, "UPDATE %s SET %s", o.Table, updateSQL(columns))
 	if clause != "" {
 		fmt.Fprintf(&query, " WHERE %s", clause)
 	}
 
-	stmt, err := db.Pool.PrepareContext(ctx, query.String())
+	stmt, err := o.DB.Pool.PrepareContext(ctx, query.String())
 	if err != nil {
 		return obj.GetID(), fmt.Errorf("%w: failed to prepare %q: %v",
 			ErrQueryFailed, query.String(), err)
@@ -176,8 +178,8 @@ func (o Operator) UpdateByQuery(ctx context.Context, db Instance, obj Persistabl
 }
 
 // Migrate updates the entire table if the object is a Migratable.
-func (o Operator) Migrate(ctx context.Context, db Instance) error {
-	tx, err := db.Pool.BeginTx(ctx, nil)
+func (o Operator) Migrate(ctx context.Context) error {
+	tx, err := o.DB.Pool.BeginTx(ctx, nil)
 	if err != nil {
 		return fmt.Errorf("failed to start transaction: %w", err)
 	}
@@ -221,8 +223,8 @@ func (o Operator) Migrate(ctx context.Context, db Instance) error {
 	defer _update.Close()
 
 	for r.Next() {
-		obj := o.NewPersistable()
-		m, ok := obj.(Migratable)
+		obj := o.Create()
+		m, ok := obj.(model.Migrator)
 		if !ok {
 			return fmt.Errorf("object %T not Migratable", obj)
 		}

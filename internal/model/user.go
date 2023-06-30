@@ -7,7 +7,6 @@ import (
 	"io"
 	"strings"
 
-	"github.com/SebastiaanPasterkamp/dndmachine/internal/database"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -88,7 +87,7 @@ func (u User) ExtractFields(columns []string) ([]interface{}, error) {
 
 			fields[i] = config
 		default:
-			return fields, fmt.Errorf("%w: %q", database.ErrUnknownColumn, column)
+			return fields, fmt.Errorf("%w: %q", ErrUnknownColumn, column)
 		}
 	}
 
@@ -97,7 +96,7 @@ func (u User) ExtractFields(columns []string) ([]interface{}, error) {
 
 // UpdateFromScanner updates the user object with values contained in the
 // database.Scanner.
-func (u *User) UpdateFromScanner(row database.Scanner, columns []string) error {
+func (u *User) UpdateFromScanner(row Scanner, columns []string) error {
 	fields := make([]interface{}, len(columns))
 	for i, column := range columns {
 		switch column {
@@ -120,7 +119,7 @@ func (u *User) UpdateFromScanner(row database.Scanner, columns []string) error {
 			config := []byte{}
 			fields[i] = &config
 		default:
-			return fmt.Errorf("%w: %q", database.ErrUnknownColumn, column)
+			return fmt.Errorf("%w: %q", ErrUnknownColumn, column)
 		}
 	}
 
@@ -164,7 +163,7 @@ func (u *User) UpdateFromScanner(row database.Scanner, columns []string) error {
 
 // Migrate adjusts a User object to migrate fields from the UserAttributes
 // struct to the main User struct.
-func (u *User) Migrate(row database.Scanner, columns []string) error {
+func (u *User) Migrate(row Scanner, columns []string) error {
 	fields := make([]interface{}, len(columns))
 	for i, column := range columns {
 		switch column {
@@ -187,7 +186,7 @@ func (u *User) Migrate(row database.Scanner, columns []string) error {
 			config := []byte{}
 			fields[i] = &config
 		default:
-			return fmt.Errorf("%w: %q", database.ErrUnknownColumn, column)
+			return fmt.Errorf("%w: %q", ErrUnknownColumn, column)
 		}
 	}
 
@@ -243,21 +242,6 @@ func (u *User) Migrate(row database.Scanner, columns []string) error {
 	return nil
 }
 
-// UserDB is a database Operator to store / retrieve user models.
-var UserDB = database.Operator{
-	Table: "user",
-	NewPersistable: func() database.Persistable {
-		return &User{}
-	},
-}
-
-// UserFromReader returns a user model created from a json stream.
-func UserFromReader(r io.Reader) (database.Persistable, error) {
-	u := User{}
-	err := u.UnmarshalFromReader(r)
-	return &u, err
-}
-
 // UnmarshalFromReader updates a user object from a JSON stream.
 func (u *User) UnmarshalFromReader(r io.Reader) error {
 	old := u.Password
@@ -281,9 +265,4 @@ func (u *User) UnmarshalFromReader(r io.Reader) error {
 	}
 
 	return nil
-}
-
-// MarshalToWriter writes a user object as a JSON stream.
-func (u *User) MarshalToWriter(w io.Writer) error {
-	return json.NewEncoder(w).Encode(u)
 }

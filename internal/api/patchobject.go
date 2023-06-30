@@ -8,12 +8,13 @@ import (
 
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/auth"
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/database"
+	"github.com/SebastiaanPasterkamp/dndmachine/internal/model"
 )
 
 // PatchObjectHandler updates specific columns of a single object using the
 // provided database.Operator using the columns, queries, and values provided by
 // the IfPossible middleware.
-func PatchObjectHandler(db database.Instance, op database.Operator) http.HandlerFunc {
+func PatchObjectHandler(op database.Operator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
 
@@ -22,7 +23,7 @@ func PatchObjectHandler(db database.Instance, op database.Operator) http.Handler
 		clause := ctx.Value(auth.SQLClause).(string)
 		values := ctx.Value(auth.SQLValues).([]interface{})
 
-		obj, err := op.GetOneByQuery(ctx, db, columns, clause, values...)
+		obj, err := op.GetOneByQuery(ctx, columns, clause, values...)
 		switch {
 		case errors.Is(err, database.ErrNotFound):
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
@@ -34,7 +35,7 @@ func PatchObjectHandler(db database.Instance, op database.Operator) http.Handler
 			return
 		}
 
-		if j, ok := obj.(JSONable); ok {
+		if j, ok := obj.(model.JSONable); ok {
 			if err := j.UnmarshalFromReader(r.Body); err != nil {
 				log.Printf("Error: failed to unmarshal payload %T: %v", j, err)
 				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
@@ -46,7 +47,7 @@ func PatchObjectHandler(db database.Instance, op database.Operator) http.Handler
 			return
 		}
 
-		id, err := op.UpdateByQuery(r.Context(), db, obj, columns, clause, values...)
+		id, err := op.UpdateByQuery(r.Context(), obj, columns, clause, values...)
 		switch {
 		case errors.Is(err, database.ErrNotFound):
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)

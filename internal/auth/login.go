@@ -3,6 +3,7 @@ package auth
 import (
 	"encoding/json"
 	"errors"
+	"io"
 	"log"
 	"net/http"
 	"time"
@@ -26,8 +27,21 @@ func HandleLogin(db database.Instance, repo cache.Repository) http.HandlerFunc {
 			return
 		}
 
-		obj, err := model.UserDB.GetOneByQuery(
-			r.Context(), db, []string{"username", "password", "role", "config"},
+		userDB := database.Operator{
+			DB:    db,
+			Table: "user",
+			Create: func() model.Persistable {
+				return &model.User{}
+			},
+			Read: func(r io.Reader) (model.Persistable, error) {
+				p := model.User{}
+				err := p.UnmarshalFromReader(r)
+				return &p, err
+			},
+		}
+
+		obj, err := userDB.GetOneByQuery(
+			r.Context(), []string{"username", "password", "role", "config"},
 			"username = ? OR email = ?", creds.Username, creds.Username)
 		switch {
 		case errors.Is(err, database.ErrNotFound):

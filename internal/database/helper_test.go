@@ -4,10 +4,12 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io"
 	"math/rand"
 	"os"
 
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/database"
+	"github.com/SebastiaanPasterkamp/dndmachine/internal/model"
 )
 
 func mockDatabase() (database.Instance, error) {
@@ -75,7 +77,7 @@ func (m Mock) ExtractFields(columns []string) ([]interface{}, error) {
 
 			fields[i] = config
 		default:
-			return fields, fmt.Errorf("%w: %q", database.ErrUnknownColumn, column)
+			return fields, fmt.Errorf("%w: %q", model.ErrUnknownColumn, column)
 		}
 	}
 
@@ -84,7 +86,7 @@ func (m Mock) ExtractFields(columns []string) ([]interface{}, error) {
 
 // UpdateFromScanner updates the mock object with values contained in the
 // database.Scanner.
-func (m *Mock) UpdateFromScanner(row database.Scanner, columns []string) error {
+func (m *Mock) UpdateFromScanner(row model.Scanner, columns []string) error {
 	fields := make([]interface{}, len(columns))
 	for i, column := range columns {
 		switch column {
@@ -99,7 +101,7 @@ func (m *Mock) UpdateFromScanner(row database.Scanner, columns []string) error {
 			config := []byte{}
 			fields[i] = &config
 		default:
-			return fmt.Errorf("%w: %q", database.ErrUnknownColumn, column)
+			return fmt.Errorf("%w: %q", model.ErrUnknownColumn, column)
 		}
 	}
 
@@ -128,9 +130,14 @@ func (m *Mock) UpdateFromScanner(row database.Scanner, columns []string) error {
 	return nil
 }
 
+// UnmarshalFromReader updates an mock item object from a JSON stream.
+func (m *Mock) UnmarshalFromReader(r io.Reader) error {
+	return json.NewDecoder(r).Decode(m)
+}
+
 // Migrate adjusts a Mock object to any changes between versions. This example
 // transfers a field from the MockAttributes to the main Mock object.
-func (m *Mock) Migrate(row database.Scanner, columns []string) error {
+func (m *Mock) Migrate(row model.Scanner, columns []string) error {
 	fields := make([]interface{}, len(columns))
 	for i, column := range columns {
 		switch column {
@@ -145,7 +152,7 @@ func (m *Mock) Migrate(row database.Scanner, columns []string) error {
 			config := []byte{}
 			fields[i] = &config
 		default:
-			return fmt.Errorf("%w: %q", database.ErrUnknownColumn, column)
+			return fmt.Errorf("%w: %q", model.ErrUnknownColumn, column)
 		}
 	}
 
@@ -177,9 +184,19 @@ func (m *Mock) Migrate(row database.Scanner, columns []string) error {
 	return nil
 }
 
-var MockDB = database.Operator{
-	Table: "mock",
-	NewPersistable: func() database.Persistable {
-		return &Mock{}
-	},
+func mockOperator(db database.Instance) database.Operator {
+	op := database.Operator{
+		DB:    db,
+		Table: "mock",
+		Create: func() model.Persistable {
+			return &Mock{}
+		},
+		Read: func(r io.Reader) (model.Persistable, error) {
+			p := Mock{}
+			err := p.UnmarshalFromReader(r)
+			return &p, err
+		},
+	}
+
+	return op
 }

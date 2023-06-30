@@ -2,6 +2,7 @@ package api_test
 
 import (
 	"context"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/api"
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/auth"
+	"github.com/SebastiaanPasterkamp/dndmachine/internal/database"
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/model"
 )
 
@@ -52,7 +54,20 @@ func TestListObjectsHandler(t *testing.T) {
 				t.Fatalf("failed to create mock db: %v", err)
 			}
 
-			h := api.ListObjectsHandler(db, model.UserDB)
+			op := database.Operator{
+				DB:    db,
+				Table: "user",
+				Create: func() model.Persistable {
+					return &model.User{}
+				},
+				Read: func(r io.Reader) (model.Persistable, error) {
+					p := model.User{}
+					err := p.UnmarshalFromReader(r)
+					return &p, err
+				},
+			}
+
+			h := api.ListObjectsHandler(op)
 
 			w := httptest.NewRecorder()
 			r := httptest.NewRequest("GET", tt.path, nil)

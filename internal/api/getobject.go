@@ -12,14 +12,14 @@ import (
 
 // GetObjectHandler returns a single object from the provided database.Operator
 // using the columns, queries, and values provided by the IfPossible middleware.
-func GetObjectHandler(db database.Instance, op database.Operator) http.HandlerFunc {
+func GetObjectHandler(op database.Operator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		columns := ctx.Value(auth.SQLColumns).([]string)
 		clause := ctx.Value(auth.SQLClause).(string)
 		values := ctx.Value(auth.SQLValues).([]interface{})
 
-		obj, err := op.GetOneByQuery(ctx, db, columns, clause, values...)
+		obj, err := op.GetOneByQuery(ctx, columns, clause, values...)
 		switch {
 		case errors.Is(err, database.ErrNotFound):
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)

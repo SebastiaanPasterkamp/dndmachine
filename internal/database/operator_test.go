@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/database"
+	"github.com/SebastiaanPasterkamp/dndmachine/internal/model"
 )
 
 func TestGetByID(t *testing.T) {
@@ -18,6 +19,8 @@ func TestGetByID(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to get DB: %v", err)
 	}
+
+	op := mockOperator(db)
 
 	testCases := []struct {
 		name     string
@@ -43,7 +46,7 @@ func TestGetByID(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			p, err := MockDB.GetByID(ctx, db, tt.columns, tt.id)
+			p, err := op.GetByID(ctx, tt.columns, tt.id)
 			if !errors.Is(err, tt.err) {
 				t.Errorf("Unexpected error. Expected %v, got %v.", tt.err, err)
 			}
@@ -73,6 +76,8 @@ func TestGetByQuery(t *testing.T) {
 		t.Fatalf("Failed to get DB: %v", err)
 	}
 
+	op := mockOperator(db)
+
 	testCases := []struct {
 		name     string
 		clause   string
@@ -100,7 +105,7 @@ func TestGetByQuery(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			p, err := MockDB.GetByQuery(ctx, db, tt.columns, tt.clause, tt.values...)
+			p, err := op.GetByQuery(ctx, tt.columns, tt.clause, tt.values...)
 			if !errors.Is(err, tt.err) {
 				t.Errorf("Unexpected error. Expected %v, got %v.", tt.err, err)
 			}
@@ -132,6 +137,8 @@ func TestInsertByQuery(t *testing.T) {
 		t.Fatalf("Failed to get DB: %v", err)
 	}
 
+	op := mockOperator(db)
+
 	columns := []string{"name", "config"}
 
 	obj := Mock{Name: "foo", MockAttributes: MockAttributes{Something: "bar"}}
@@ -150,7 +157,7 @@ func TestInsertByQuery(t *testing.T) {
 		{"insert config only", obj, []string{"config"},
 			nil, &Mock{Name: "", MockAttributes: MockAttributes{Something: "bar"}}},
 		{"insert unknown columns fails", obj, []string{"config", "foo", "bar"},
-			database.ErrUnknownColumn, nil},
+			model.ErrUnknownColumn, nil},
 	}
 
 	for _, tt := range testCases {
@@ -158,7 +165,7 @@ func TestInsertByQuery(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			id, err := MockDB.InsertByQuery(ctx, db, &tt.input, tt.columns, "")
+			id, err := op.InsertByQuery(ctx, &tt.input, tt.columns, "")
 			if !errors.Is(err, tt.err) {
 				t.Errorf("Unexpected error. Expected %v, got %v.", tt.err, err)
 			}
@@ -167,7 +174,7 @@ func TestInsertByQuery(t *testing.T) {
 				return
 			}
 
-			p, err := MockDB.GetByID(ctx, db, columns, id)
+			p, err := op.GetByID(ctx, columns, id)
 			if err != nil {
 				t.Fatalf("Unexpected error: %v.", err)
 			}
@@ -210,7 +217,7 @@ func TestUpdateByQuery(t *testing.T) {
 		{"update config only", obj, []string{"config"}, "id = ?", []interface{}{1},
 			nil, &Mock{Name: "test", MockAttributes: MockAttributes{Something: "bar"}}},
 		{"update unknown columns fails", obj, []string{"config", "foo", "bar"}, "id = ?", []interface{}{1},
-			database.ErrUnknownColumn, nil},
+			model.ErrUnknownColumn, nil},
 	}
 
 	for _, tt := range testCases {
@@ -223,7 +230,9 @@ func TestUpdateByQuery(t *testing.T) {
 				t.Fatalf("Failed to get DB: %v", err)
 			}
 
-			id, err := MockDB.UpdateByQuery(ctx, db, &tt.input, tt.columns, tt.clause, tt.values...)
+			op := mockOperator(db)
+
+			id, err := op.UpdateByQuery(ctx, &tt.input, tt.columns, tt.clause, tt.values...)
 			if !errors.Is(err, tt.err) {
 				t.Errorf("Unexpected error. Expected %v, got %v.", tt.err, err)
 			}
@@ -232,7 +241,7 @@ func TestUpdateByQuery(t *testing.T) {
 				return
 			}
 
-			p, err := MockDB.GetByID(ctx, db, columns, id)
+			p, err := op.GetByID(ctx, columns, id)
 			if err != nil {
 				t.Fatalf("Unexpected error: %v.", err)
 			}
@@ -283,7 +292,9 @@ func TestMigrate(t *testing.T) {
 				t.Fatalf("Failed to get DB: %v", err)
 			}
 
-			p, err := MockDB.GetByID(ctx, db, columns, tt.id)
+			op := mockOperator(db)
+
+			p, err := op.GetByID(ctx, columns, tt.id)
 			if err != nil {
 				t.Errorf("Unexpected error: %v", err)
 			}
@@ -293,12 +304,12 @@ func TestMigrate(t *testing.T) {
 					tt.before, tt.before, p)
 			}
 
-			err = MockDB.Migrate(ctx, db)
+			err = op.Migrate(ctx)
 			if err != nil {
 				t.Fatalf("Migration failed: %v", err)
 			}
 
-			p, err = MockDB.GetByID(ctx, db, columns, tt.id)
+			p, err = op.GetByID(ctx, columns, tt.id)
 			if err != nil {
 				t.Errorf("Unexpected error: %v", err)
 			}

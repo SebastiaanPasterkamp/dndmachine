@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 
 	"github.com/SebastiaanPasterkamp/dndmachine/internal/database"
@@ -79,11 +80,37 @@ func (s *Instance) upgrade(db database.Instance, cfg CmdUpgrade) error {
 		return fmt.Errorf("failed to commit version upgrades: %w", err)
 	}
 
-	if err := model.UserDB.Migrate(ctx, db); err != nil {
+	userDB := database.Operator{
+		DB:    db,
+		Table: "user",
+		Create: func() model.Persistable {
+			return &model.User{}
+		},
+		Read: func(r io.Reader) (model.Persistable, error) {
+			p := model.User{}
+			err := p.UnmarshalFromReader(r)
+			return &p, err
+		},
+	}
+
+	if err := userDB.Migrate(ctx); err != nil {
 		return fmt.Errorf("failed to upgrade user modules: %w", err)
 	}
 
-	if err := model.EquipmentDB.Migrate(ctx, db); err != nil {
+	equipmentDB := database.Operator{
+		DB:    db,
+		Table: "equipment",
+		Create: func() model.Persistable {
+			return &model.Equipment{}
+		},
+		Read: func(r io.Reader) (model.Persistable, error) {
+			p := model.Equipment{}
+			err := p.UnmarshalFromReader(r)
+			return &p, err
+		},
+	}
+
+	if err := equipmentDB.Migrate(ctx); err != nil {
 		return fmt.Errorf("failed to upgrade equipment modules: %w", err)
 	}
 
