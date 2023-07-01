@@ -41,11 +41,20 @@ opa-build:
 	cp -v ui/public/policy.wasm ui/src/testdata
 
 opa-test:
-	opa test --verbose internal/policy/rego
-	opa test --verbose internal/policy/testdata
+	docker run \
+		--rm -it \
+		--user ${UID}:${GID} \
+		-v ${PWD}/internal/policy:/code \
+		cromrots/opa:0.50.1 \
+			test --verbose /code
 
 opa-coverage:
-	opa test --coverage --verbose internal/policy/rego
+	docker run \
+		--rm -it \
+		--user ${UID}:${GID} \
+		-v ${PWD}/internal/policy:/code \
+		cromrots/opa:0.50.1 \
+			test --coverage --verbose /code
 
 dev: opa-build
 	USER=${UID}:${GID} \
