@@ -8,6 +8,8 @@ get_list := ["username", "role", "config"]
 
 patch_one := ["username", "password", "email", "google_id", "config"]
 
+patch_admin := ["username", "password", "role", "email", "google_id", "config"]
+
 post_one := ["username", "password", "role", "email", "config"]
 
 allow = get_one {
@@ -31,6 +33,17 @@ allow = patch_one {
 	input.method == "PATCH"
 	input.user.id
 	user_id := to_number(path_id)
+	not is_admin
+	allowed[usr]
+	usr.id == user_id
+}
+
+allow = patch_admin {
+	input.path = ["api", "user", path_id]
+	input.method == "PATCH"
+	input.user.id
+	user_id := to_number(path_id)
+	is_admin
 	allowed[usr]
 	usr.id == user_id
 }

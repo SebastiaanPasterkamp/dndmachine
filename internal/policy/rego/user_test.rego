@@ -85,7 +85,7 @@ test_post_as_non_admin_denied {
 }
 
 test_patch_as_admin_allowed {
-	patch_one = allow with input as {
+	patch_admin = allow with input as {
 		"path": ["api", "user", "2"],
 		"method": "PATCH",
 		"user": {"id": 1, "role": ["admin"]},
