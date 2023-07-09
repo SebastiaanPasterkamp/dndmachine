@@ -66,6 +66,10 @@ func (s *Instance) Router(ctx context.Context, db database.Instance) (*chi.Mux, 
 		fs := http.FileServer(http.Dir(s.PublicPath))
 		r.Handle("/", http.FileServer(http.Dir(s.PublicPath)))
 		r.Handle("/ui/*", http.StripPrefix("/ui/", fs))
+
+		r.NotFound(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			http.ServeFile(w, r, s.PublicPath+"/index.html")
+		}))
 	}
 
 	r.Route("/auth", func(r chi.Router) {
