@@ -1,52 +1,55 @@
+import opa from "@open-policy-agent/opa-wasm";
 import { act, render, screen, waitFor } from '@testing-library/react';
-import { Route, Routes, MemoryRouter } from 'react-router-dom';
-import { rest } from 'msw'
-import { setupServer } from 'msw/node'
 import fs from 'fs';
+import { rest } from 'msw';
+import { setupServer } from 'msw/node';
 import path from 'path';
-import UserView from './UserView';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
+
+import { MockDnDMachineContext } from '../../context/DnDMachineContext';
+import PolicyContext from "../../context/PolicyContext";
+import { MockPolicyEngineContext } from '../../context/PolicyEngineContext';
+import CharacterView from './CharacterView';
 
 const server = setupServer(
-  rest.get('/api/user', (_, res, ctx) => {
+  rest.get('/api/character', (_, res, ctx) => {
     return res(ctx.json({
-      results: [{ id: 1, name: "hello" }],
+      results: [{ id: 1, name: "Testy McTestFace" }],
     }))
   }),
-  rest.get('/api/user/1', (_, res, ctx) => {
+  rest.get('/api/character/1', (_, res, ctx) => {
     return res(ctx.json({
-      result: { id: 1, name: "hello" },
+      result: { id: 1, name: "Testy McTestFace" },
     }))
   }),
-  rest.get('/ui/policy.wasm', (_, res, ctx) => {
-    const wasmPath = path.resolve(__dirname, '../../testdata/policy.wasm');
-    const wasm = fs.readFileSync(wasmPath);
-
-    return res(
-      ctx.set('Content-Length', wasm.byteLength.toString()),
-      ctx.set('Content-Type', 'application/wasm'),
-      ctx.body(wasm),
-    )
-  })
 )
 
 beforeAll(() => server.listen())
 afterEach(() => server.resetHandlers())
 afterAll(() => server.close())
 
-test('renders UserView', async () => {
+test('renders CharacterView', async () => {
+  const wasmPath = path.resolve(__dirname, '../../testdata/policy.wasm');
+  const wasm = fs.readFileSync(wasmPath);
+  const policy = await opa.loadPolicy(wasm);
+
   await act(async () => render(
-    <MemoryRouter initialEntries={['/user/1']} >
-      <Routes>
-        <Route
-          path='/user/:id'
-          element={<UserView />}
-        />
-      </Routes>
-    </MemoryRouter >
+    <MockPolicyEngineContext policy={policy}>
+      <PolicyContext>
+        <MockDnDMachineContext characterCompute={async (character) => character}>
+          <MemoryRouter initialEntries={['/character/1']} >
+            <Routes>
+              <Route
+                path='/character/:id'
+                element={<CharacterView />}
+              />
+            </Routes>
+          </MemoryRouter >
+        </MockDnDMachineContext>
+      </PolicyContext>
+    </MockPolicyEngineContext>
   ));
 
-  await waitFor(() => screen.getByText('hello'))
-
-  const linkElement = screen.getByText('hello');
-  expect(linkElement).toBeInTheDocument();
+  const nameElements = await waitFor(() => screen.getAllByText(/Testy McTestFace/))
+  expect(nameElements[0]).toBeInTheDocument();
 });

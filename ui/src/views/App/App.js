@@ -7,18 +7,15 @@ import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import { useCurrentUserContext } from '../../context/CurrentUserContext';
+
 import Footer from '../../partials/Footer';
 import Header from '../../partials/Header';
 import Menu from '../../partials/Menu';
 
-const CharacterView = lazy(() => import('../Characters/CharacterView'));
-const CharactersDashboard = lazy(() => import('../Characters/CharactersDashboard'));
+const CharacterRoutes = lazy(() => import('../Characters/CharacterRoutes'));
 const EquipmentTable = lazy(() => import('../Equipment/EquipmentTable'));
 const SignIn = lazy(() => import('../SignIn'));
-const UserCreate = lazy(() => import('../Users/UserCreate'));
-const UserEdit = lazy(() => import('../Users/UserEdit'));
-const UsersDashboard = lazy(() => import('../Users/UsersDashboard'));
-const UserView = lazy(() => import('../Users/UserView'));
+const UserRoutes = lazy(() => import('../Users/UserRoutes'));
 
 export default function App() {
   const { user } = useCurrentUserContext();
@@ -64,20 +61,8 @@ export default function App() {
                 <Routes>
                   {/* Characters */}
                   <Route
-                    path="/character"
-                    element={<CharactersDashboard />}
-                  />
-                  <Route
-                    path="/character/new"
-                    element={<CharacterView />}
-                  />
-                  <Route
-                    path="/character/:id"
-                    element={<CharacterView />}
-                  />
-                  <Route
-                    path="/character/:id/edit"
-                    element={<CharacterView />}
+                    path="/character/*"
+                    element={<CharacterRoutes />}
                   />
 
                   {/* Equipment */}
@@ -88,20 +73,8 @@ export default function App() {
 
                   {/* Users */}
                   <Route
-                    path="/user"
-                    element={<UsersDashboard />}
-                  />
-                  <Route
-                    path="/user/new"
-                    element={<UserCreate />}
-                  />
-                  <Route
-                    path="/user/:id"
-                    element={<UserView />}
-                  />
-                  <Route
-                    path="/user/:id/edit"
-                    element={<UserEdit />}
+                    path="/user/*"
+                    element={<UserRoutes />}
                   />
 
                 </Routes>

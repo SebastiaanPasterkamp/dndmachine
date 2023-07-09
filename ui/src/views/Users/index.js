@@ -1,11 +1,12 @@
 import UserCreate from './UserCreate'
-import UsersDashboard from './UsersDashboard'
 import UserEdit from './UserEdit'
+import UserRoutes from './UserRoutes'
 import UserView from './UserView'
+import UsersDashboard from './UsersDashboard'
+
+export default UserRoutes;
 
 export {
-  UserCreate,
-  UsersDashboard,
-  UserEdit,
-  UserView,
+  UserCreate, UserEdit,
+  UserView, UsersDashboard
 }

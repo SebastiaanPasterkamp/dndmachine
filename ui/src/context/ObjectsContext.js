@@ -80,6 +80,27 @@ export default function ObjectsContext({ types, children }) {
   );
 }
 
+function MockObjectsContext({ types, loading: defaultLoading = false, children, ...initial }) {
+  const [objects, setObjects] = React.useState(initial);
+  const [loading, setLoading] = React.useState(types.reduce((l, t) => ({ ...l, [t]: defaultLoading }), {}));
+
+  const updateObject = async (type, id) => {
+    setObjects(objects => {
+      const { [type]: current } = objects;
+      return {
+        ...objects,
+        [type]: { ...current, [id]: object },
+      }
+    });
+  };
+
+  return (
+    <Objects.Provider value={{ loading, updateObject, ...objects }}>
+      {children}
+    </Objects.Provider>
+  );
+}
+
 function useObjectsContext() {
   const context = React.useContext(Objects);
   if (context === undefined) {
@@ -89,8 +110,7 @@ function useObjectsContext() {
 }
 
 export {
-  getObject,
-  getObjects,
-  Objects,
-  useObjectsContext,
-}
+  MockObjectsContext, Objects, getObject,
+  getObjects, useObjectsContext
+};
+

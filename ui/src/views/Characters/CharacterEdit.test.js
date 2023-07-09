@@ -10,15 +10,16 @@ import { MockUserContext } from '../../context/CurrentUserContext';
 import { MockObjectsContext, useObjectsContext } from "../../context/ObjectsContext";
 import PolicyContext from "../../context/PolicyContext";
 import { MockPolicyEngineContext } from '../../context/PolicyEngineContext';
-import UsersDashboard from './UsersDashboard';
+import CharacterEdit from "./CharacterEdit";
 
 const server = setupServer(
-  rest.get('/api/user', (_, res, ctx) => {
+  rest.get('/api/character/2', (req, res, ctx) => {
     return res(ctx.json({
-      results: [
-        { id: 1, role: ["admin"], name: "admin" },
-        { id: 2, role: ["player"], name: "player" },
-      ]
+      result: {
+        id: 2,
+        user_id: 2,
+        name: "Foo",
+      },
     }))
   }),
 )
@@ -27,7 +28,7 @@ beforeAll(() => server.listen())
 afterEach(() => server.resetHandlers())
 afterAll(() => server.close())
 
-test('renders UsersDashboard', async () => {
+test('renders CharacterEdit to modify existing', async () => {
   const wasmPath = path.resolve(__dirname, '../../testdata/policy.wasm');
   const wasm = fs.readFileSync(wasmPath);
   const policy = await opa.loadPolicy(wasm);
@@ -35,32 +36,32 @@ test('renders UsersDashboard', async () => {
   await act(async () => render(
     <MockPolicyEngineContext policy={policy}>
       <MockUserContext user={{
-        id: 1,
-        role: ["admin"],
-        name: "admin",
+        id: 2,
+        role: ["player"],
+        username: "player",
       }}>
         <MockObjectsContext
-          types={['user']}
-          user={{
-            1: { id: 1, role: ["admin"], name: "admin" },
-            2: { id: 2, role: ["player"], name: "player" },
+          types={['character']}
+          character={{
+            1: { id: 1, user_id: 2, name: "Foo" },
+            2: { id: 2, user_id: 2, name: "Bar" },
           }}
         >
-          <PolicyContext useContext={useObjectsContext} query={`authz/user/allow`}>
-            <MemoryRouter initialEntries={['/user']} >
+          <PolicyContext useContext={useObjectsContext} query={`authz/character/allow`}>
+            <MemoryRouter initialEntries={['/character/2/edit']} >
               <Routes>
                 <Route
-                  path='/user'
-                  element={<UsersDashboard />}
+                  path='/character/:id/edit'
+                  element={<CharacterEdit />}
                 />
               </Routes>
             </MemoryRouter>
           </PolicyContext>
         </MockObjectsContext>
       </MockUserContext>
-    </MockPolicyEngineContext>
+    </MockPolicyEngineContext >
   ));
 
-  const nameElements = await waitFor(() => screen.getAllByText('admin'))
-  expect(nameElements[0]).toBeInTheDocument();
+  const updateButton = await waitFor(() => screen.getByText('Update'))
+  expect(updateButton).toBeInTheDocument();
 });

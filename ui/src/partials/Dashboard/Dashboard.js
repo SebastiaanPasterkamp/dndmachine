@@ -1,6 +1,6 @@
-import * as React from 'react';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
+import * as React from 'react';
 import { useObjectsContext } from '../../context/ObjectsContext';
 
 export default function Dashboard({
@@ -8,7 +8,10 @@ export default function Dashboard({
   type,
   placeholders = 3,
 }) {
-  const { [type]: objects, loading } = useObjectsContext();
+  const {
+    [type]: objects = [],
+    loading = { [type]: true },
+  } = useObjectsContext();
 
   const skeleton = [...Array(placeholders)];
 
