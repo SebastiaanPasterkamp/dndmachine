@@ -72,6 +72,7 @@ func HandleLogin(db database.Instance, repo cache.Repository) http.HandlerFunc {
 
 		sessionID := uuid.New().String()
 
+		user.Password = ""
 		err = repo.Set(r.Context(), sessionID, user, 0)
 		if err != nil {
 			log.Printf("failed to initialize session: %v", err)
