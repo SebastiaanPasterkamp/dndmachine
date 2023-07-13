@@ -1,9 +1,9 @@
-import * as React from 'react';
-import PropTypes from 'prop-types';
 import Avatar from '@mui/material/Avatar';
 import Badge from '@mui/material/Badge';
+import PropTypes from 'prop-types';
+import * as React from 'react';
 
-import { stringToInitials, stringToColor } from '../../utils';
+import { stringToColor, stringToInitials } from '../../utils';
 
 export default function BadgedAvatar(props) {
   const { name, avatar, badge, ...rest } = props;
@@ -32,6 +32,7 @@ export default function BadgedAvatar(props) {
           alt={badge.name}
           src={badge.avatar}
           sx={{ width: 32, height: 32 }}
+          children={stringToInitials(badge.name)}
         />
       }
     >
