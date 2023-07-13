@@ -141,11 +141,17 @@ docker-run: docker
 		$(BINARY_NAME)
 
 clean:
-	rm \
+	rm -rf \
 		$(BINARY_NAME) \
 		cover.out \
-		ui/build \
-		ui/public/policy.wasm
+		machine.db \
+		ui/build/ \
+		tmp/ \
+		bundle.tar.gz \
+		ui/src/context/wasm_exec.js \
+		ui/public/dndmachine.wasm \
+		ui/public/policy.wasm || true
+	docker-compose rm -f
 	docker volume rm $(BINARY_NAME)
 
 npm-install:
