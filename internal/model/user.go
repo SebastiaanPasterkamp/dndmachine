@@ -32,9 +32,10 @@ type UserRoles struct {
 // UserAttributes are a collection of non-primary fields stored in the config
 // column of the user table.
 type UserAttributes struct {
-	DCI   string `json:"dci,omitempty"`
-	Name  string `json:"name,omitempty"`
-	Theme string `json:"theme,omitempty"`
+	DCI    string `json:"dci,omitempty"`
+	Avatar string `json:"avatar,omitempty"`
+	Name   string `json:"name,omitempty"`
+	Theme  string `json:"theme,omitempty"`
 }
 
 // VerifyCredentials verifies the provided password against the encrypted user

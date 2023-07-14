@@ -1,18 +1,18 @@
-import * as React from 'react';
-import PropTypes from 'prop-types';
-import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
-import BackspaceIcon from '@mui/icons-material/Backspace'
-import CancelIcon from '@mui/icons-material/Cancel'
+import BackspaceIcon from '@mui/icons-material/Backspace';
+import CancelIcon from '@mui/icons-material/Cancel';
 import EditIcon from '@mui/icons-material/Edit';
-import Grid from '@mui/material/Grid';
-import OutlinedForm, { OutlinedInput, OutlinedSelect } from '../OutlinedForm';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import { PolicyButton } from '../ProtectedLink';
-import useFormHelper from '../../utils/formHelper';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import PropTypes from 'prop-types';
+import * as React from 'react';
 
+import useFormHelper from '../../utils/formHelper';
 import { maxLength, minLength, numeric, requiredString, validEmail } from '../../utils/validators';
-import { stringToInitials, stringToColor } from '../../utils';
+import BadgedAvatar from '../BadgedAvatar/BadgedAvatar';
+import OutlinedForm, { OutlinedFileUpload, OutlinedInput, OutlinedSelect } from '../OutlinedForm';
+import { PolicyButton } from '../ProtectedLink';
 
 const roles = [
   { id: 'player', name: 'Player' },
@@ -28,6 +28,7 @@ const themes = [
 
 const defaultUser = {
   username: "",
+  avatar: "",
   name: "",
   email: "",
   password: "",
@@ -73,14 +74,15 @@ export default function UserForm({ user, onClose, onDone }) {
   } = useFormHelper({ ...defaultUser, ...user }, validate, false)
 
   const handleCancel = async (e) => {
-    e.preventDefault();
+    if (e.preventDefault) e.preventDefault();
 
     resetForm();
     onClose();
   }
 
   const handleUpdate = async (e) => {
-    e.preventDefault();
+    if (e.preventDefault) e.preventDefault();
+
     const valid = await isValid();
     if (!valid) {
       return;
@@ -110,7 +112,8 @@ export default function UserForm({ user, onClose, onDone }) {
   }
 
   const handleCreate = async (e) => {
-    e.preventDefault();
+    if (e.preventDefault) e.preventDefault();
+
     const valid = await isValid();
     if (!valid) {
       return;
@@ -144,12 +147,9 @@ export default function UserForm({ user, onClose, onDone }) {
   return (
     <OutlinedForm onSubmit={values.id ? handleUpdate : handleCreate}>
       <div style={{ display: "flex", justifyContent: "center" }}>
-        <Avatar
-          sx={{
-            bgcolor: stringToColor(displayName),
-            width: 56, height: 56,
-          }}
-          children={stringToInitials(displayName)}
+        <BadgedAvatar
+          name={displayName}
+          avatar={values.avatar}
           aria-label="name"
           variant="rounded"
         />
@@ -157,15 +157,28 @@ export default function UserForm({ user, onClose, onDone }) {
 
       <Grid container>
         <Grid item xs={12} sm={6} sx={{ px: 1 }}>
-          <OutlinedInput
-            label="Username"
-            name="username"
-            required
-            value={values.username}
-            error={errors.username}
-            onChange={handleInputChange}
-            helper="Must be unique."
-          />
+          <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+            <OutlinedFileUpload
+              sx={{ width: 72, height: 72 }}
+              label="Avatar"
+              name="avatar"
+              title={values.name}
+              aria-label="Avatar"
+              value={values.avatar}
+              error={errors.avatar}
+              onChange={handleInputChange}
+            />
+
+            <OutlinedInput
+              label="Username"
+              name="username"
+              required
+              value={values.username}
+              error={errors.username}
+              onChange={handleInputChange}
+              helper="Must be unique."
+            />
+          </Box>
 
           <OutlinedInput
             label="Password"

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState } from 'react';
 
 export default function useFormHelper(initialValues, validate, validateOnChange = false) {
   const [values, setValues] = useState(initialValues);
@@ -26,7 +26,7 @@ export default function useFormHelper(initialValues, validate, validateOnChange 
   });
 
   const handleInputChange = async (e) => {
-    e.preventDefault();
+    if (e.preventDefault) e.preventDefault();
     const { name, value } = e.target;
 
     setValues((values) => ({

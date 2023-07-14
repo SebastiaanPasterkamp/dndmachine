@@ -1,18 +1,17 @@
-import * as React from 'react';
-import PropTypes from 'prop-types';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import AppBar from '@mui/material/AppBar';
-import Avatar from '@mui/material/Avatar';
-import { useCurrentUserContext } from '../../context/CurrentUserContext'
-import IconButton from '@mui/material/IconButton';
 import LogoutIcon from '@mui/icons-material/Logout';
-import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
-import ProtectedLink from '../ProtectedLink';
+import AppBar from '@mui/material/AppBar';
+import IconButton from '@mui/material/IconButton';
+import Menu from '@mui/material/Menu';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
+import PropTypes from 'prop-types';
+import * as React from 'react';
+import { useCurrentUserContext } from '../../context/CurrentUserContext';
+import ProtectedLink from '../ProtectedLink';
 
-import { stringToInitials, stringToColor } from '../../utils';
+import BadgedAvatar from '../BadgedAvatar/BadgedAvatar';
 
 async function logoutUser(credentials) {
   return fetch('/auth/logout', {
@@ -26,7 +25,7 @@ async function logoutUser(credentials) {
 
 export default function Header({ menuOpen, toggleMenu }) {
   const { user, setUser } = useCurrentUserContext();
-  const { name, username } = user || {};
+  const { name, avatar, username } = user || {};
   const displayName = name ? name : username;
 
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -73,11 +72,9 @@ export default function Header({ menuOpen, toggleMenu }) {
               onClick={handleMenu}
               color="inherit"
             >
-              <Avatar
-                sx={{
-                  bgcolor: stringToColor(displayName),
-                }}
-                children={stringToInitials(displayName)}
+              <BadgedAvatar
+                name={displayName}
+                avatar={avatar}
                 aria-label="name"
               />
             </IconButton>

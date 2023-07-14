@@ -1,28 +1,27 @@
-import * as React from 'react';
-import PropTypes from 'prop-types';
-import Avatar from '@mui/material/Avatar';
-import Card from '@mui/material/Card';
-import CardActions from '@mui/material/CardActions';
-import CardActionArea from '@mui/material/CardActionArea';
-import CardHeader from '@mui/material/CardHeader';
-import CardContent from '@mui/material/CardContent';
-import Chip from '@mui/material/Chip';
-import EmailIcon from '@mui/icons-material/Email';
+import { faWizardsOfTheCoast } from '@fortawesome/free-brands-svg-icons/faWizardsOfTheCoast';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import EmailIcon from '@mui/icons-material/Email';
 import GroupsIcon from '@mui/icons-material/Groups';
-import { Link } from 'react-router-dom'
+import Card from '@mui/material/Card';
+import CardActionArea from '@mui/material/CardActionArea';
+import CardActions from '@mui/material/CardActions';
+import CardContent from '@mui/material/CardContent';
+import CardHeader from '@mui/material/CardHeader';
+import Chip from '@mui/material/Chip';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import { PolicyLink } from '../ProtectedLink';
 import Skeleton from '@mui/material/Skeleton';
-import { faWizardsOfTheCoast } from '@fortawesome/free-brands-svg-icons/faWizardsOfTheCoast';
+import PropTypes from 'prop-types';
+import * as React from 'react';
+import { Link } from 'react-router-dom';
+import { PolicyLink } from '../ProtectedLink';
 
-import { stringToInitials, stringToColor } from '../../utils';
+import BadgedAvatar from '../BadgedAvatar/BadgedAvatar';
 
 export default function UserCard(props) {
-  const { id, username, name, email, role, dci } = props;
+  const { id, username, name, avatar, email, role, dci } = props;
   const loading = id === undefined;
   const displayName = name ? name : username;
 
@@ -45,11 +44,9 @@ export default function UserCard(props) {
             loading ? (
               <Skeleton animation="wave" variant="circular" width={40} height={40} />
             ) : (
-              <Avatar
-                sx={{
-                  bgcolor: stringToColor(displayName),
-                }}
-                children={stringToInitials(displayName)}
+              <BadgedAvatar
+                name={displayName}
+                avatar={avatar}
                 aria-label="name"
               />
             )
@@ -148,6 +145,7 @@ UserCard.propTypes = {
   id: PropTypes.number,
   username: PropTypes.string,
   name: PropTypes.string,
+  avatar: PropTypes.string,
   email: PropTypes.string,
   role: PropTypes.arrayOf(
     PropTypes.string
@@ -156,5 +154,6 @@ UserCard.propTypes = {
 };
 
 UserCard.defaultProps = {
+  avatar: "",
   role: [],
 };
