@@ -1,11 +1,11 @@
-import React from 'react'
 import PropTypes from 'prop-types';
+import React from 'react';
 
 import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
 import FormHelperText from '@mui/material/FormHelperText';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
 
 export default function OutlinedSelect({ helper, label, options, error = null, multiple = false, allowEmpty = false, ...rest }) {
   return (
@@ -13,7 +13,7 @@ export default function OutlinedSelect({ helper, label, options, error = null, m
       variant="outlined"
       fullWidth
       margin="normal"
-      {...(error && { error: true })}
+      error={!!error}
     >
       <InputLabel>{label}</InputLabel>
       <Select {...rest} multiple={multiple}>

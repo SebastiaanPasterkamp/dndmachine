@@ -1,10 +1,10 @@
-import React from 'react'
-import PropTypes from 'prop-types';
-import InputAdornment from '@mui/material/InputAdornment';
-import TextField from '@mui/material/TextField';
-import IconButton from '@mui/material/IconButton';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import TextField from '@mui/material/TextField';
+import PropTypes from 'prop-types';
+import React from 'react';
 
 export default function OutlinedInput({ helper, name, value, onChange, type, unit, error, ...rest }) {
   const [state, setState] = React.useState({ text: value, valid: true });
@@ -62,7 +62,7 @@ export default function OutlinedInput({ helper, name, value, onChange, type, uni
           </InputAdornment>
         )
       }}
-      error={!state.valid || error}
+      error={!state.valid || !!error}
     />
   )
 }
