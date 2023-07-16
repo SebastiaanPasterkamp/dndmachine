@@ -1,12 +1,14 @@
-import { act, render, screen, waitFor } from '@testing-library/react';
-import { Route, Routes, MemoryRouter } from 'react-router-dom';
-import { rest } from 'msw'
-import { setupServer } from 'msw/node'
-import fs from 'fs';
-import path from 'path';
 import opa from "@open-policy-agent/opa-wasm";
+import { act, render, screen, waitFor } from '@testing-library/react';
+import fs from 'fs';
+import { rest } from 'msw';
+import { setupServer } from 'msw/node';
+import path from 'path';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
 import { MockUserContext } from '../../context/CurrentUserContext';
+import { MockObjectsContext, useObjectsContext } from "../../context/ObjectsContext";
+import PolicyContext from "../../context/PolicyContext";
 import { MockPolicyEngineContext } from '../../context/PolicyEngineContext';
 import UserEdit from './UserEdit';
 
@@ -45,14 +47,24 @@ test('renders UserEdit to modify self', async () => {
         role: ["player"],
         name: "player",
       }}>
-        <MemoryRouter initialEntries={['/user/2/edit']} >
-          <Routes>
-            <Route
-              path='/user/:id/edit'
-              element={<UserEdit />}
-            />
-          </Routes>
-        </MemoryRouter>
+        <MockObjectsContext
+          types={['user']}
+          user={{
+            1: { id: 1, role: ["admin"], name: "admin" },
+            2: { id: 2, role: ["player"], name: "player" },
+          }}
+        >
+          <PolicyContext useContext={useObjectsContext} query={`authz/user/allow`}>
+            <MemoryRouter initialEntries={['/user/2/edit']} >
+              <Routes>
+                <Route
+                  path='/user/:id/edit'
+                  element={<UserEdit />}
+                />
+              </Routes>
+            </MemoryRouter>
+          </PolicyContext>
+        </MockObjectsContext>
       </MockUserContext>
     </MockPolicyEngineContext>
   ));
@@ -75,14 +87,24 @@ test('renders UserEdit to modify as Admin', async () => {
         role: ["admin"],
         username: "admin",
       }}>
-        <MemoryRouter initialEntries={['/user/2/edit']} >
-          <Routes>
-            <Route
-              path='/user/:id/edit'
-              element={<UserEdit />}
-            />
-          </Routes>
-        </MemoryRouter>
+        <MockObjectsContext
+          types={['user']}
+          user={{
+            1: { id: 1, role: ["admin"], name: "admin" },
+            2: { id: 2, role: ["player"], name: "player" },
+          }}
+        >
+          <PolicyContext useContext={useObjectsContext} query={`authz/user/allow`}>
+            <MemoryRouter initialEntries={['/user/2/edit']} >
+              <Routes>
+                <Route
+                  path='/user/:id/edit'
+                  element={<UserEdit />}
+                />
+              </Routes>
+            </MemoryRouter>
+          </PolicyContext>
+        </MockObjectsContext>
       </MockUserContext>
     </MockPolicyEngineContext>
   ));

@@ -1,27 +1,13 @@
+import opa from "@open-policy-agent/opa-wasm";
 import { act, render, screen, waitFor } from '@testing-library/react';
-import { Route, Routes, MemoryRouter } from 'react-router-dom';
-import { rest } from 'msw'
-import { setupServer } from 'msw/node'
 import fs from 'fs';
 import path from 'path';
-import opa from "@open-policy-agent/opa-wasm";
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
 import { MockUserContext } from '../../context/CurrentUserContext';
+import PolicyContext from "../../context/PolicyContext";
 import { MockPolicyEngineContext } from '../../context/PolicyEngineContext';
 import UserCreate from './UserCreate';
-
-const server = setupServer(
-  rest.get('/api/user', (_, res, ctx) => res(ctx.json({
-    results: [
-      { id: 1, role: ["admin"], name: "admin" },
-      { id: 2, role: ["player"], name: "player" },
-    ]
-  }))),
-)
-
-beforeAll(() => server.listen())
-afterEach(() => server.resetHandlers())
-afterAll(() => server.close())
 
 test('renders UserCreate', async () => {
   const wasmPath = path.resolve(__dirname, '../../testdata/policy.wasm');
@@ -35,16 +21,18 @@ test('renders UserCreate', async () => {
         role: ["admin"],
         name: "admin",
       }}>
-        <MemoryRouter initialEntries={['/user/new']} >
-          <Routes>
-            <Route
-              path='/user/new'
-              element={<UserCreate />}
-            />
-          </Routes>
-        </MemoryRouter>
+        <PolicyContext query={`authz/user/allow`}>
+          <MemoryRouter initialEntries={['/user/new']} >
+            <Routes>
+              <Route
+                path='/user/new'
+                element={<UserCreate />}
+              />
+            </Routes>
+          </MemoryRouter>
+        </PolicyContext>
       </MockUserContext>
-    </MockPolicyEngineContext>
+    </MockPolicyEngineContext >
   ));
 
   await waitFor(() => screen.getByText('Create'))
