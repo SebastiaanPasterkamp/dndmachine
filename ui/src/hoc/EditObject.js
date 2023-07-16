@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
-import ObjectView from '../partials/ObjectView';
-import ObjectsContext, { Objects, useObjectsContext } from '../context/ObjectsContext';
-import PolicyContext from '../context/PolicyContext';
 
-export default function EditObject({ type, form: Form, context = [] }) {
+import { useObjectsContext } from '../context/ObjectsContext';
+import ObjectView from '../partials/ObjectView';
+
+export default function EditObject({ type, form: Form }) {
 
   const ChangeHandler = function ({ [type]: object }) {
     const navigate = useNavigate();
@@ -34,19 +34,11 @@ export default function EditObject({ type, form: Form, context = [] }) {
 
   return function () {
     return (
-      <ObjectsContext types={[type, ...context]}>
-        <Objects.Consumer>
-          {(ctx) => (
-            <PolicyContext data={ctx} query={`authz/${type}/allow`}>
-              <ObjectView
-                type={type}
-                propName={type}
-                component={ChangeHandler}
-              />
-            </PolicyContext>
-          )}
-        </Objects.Consumer>
-      </ObjectsContext>
+      <ObjectView
+        type={type}
+        propName={type}
+        component={ChangeHandler}
+      />
     );
   }
 };

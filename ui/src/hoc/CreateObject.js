@@ -1,16 +1,16 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
-import ObjectsContext, { Objects, useObjectsContext } from '../context/ObjectsContext';
-import PolicyContext from '../context/PolicyContext';
 
-export default function CreateObject({ type, form: Form, context = [] }) {
+import { useObjectsContext } from '../context/ObjectsContext';
+
+export default function CreateObject({ type, form: Form }) {
 
   const CreationHandler = function () {
     const navigate = useNavigate();
     const { updateObject } = useObjectsContext();
 
     const handleClose = (object) => {
-      if (object) {
+      if (object?.id !== undefined) {
         navigate(`/${type}/${object.id}`);
       } else {
         navigate(`/${type}`);
@@ -32,15 +32,7 @@ export default function CreateObject({ type, form: Form, context = [] }) {
 
   return function () {
     return (
-      <ObjectsContext types={context}>
-        <Objects.Consumer>
-          {(ctx) => (
-            <PolicyContext data={ctx} query={`authz/${type}/allow`}>
-              <CreationHandler />
-            </PolicyContext>
-          )}
-        </Objects.Consumer>
-      </ObjectsContext>
+      <CreationHandler />
     );
   }
 };
