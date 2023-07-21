@@ -45,6 +45,11 @@ func Mount(db database.Instance, e *policy.Enforcer) http.Handler {
 		op := database.Operator{
 			DB:    db,
 			Table: "character",
+			SelectJoin: []string{
+				"LEFT JOIN party_characters AS party1 ON (character.id=party1.character_id)",
+				"LEFT JOIN party_characters AS party2 ON (party2.party_id=party1.party_id and party2.character_id!=character.id)",
+				"LEFT JOIN character AS member ON (member.id=party2.character_id)",
+			},
 			Create: func() model.Persistable {
 				return &character.Object{}
 			},
@@ -57,7 +62,7 @@ func Mount(db database.Instance, e *policy.Enforcer) http.Handler {
 
 		r.Get("/", ListObjectsHandler(op))
 		r.Post("/", PostObjectHandler(op))
-		r.Get("/{objID:[0-9]+}$", GetObjectHandler(op))
+		r.Get("/{objID:[0-9]+}", GetObjectHandler(op))
 		r.Patch("/{objID:[0-9]+}", PatchObjectHandler(op))
 	})
 

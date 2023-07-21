@@ -23,43 +23,51 @@ func TestMount(t *testing.T) {
 
 	testCases := []struct {
 		name             string
+		sql              string
 		method           string
 		path             string
 		input            string
-		user             *model.User
+		currentUser      *model.User
 		expectedStatus   int
 		expectedResponse string
 	}{
-		{"Get user as user works", "GET", "/api/user/1", "",
+		{"Get user as user works", "", "GET", "/api/user/1", "",
 			&model.User{ID: 1, UserRoles: model.UserRoles{Role: []string{"admin"}}},
 			http.StatusOK, "testdata/get.json"},
-		{"Get user as anonymous is denied", "GET", "/api/user/1", "",
+		{"Get user as anonymous is denied", "", "GET", "/api/user/1", "",
 			nil,
 			http.StatusUnauthorized, ""},
-		{"Get user as other gives 404", "GET", "/api/user/1", "",
+		{"Get user as other gives 404", "", "GET", "/api/user/1", "",
 			&model.User{ID: 2},
 			http.StatusNotFound, ""},
-		{"List users as admin works", "GET", "/api/user", "",
+		{"List users as admin works", "", "GET", "/api/user", "",
 			&model.User{ID: 1, UserRoles: model.UserRoles{Role: []string{"admin"}}},
 			http.StatusOK, "testdata/list.json"},
-		{"List users as non-admin extremely limited", "GET", "/api/user", "",
+		{"List users as non-admin extremely limited", "", "GET", "/api/user", "",
 			&model.User{ID: 2, UserRoles: model.UserRoles{Role: []string{"dm"}}},
 			http.StatusOK, "testdata/list-empty.json"},
-		{"Get unknown gives 404", "GET", "/api/foobar", "",
+		{"Get unknown gives 404", "", "GET", "/api/foobar", "",
 			&model.User{ID: 1, UserRoles: model.UserRoles{Role: []string{"admin"}}},
 			http.StatusNotFound, ""},
-		{"Post user as admin works", "POST", "/api/user", "testdata/post.json",
+		{"Post user as admin works", "", "POST", "/api/user", "testdata/post.json",
 			&model.User{ID: 1, UserRoles: model.UserRoles{Role: []string{"admin"}}},
 			http.StatusOK, ""},
-		{"Post user as non-admin denied", "POST", "/api/user", "testdata/post.json",
+		{"Post user as non-admin denied", "", "POST", "/api/user", "testdata/post.json",
 			&model.User{ID: 2, UserRoles: model.UserRoles{Role: []string{"dm"}}},
 			http.StatusUnauthorized, ""},
+
+		{"Get character as player works", "testdata/get-character.sql", "GET", "/api/character/20", "",
+			&model.User{ID: 2, UserRoles: model.UserRoles{Role: []string{"player"}}},
+			http.StatusOK, "testdata/get-character.json"},
+		{"Get characters as player works", "testdata/get-character.sql", "GET", "/api/character", "",
+			&model.User{ID: 2, UserRoles: model.UserRoles{Role: []string{"player"}}},
+			http.StatusOK, "testdata/get-characters.json"},
 	}
 
 	for _, tt := range testCases {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			db, err := mockDatabase()
+			db, err := mockDatabase(tt.sql)
 			if err != nil {
 				t.Fatalf("failed to create mock db: %v", err)
 			}
@@ -81,7 +89,7 @@ func TestMount(t *testing.T) {
 			r := httptest.NewRequest(tt.method, tt.path, src)
 
 			ctx := r.Context()
-			ctx = context.WithValue(ctx, auth.CurrentUser, tt.user)
+			ctx = context.WithValue(ctx, auth.CurrentUser, tt.currentUser)
 			r = r.WithContext(ctx)
 
 			mux.ServeHTTP(w, r)

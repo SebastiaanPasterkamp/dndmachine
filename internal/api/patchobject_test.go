@@ -55,7 +55,7 @@ func TestPatchObjectHandler(t *testing.T) {
 	for _, tt := range testCases {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			db, err := mockDatabase()
+			db, err := mockDatabase("")
 			if err != nil {
 				t.Fatalf("failed to create mock db: %v", err)
 			}

@@ -26,7 +26,7 @@ func TestPostObjectHandler(t *testing.T) {
 		Clause           string
 		Values           []interface{}
 		expectedStatus   int
-		verifyID         int64
+		expectedID       int64
 		expectedResult   string
 		expectedResponse string
 	}{
@@ -51,7 +51,7 @@ func TestPostObjectHandler(t *testing.T) {
 	for _, tt := range testCases {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			db, err := mockDatabase()
+			db, err := mockDatabase("")
 			if err != nil {
 				t.Fatalf("failed to create mock db: %v", err)
 			}
@@ -102,36 +102,38 @@ func TestPostObjectHandler(t *testing.T) {
 					tt.expectedResponse, w.Body.String())
 			}
 
-			if tt.verifyID > 0 {
-				obj, err := op.GetByID(ctx, verifyColumns, tt.verifyID)
-				if err != nil {
-					t.Fatalf("failed to retrieve verify object: %v", err)
-				}
+			if tt.expectedID <= 0 {
+				return
+			}
 
-				user, ok := obj.(*model.User)
-				if !ok {
-					t.Fatalf("obj is not of type %T, but %T", user, obj)
-				}
+			obj, err := op.GetByID(ctx, verifyColumns, tt.expectedID)
+			if err != nil {
+				t.Fatalf("failed to retrieve verify object: %v", err)
+			}
 
-				input, err := os.Open(tt.expectedResult)
-				if err != nil {
-					t.Fatalf("failed to open expected response: %v", err)
-				}
-				defer func() {
-					_ = payload.Close()
-				}()
+			user, ok := obj.(*model.User)
+			if !ok {
+				t.Fatalf("obj is not of type %T, but %T", user, obj)
+			}
 
-				expected, err := op.Read(input)
+			input, err := os.Open(tt.expectedResult)
+			if err != nil {
+				t.Fatalf("failed to open expected response: %v", err)
+			}
+			defer func() {
+				_ = payload.Close()
+			}()
 
-				if user.Password == "" || len(user.Password) < 7 || user.Password[:7] != "$2a$10$" {
-					t.Fatalf("failed to open expected response: %v", err)
-				}
-				user.Password = ""
+			expected, err := op.Read(input)
 
-				if !reflect.DeepEqual(expected, user) {
-					t.Errorf("Unexpected object stored. Expected %T %v, got %T %v.",
-						expected, expected, user, user)
-				}
+			if user.Password == "" || len(user.Password) < 7 || user.Password[:7] != "$2a$10$" {
+				t.Fatalf("failed to open expected response: %v", err)
+			}
+			user.Password = ""
+
+			if !reflect.DeepEqual(expected, user) {
+				t.Errorf("Unexpected object stored. Expected %T %v, got %T %v.",
+					expected, expected, user, user)
 			}
 		})
 	}
