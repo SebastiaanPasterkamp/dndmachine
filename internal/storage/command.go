@@ -17,7 +17,9 @@ func (s *Instance) Command(db database.Instance) error {
 			return fmt.Errorf("failed to list storage version: %w", err)
 		}
 	case s.Import != nil:
-		return fmt.Errorf("Not yet implemented.")
+		if err := s.import_(db, *s.Import); err != nil {
+			return fmt.Errorf("failed to import: %w", err)
+		}
 	case s.Export != nil:
 		return fmt.Errorf("Not yet implemented.")
 	default:

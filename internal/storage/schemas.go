@@ -181,8 +181,8 @@ func ListSchemaDir(dir string) ([]*SchemaChange, error) {
 
 		schema, err := NewSchemaChange(filepath.Join(dir, file.Name()))
 		if err != nil {
-			return schemas, fmt.Errorf("failed to load schema %q: %w",
-				file.Name(), err)
+			return schemas, fmt.Errorf("%w: %q: %w",
+				ErrSchemaReadFailed, file.Name(), err)
 		}
 
 		schemas = append(schemas, &schema)

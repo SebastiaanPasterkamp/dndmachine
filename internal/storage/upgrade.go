@@ -16,17 +16,17 @@ func (s *Instance) upgrade(db database.Instance, cfg CmdUpgrade) error {
 
 	schemas, err := ListSchemaDir(s.Path)
 	if err != nil {
-		return fmt.Errorf("failed to list available schema changes: %w", err)
+		return fmt.Errorf("%w: %w", ErrListingChangesFailed, err)
 	}
 
 	tx, err := db.Pool.BeginTx(ctx, nil)
 	if err != nil {
-		return fmt.Errorf("failed to start a transaction: %w", err)
+		return fmt.Errorf("%w: %w", ErrTransactionFailed, err)
 	}
 
 	if err := initialize(tx); err != nil {
 		_ = tx.Rollback()
-		return fmt.Errorf("failed to start schema versioning: %w", err)
+		return fmt.Errorf("%w: %w", ErrInitVersioning, err)
 	}
 
 	newChanges := false
@@ -40,29 +40,29 @@ func (s *Instance) upgrade(db database.Instance, cfg CmdUpgrade) error {
 			if newChanges && cfg.RejectOutOfOrder {
 				_ = tx.Rollback()
 
-				return fmt.Errorf("%w: %s %q", ErrOutOfOrder,
+				return fmt.Errorf("%w: %q from %q", ErrOutOfOrder,
 					schema.Version.String(), schema.Path)
 			}
 		case errors.Is(err, ErrNotApplied):
 			r, err := schema.Reader()
 			if err != nil {
-				return fmt.Errorf("failed to read schema %s %q: %w",
-					schema.Version.String(), schema.Path, err)
+				return fmt.Errorf("%w: %q from %q: %w",
+					ErrSchemaReadFailed, schema.Version.String(), schema.Path, err)
 			}
 
 			err = database.ImportToDB(tx, r)
 			if err != nil {
 				_ = tx.Rollback()
 
-				return fmt.Errorf("failed to apply schema %s %q: %w",
-					schema.Version.String(), schema.Path, err)
+				return fmt.Errorf("%w: %q from %q: %w",
+					ErrSchemaApplyFailed, schema.Version.String(), schema.Path, err)
 			}
 
 			if _, err := schema.register(tx); err != nil {
 				_ = tx.Rollback()
 
-				return fmt.Errorf("failed to record having applied schema %s %q: %w",
-					schema.Version.String(), schema.Path, err)
+				return fmt.Errorf("%w: %q from %q: %w",
+					ErrSchemaRecordingFailed, schema.Version.String(), schema.Path, err)
 			}
 
 			log.Printf("🗸 %s %q : %q\n", schema.Version, schema.Path, schema.Description)
@@ -71,13 +71,13 @@ func (s *Instance) upgrade(db database.Instance, cfg CmdUpgrade) error {
 		default:
 			_ = tx.Rollback()
 
-			return fmt.Errorf("cannot determine if schema %s %q has already been applied: %w",
-				schema.Version.String(), schema.Path, err)
+			return fmt.Errorf("%w: %q from %q: %w",
+				ErrSchemaUnknownStatus, schema.Version.String(), schema.Path, err)
 		}
 	}
 
 	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("failed to commit version upgrades: %w", err)
+		return fmt.Errorf("%w: %w", ErrFailedCommit, err)
 	}
 
 	userDB := database.Operator{
@@ -94,7 +94,7 @@ func (s *Instance) upgrade(db database.Instance, cfg CmdUpgrade) error {
 	}
 
 	if err := userDB.Migrate(ctx); err != nil {
-		return fmt.Errorf("failed to upgrade user modules: %w", err)
+		return fmt.Errorf("%w %q: %w", ErrMigrationFailed, "user", err)
 	}
 
 	equipmentDB := database.Operator{
@@ -111,7 +111,7 @@ func (s *Instance) upgrade(db database.Instance, cfg CmdUpgrade) error {
 	}
 
 	if err := equipmentDB.Migrate(ctx); err != nil {
-		return fmt.Errorf("failed to upgrade equipment modules: %w", err)
+		return fmt.Errorf("%w %q: %w", ErrMigrationFailed, "equipment", err)
 	}
 
 	return nil

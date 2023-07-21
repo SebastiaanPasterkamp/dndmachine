@@ -19,21 +19,24 @@ func TestUpgradeCommand(t *testing.T) {
 		args          storage.CmdUpgrade
 		expectedError error
 		workingQuery  string
+		failingQuery  string
 	}{
 		{"Good", "testdata/good_schemas", "", storage.CmdUpgrade{},
-			nil, "SELECT count(*) FROM user"},
+			nil, "SELECT count(*) FROM user", ""},
 		{"Out of order allowed", "testdata/good_schemas", "testdata/good_schemas/0.0.3.unrelated.sql", storage.CmdUpgrade{},
-			nil, "SELECT count(*) FROM user"},
+			nil, "SELECT count(*) FROM user", ""},
 		{"Out of order rejected", "testdata/good_schemas", "testdata/good_schemas/0.0.3.unrelated.sql", storage.CmdUpgrade{RejectOutOfOrder: true},
-			storage.ErrOutOfOrder, ""},
+			storage.ErrOutOfOrder, "", ""},
 		{"Not a directory", "testdata/nonexistent", "", storage.CmdUpgrade{},
-			os.ErrNotExist, ""},
+			os.ErrNotExist, "", ""},
 		{"Bad version", "testdata/bad_version", "", storage.CmdUpgrade{},
-			storage.ErrInvalidVersion, ""},
+			storage.ErrInvalidVersion, "", ""},
 		{"Missing header", "testdata/missing_header", "", storage.CmdUpgrade{},
-			storage.ErrMissingSchemaDescription, ""},
+			storage.ErrMissingSchemaDescription, "", ""},
 		{"Real schema", "../../schema", "", storage.CmdUpgrade{},
-			nil, "SELECT count(*) FROM user"},
+			nil, "SELECT count(*) FROM user", ""},
+		{"Corrupt schema", "testdata/corrupt_sql", "", storage.CmdUpgrade{},
+			storage.ErrSchemaApplyFailed, "", "SELECT count(*) FROM user"},
 	}
 
 	for _, tt := range testCases {
@@ -78,9 +81,15 @@ func TestUpgradeCommand(t *testing.T) {
 					tt.expectedError, err)
 			}
 
-			if tt.expectedError == nil {
+			if tt.workingQuery != "" {
 				if _, err = db.Pool.Exec(tt.workingQuery); err != nil {
 					t.Errorf("Unexpected error running %q: %v", tt.workingQuery, err)
+				}
+			}
+
+			if tt.failingQuery != "" {
+				if _, err = db.Pool.Exec(tt.failingQuery); err == nil {
+					t.Errorf("Expected error running %q, got nil", tt.failingQuery)
 				}
 			}
 		})

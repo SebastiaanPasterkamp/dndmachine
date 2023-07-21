@@ -1,4 +1,4 @@
--- Don't even bother reading this
+-- First schema file
 
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user` (
@@ -7,5 +7,4 @@ CREATE TABLE `user` (
 
 DROP TABLE IF EXISTS `equipment`;
 CREATE TABLE `equipment` (
-  `id` INTEGER PRIMARY KEY AUTOINCREMENT
-);
+-- Truncated...
