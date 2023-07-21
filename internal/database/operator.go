@@ -20,14 +20,19 @@ func (o Operator) GetOneByQuery(ctx context.Context, columns []string, clause st
 	var query strings.Builder
 
 	columns = append(columns, "id")
-	fmt.Fprintf(&query, "SELECT %s FROM %s", columnSQL(columns), o.Table)
+	fmt.Fprintf(&query, "SELECT %s FROM %s",
+		selectSQL(o.Table, columns), o.Table)
+	for _, join := range o.SelectJoin {
+		query.WriteByte(' ')
+		query.WriteString(join)
+	}
 	if clause != "" {
 		fmt.Fprintf(&query, " WHERE %s", clause)
 	}
 
 	stmt, err := o.DB.Pool.PrepareContext(ctx, query.String())
 	if err != nil {
-		return nil, fmt.Errorf("%w: failed to prepare %q: %v",
+		return nil, fmt.Errorf("%w: failed to prepare %q: %w",
 			ErrQueryFailed, query.String(), err)
 	}
 	defer stmt.Close()
@@ -39,9 +44,11 @@ func (o Operator) GetOneByQuery(ctx context.Context, columns []string, clause st
 	err = obj.UpdateFromScanner(r, columns)
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
-		return nil, fmt.Errorf("select failed: %w: Object %T not found", ErrNotFound, obj)
+		return nil, fmt.Errorf("select failed: %w: Object %T using %q not found",
+			ErrNotFound, obj, query.String())
 	case err != nil:
-		return nil, fmt.Errorf("%w: cannot select %T from result: %v", ErrQueryFailed, obj, err)
+		return nil, fmt.Errorf("%w: cannot select %T from %q: %w",
+			ErrQueryFailed, obj, query.String(), err)
 	}
 
 	return obj, nil
@@ -55,14 +62,19 @@ func (o Operator) GetByQuery(ctx context.Context, columns []string, clause strin
 	)
 
 	columns = append(columns, "id")
-	fmt.Fprintf(&query, "SELECT %s FROM %s", columnSQL(columns), o.Table)
+	fmt.Fprintf(&query, "SELECT %s FROM %s",
+		selectSQL(o.Table, columns), o.Table)
+	for _, join := range o.SelectJoin {
+		query.WriteByte(' ')
+		query.WriteString(join)
+	}
 	if clause != "" {
 		fmt.Fprintf(&query, " WHERE %s", clause)
 	}
 
 	stmt, err := o.DB.Pool.PrepareContext(ctx, query.String())
 	if err != nil {
-		return objs, fmt.Errorf("%w: failed to prepare %q: %v",
+		return objs, fmt.Errorf("%w: failed to prepare %q: %w",
 			ErrQueryFailed, query.String(), err)
 	}
 	defer stmt.Close()
@@ -73,7 +85,8 @@ func (o Operator) GetByQuery(ctx context.Context, columns []string, clause strin
 		case errors.Is(err, sql.ErrNoRows):
 			return objs, fmt.Errorf("select failed: %w", ErrNotFound)
 		case err != nil:
-			return nil, fmt.Errorf("%w: cannot select from result: %v", ErrQueryFailed, err)
+			return nil, fmt.Errorf("%w: cannot select from %q: %w",
+				ErrQueryFailed, query.String(), err)
 		}
 	}
 	defer r.Close()
@@ -85,9 +98,11 @@ func (o Operator) GetByQuery(ctx context.Context, columns []string, clause strin
 		if err != nil {
 			switch {
 			case errors.Is(err, sql.ErrNoRows):
-				return objs, fmt.Errorf("select failed: %w: Object %T not found", ErrNotFound, obj)
+				return objs, fmt.Errorf("select failed: %w: Object %T using %q not found",
+					ErrNotFound, obj, query.String())
 			case err != nil:
-				return nil, fmt.Errorf("%w: cannot select %T from result: %v", ErrQueryFailed, obj, err)
+				return nil, fmt.Errorf("%w: cannot select %T from %q: %w",
+					ErrQueryFailed, obj, query.String(), err)
 			}
 		}
 		objs = append(objs, obj)
@@ -101,34 +116,35 @@ func (o Operator) GetByQuery(ctx context.Context, columns []string, clause strin
 func (o Operator) InsertByQuery(ctx context.Context, obj model.Persistable, columns []string, clause string, args ...interface{}) (int64, error) {
 	var query strings.Builder
 	fmt.Fprintf(&query, "INSERT INTO %s (%s) VALUES (%s)",
-		o.Table, columnSQL(columns), placeholderSQL(columns))
+		o.Table, insertSQL(columns), placeholderSQL(columns))
 	if clause != "" {
 		fmt.Fprintf(&query, " WHERE %s", clause)
 	}
 
 	stmt, err := o.DB.Pool.PrepareContext(ctx, query.String())
 	if err != nil {
-		return 0, fmt.Errorf("%w: failed to prepare %q: %v",
+		return 0, fmt.Errorf("%w: failed to prepare %q: %w",
 			ErrQueryFailed, query.String(), err)
 	}
 	defer stmt.Close()
 
 	fields, err := obj.ExtractFields(columns)
 	if err != nil {
-		return 0, fmt.Errorf("failed to get fields %q from %T: %w", columns, obj, err)
+		return 0, fmt.Errorf("failed to get fields %q from %T: %w",
+			columns, obj, err)
 	}
 	fields = append(fields, args...)
 
 	r, err := stmt.ExecContext(ctx, fields...)
 	if err != nil {
-		return 0, fmt.Errorf("%w: cannot insert object %T: %v",
-			ErrQueryFailed, obj, err)
+		return 0, fmt.Errorf("%w: cannot insert object %T using %q: %w",
+			ErrQueryFailed, obj, query.String(), err)
 	}
 
 	id, err := r.LastInsertId()
 	if err != nil {
-		return 0, fmt.Errorf("%w: failed to get ID after insert of %T: %v",
-			ErrQueryFailed, obj, err)
+		return 0, fmt.Errorf("%w: failed to get ID after insert of %T using %q: %w",
+			ErrQueryFailed, obj, query.String(), err)
 	}
 
 	return id, nil
@@ -137,41 +153,47 @@ func (o Operator) InsertByQuery(ctx context.Context, obj model.Persistable, colu
 // UpdateByQuery updates one model in the database, and returns the affected id.
 func (o Operator) UpdateByQuery(ctx context.Context, obj model.Persistable, columns []string, clause string, args ...interface{}) (int64, error) {
 	var query strings.Builder
-	fmt.Fprintf(&query, "UPDATE %s SET %s", o.Table, updateSQL(columns))
+	fmt.Fprintf(&query, "UPDATE %s SET %s",
+		o.Table, updateSQL(columns))
 	if clause != "" {
 		fmt.Fprintf(&query, " WHERE %s", clause)
 	}
 
 	stmt, err := o.DB.Pool.PrepareContext(ctx, query.String())
 	if err != nil {
-		return obj.GetID(), fmt.Errorf("%w: failed to prepare %q: %v",
+		return obj.GetID(), fmt.Errorf("%w: failed to prepare %q: %w",
 			ErrQueryFailed, query.String(), err)
 	}
 	defer stmt.Close()
 
 	fields, err := obj.ExtractFields(columns)
 	if err != nil {
-		return 0, fmt.Errorf("failed to get fields %q from %T: %w", columns, obj, err)
+		return 0, fmt.Errorf("failed to get fields %q from %T: %w",
+			columns, obj, err)
 	}
 	fields = append(fields, args...)
 
 	r, err := stmt.ExecContext(ctx, fields...)
 	if err != nil {
-		return obj.GetID(), fmt.Errorf("failed to update object %T: %w", obj, err)
+		return obj.GetID(), fmt.Errorf("failed to update object %T using %q: %w",
+			obj, query.String(), err)
 	}
 
 	rows, err := r.RowsAffected()
 	if err != nil {
-		return obj.GetID(), fmt.Errorf("failed to get results for update of %T: %w", obj, err)
+		return obj.GetID(), fmt.Errorf("failed to get results for update of %T using %q: %w",
+			obj, query.String(), err)
 	}
 
 	switch rows {
 	case 0:
-		return obj.GetID(), fmt.Errorf("update failed: %v: Object %T not found", ErrNotFound, obj)
+		return obj.GetID(), fmt.Errorf("update failed: %v: Object %T not found",
+			ErrNotFound, obj)
 	case 1:
 		// pass
 	default:
-		return obj.GetID(), fmt.Errorf("unexpected number of updates of %T: %d", obj, rows)
+		return obj.GetID(), fmt.Errorf("unexpected number of updates of %T using %q: %d",
+			obj, query.String(), rows)
 	}
 
 	return obj.GetID(), nil
@@ -191,7 +213,7 @@ func (o Operator) Migrate(ctx context.Context) error {
 
 	_select, err := tx.PrepareContext(ctx, query)
 	if err != nil {
-		return fmt.Errorf("%w: failed to prepare %q: %v",
+		return fmt.Errorf("%w: failed to prepare %q: %w",
 			ErrQueryFailed, query, err)
 	}
 	defer _select.Close()
@@ -202,22 +224,25 @@ func (o Operator) Migrate(ctx context.Context) error {
 		case errors.Is(err, sql.ErrNoRows):
 			return fmt.Errorf("select failed: %w", ErrNotFound)
 		case err != nil:
-			return fmt.Errorf("%w: cannot select from result: %v", ErrQueryFailed, err)
+			return fmt.Errorf("%w: cannot select from %q: %w",
+				ErrQueryFailed, query, err)
 		}
 	}
 	defer r.Close()
 
 	columns, err := r.Columns()
 	if err != nil {
-		return fmt.Errorf("%w: cannot get columns from result: %v", ErrQueryFailed, err)
+		return fmt.Errorf("%w: cannot get columns from %q: %w",
+			ErrQueryFailed, query, err)
 	}
 
 	updates := removeField(columns, "id")
-	query = fmt.Sprintf("UPDATE %s SET %s WHERE id = ?", o.Table, updateSQL(updates))
+	query = fmt.Sprintf("UPDATE %s SET %s WHERE id = ?",
+		o.Table, updateSQL(updates))
 
 	_update, err := tx.PrepareContext(ctx, query)
 	if err != nil {
-		return fmt.Errorf("%w: failed to prepare %q: %v",
+		return fmt.Errorf("%w: failed to prepare %q: %w",
 			ErrQueryFailed, query, err)
 	}
 	defer _update.Close()
@@ -235,13 +260,15 @@ func (o Operator) Migrate(ctx context.Context) error {
 
 		fields, err := obj.ExtractFields(updates)
 		if err != nil {
-			return fmt.Errorf("failed to get fields %q from %T: %w", columns, obj, err)
+			return fmt.Errorf("failed to get fields %q from %T: %w",
+				columns, obj, err)
 		}
 		fields = append(fields, obj.GetID())
 
 		_, err = _update.ExecContext(ctx, fields...)
 		if err != nil {
-			return fmt.Errorf("failed to update object %T: %w", obj, err)
+			return fmt.Errorf("failed to update object %T using %q: %w",
+				obj, query, err)
 		}
 	}
 
@@ -253,12 +280,24 @@ func (o Operator) Migrate(ctx context.Context) error {
 	return nil
 }
 
-func columnSQL(fields []string) string {
+func selectSQL(table string, fields []string) string {
+	columns := make([]string, len(fields))
+	for i, field := range fields {
+		columns[i] = fmt.Sprintf("%s.%s", table, field)
+	}
+	return strings.Join(columns, ", ")
+}
+
+func insertSQL(fields []string) string {
 	return strings.Join(fields, ", ")
 }
 
 func updateSQL(fields []string) string {
-	return strings.Join(fields, " = ?, ") + " = ?"
+	columns := make([]string, len(fields))
+	for i, field := range fields {
+		columns[i] = fmt.Sprintf("%s = ?", field)
+	}
+	return strings.Join(columns, ", ")
 }
 
 func placeholderSQL(fields []string) string {

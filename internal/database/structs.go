@@ -33,8 +33,9 @@ type Instance struct {
 // Operator provides a collection of functions to store and retrieve a
 // Persistable in the database.
 type Operator struct {
-	DB     Instance
-	Table  string
-	Create func() model.Persistable
-	Read   func(io.Reader) (model.Persistable, error)
+	DB         Instance
+	Table      string
+	SelectJoin []string
+	Create     func() model.Persistable
+	Read       func(io.Reader) (model.Persistable, error)
 }
