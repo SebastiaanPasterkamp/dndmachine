@@ -8,18 +8,32 @@ import { stringToColor, stringToInitials } from '../../utils';
 export default function BadgedAvatar(props) {
   const { name, avatar, badge, ...rest } = props;
 
+  const avatarProps = {
+    alt: name,
+    src: avatar,
+    sx: {
+      bgcolor: stringToColor(name),
+    },
+    children: stringToInitials(name),
+    ...rest
+  };
+
   if (!badge?.name) {
     return (
-      <Avatar
-        sx={{
-          bgcolor: stringToColor(name),
-        }}
-        children={stringToInitials(name)}
-        src={avatar}
-        {...rest}
-      />
+      <Avatar {...avatarProps} />
     );
   }
+
+  const badgeProps = {
+    alt: badge.name,
+    src: badge.avatar,
+    sx: {
+      width: 32,
+      height: 32,
+      bgcolor: stringToColor(badge.name),
+    },
+    children: stringToInitials(badge.name),
+  };
 
   return (
     <Badge
@@ -28,22 +42,10 @@ export default function BadgedAvatar(props) {
         horizontal: 'right',
       }}
       badgeContent={
-        <Avatar
-          alt={badge.name}
-          src={badge.avatar}
-          sx={{ width: 32, height: 32 }}
-          children={stringToInitials(badge.name)}
-        />
+        <Avatar {...badgeProps} />
       }
     >
-      <Avatar
-        sx={{
-          bgcolor: stringToColor(name),
-        }}
-        children={stringToInitials(name)}
-        src={avatar}
-        {...rest}
-      />
+      <Avatar {...avatarProps} />
     </Badge>
   );
 }
