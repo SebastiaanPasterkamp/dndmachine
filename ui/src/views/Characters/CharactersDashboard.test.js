@@ -24,9 +24,14 @@ test('renders CharactersDashboard', async () => {
         name: "player",
       }}>
         <MockObjectsContext
-          types={['character']}
+          types={['user', 'character']}
           character={{
-            1: { id: 1, name: "Testy McTestFace" },
+            1: { id: 1, user_id: 2, name: "Foo" },
+            2: { id: 2, user_id: 2, name: "Testy McTestFace" },
+          }}
+          user={{
+            1: { id: 1, username: "admin", role: ["admin"] },
+            2: { id: 2, username: "player", role: ["player"] },
           }}
         >
           <PolicyContext useContext={useObjectsContext} query={`authz/character/allow`}>

@@ -19,7 +19,7 @@ test('renders CharacterCreate', async () => {
       <MockUserContext user={{
         id: 2,
         role: ["player"],
-        name: "player",
+        username: "player",
       }}>
         <PolicyContext query={`authz/character/allow`}>
           <MemoryRouter initialEntries={['/character/new']} >
@@ -35,8 +35,6 @@ test('renders CharacterCreate', async () => {
     </MockPolicyEngineContext >
   ));
 
-  await waitFor(() => screen.getByText('Create'))
-
-  const createButton = screen.getByText('Create');
-  expect(createButton).toBeInTheDocument();
+  const createButton = await waitFor(() => screen.getAllByText('Create'))
+  expect(createButton[1]).toBeInTheDocument();
 });

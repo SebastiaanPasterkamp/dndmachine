@@ -12,10 +12,14 @@ import { useObjectsContext } from '../../context/ObjectsContext';
 import BadgedAvatar from '../BadgedAvatar/BadgedAvatar';
 
 export default function CharacterCard(props) {
-    const { id, user_id, name, level, classes, ...rest } = props;
+    const { id, user_id, name, avatar, level, classes, ...rest } = props;
     const { user = {} } = useObjectsContext();
     const loading = id === undefined;
     const { [user_id]: owner } = user;
+    const badge = owner ? {
+        avatar: owner.avatar,
+        name: owner.name ? owner.name : owner.username,
+    } : undefined;
 
     const handleDelete = async (e) => {
         e.preventDefault();
@@ -28,7 +32,6 @@ export default function CharacterCard(props) {
             .catch((error) => console.error('Error:', error));
     }
 
-
     return (
         <Card sx={{ maxWidth: 345, m: 2 }}>
             <CardActionArea component={Link} to={`/character/${id}`}>
@@ -39,7 +42,8 @@ export default function CharacterCard(props) {
                         ) : (
                             <BadgedAvatar
                                 name={name}
-                                badge={owner}
+                                avatar={avatar}
+                                badge={badge}
                                 aria-label="name"
                             />
                         )

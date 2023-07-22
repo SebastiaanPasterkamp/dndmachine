@@ -1,9 +1,9 @@
 import ObjectEdit from '../../hoc/EditObject';
-import CharacterEditor from '../../partials/CharacterEditor/CharacterEditor';
+import PreviewSwitcher from '../../partials/CharacterEditor/PreviewSwitcher';
 
 const CharacterEdit = ObjectEdit({
   type: 'character',
-  form: CharacterEditor,
+  form: PreviewSwitcher,
 });
 
 export default CharacterEdit;

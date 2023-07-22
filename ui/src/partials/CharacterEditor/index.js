@@ -1,3 +1,8 @@
-import UserForm from './UserForm'
+import CharacterEditor from './CharacterEditor';
+import PreviewSwitcher from './PreviewSwitcher';
 
-export default UserForm
+export default PreviewSwitcher;
+
+export {
+  CharacterEditor, PreviewSwitcher
+};

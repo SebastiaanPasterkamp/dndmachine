@@ -6,36 +6,11 @@ import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import * as React from 'react';
 
-import { useCurrentUserContext } from '../../context/CurrentUserContext';
-import useFormHelper from '../../utils/formHelper';
-import { requiredString } from '../../utils/validators';
-import OutlinedForm, { OutlinedFileUpload, OutlinedInput } from '../OutlinedForm';
+import OutlinedForm from '../OutlinedForm';
 import { PolicyButton } from '../ProtectedLink';
+import Description from './options/Description';
 
-const defaultCharacter = {
-  name: "",
-  avatar: "",
-  level: 1,
-}
-
-export default function CharacterEditor({ character, onClose, onDone }) {
-  const { user } = useCurrentUserContext();
-
-  const validate = async (values) => {
-    var errors = {};
-    if ('name' in values) {
-      errors.name = requiredString(values.name);
-    }
-    return errors;
-  }
-
-  const {
-    values,
-    errors,
-    handleInputChange,
-    isValid,
-    resetForm,
-  } = useFormHelper({ user_id: user.id, ...defaultCharacter, ...character }, validate, false)
+export default function CharacterEditor({ values, setValues, isValid, onClose, onDone, resetForm }) {
 
   const handleCancel = async (e) => {
     e.preventDefault();
@@ -104,94 +79,88 @@ export default function CharacterEditor({ character, onClose, onDone }) {
     }
   }
 
+  const getChoiceHandler = (uuid) => React.useMemo(
+    () => async (e) => {
+      if (e.preventDefault) e.preventDefault();
+      const { name, value } = e.target;
+
+      setValues((values) => {
+        const { choices } = values;
+        const { [uuid]: orig } = choices;
+        return {
+          ...values,
+          choices: {
+            ...choices,
+            [uuid]: { ...orig, [name]: value },
+          },
+        }
+      });
+    },
+    [uuid, setValues]
+  );
+
+  const queue = [
+    "c4826704-86dc-4daf-985b-d4514ece5bc5",
+    "867fde51-ed0d-4ec6-bed4-a6e561f08ff4",
+  ];
+  const uuid = queue[0];
+
   return (
     <OutlinedForm onSubmit={values.id ? handleUpdate : handleCreate}>
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        <OutlinedFileUpload
-          sx={{ width: 56, height: 56 }}
-          label="Avatar"
-          name="avatar"
-          title={values.name}
-          aria-label="Avatar"
-          value={values.avatar}
-          error={errors.avatar}
-          onChange={handleInputChange}
-        />
-      </div>
+      <Description
+        uuid={uuid}
+        onChange={getChoiceHandler(uuid)}
+        choice={values.choices[uuid] || {}}
+      />
 
-      <Grid container>
-        <Grid item xs={12} sm={6} sx={{ px: 1 }}>
-          <OutlinedFileUpload
-            sx={{ width: 56, height: 56 }}
-            label="Avatar"
-            name="avatar"
-            title={values.name}
-            aria-label="Avatar"
-            value={values.avatar}
-            error={errors.avatar}
-            onChange={handleInputChange}
-          />
+      <Grid item xs={12} style={{ display: "flex", justifyContent: "space-evenly", alignItems: "center" }}>
+        {values.id ? (
+          <PolicyButton
+            path={`/api/character/${values.id}`}
+            method="PATCH"
+            query="authz/character/allow"
 
-          <OutlinedInput
-            label="Name"
-            name="name"
-            required
-            value={values.name}
-            error={errors.name}
-            onChange={handleInputChange}
-            helper="Must be unique."
-          />
-        </Grid>
-
-        <Grid item xs={12} style={{ display: "flex", justifyContent: "space-evenly", alignItems: "center" }}>
-          {values.id ? (
-            <PolicyButton
-              path={`/api/character/${values.id}`}
-              method="PATCH"
-              query="authz/character/allow"
-
-              variant="contained"
-              type="submit"
-              color="primary"
-              onClick={handleUpdate}
-              startIcon={<EditIcon />}
-            >
-              Update
-            </PolicyButton>
-          ) : (
-            <PolicyButton
-              path={`/api/character`}
-              method="POST"
-              query="authz/character/allow"
-
-              variant="contained"
-              type="submit"
-              color="primary"
-              onClick={handleCreate}
-              startIcon={<PersonAddIcon />}
-            >
-              Create
-            </PolicyButton>
-          )}
-          <Button
             variant="contained"
-            type="cancel"
-            color="secondary"
-            onClick={handleCancel}
-            startIcon={<CancelIcon />}
+            type="submit"
+            color="primary"
+            onClick={handleUpdate}
+            startIcon={<EditIcon />}
           >
-            Cancel
-          </Button>
-          <Button
+            Update
+          </PolicyButton>
+        ) : (
+          <PolicyButton
+            path={`/api/character`}
+            method="POST"
+            query="authz/character/allow"
+
             variant="contained"
-            type="reset"
-            color="warning"
-            onClick={resetForm}
-            startIcon={<BackspaceIcon />}
+            type="submit"
+            color="primary"
+            onClick={handleCreate}
+            startIcon={<PersonAddIcon />}
           >
-            Reset
-          </Button>
-        </Grid>
+            Create
+          </PolicyButton>
+        )}
+        <Button
+          variant="contained"
+          type="cancel"
+          color="secondary"
+          onClick={handleCancel}
+          startIcon={<CancelIcon />}
+        >
+          Cancel
+        </Button>
+        <Button
+          variant="contained"
+          type="reset"
+          color="warning"
+          onClick={resetForm}
+          startIcon={<BackspaceIcon />}
+        >
+          Reset
+        </Button>
       </Grid>
     </OutlinedForm >
   )

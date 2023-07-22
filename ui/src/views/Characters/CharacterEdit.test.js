@@ -7,19 +7,25 @@ import path from 'path';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
 import { MockUserContext } from '../../context/CurrentUserContext';
+import { MockDnDMachineContext } from '../../context/DnDMachineContext';
 import { MockObjectsContext, useObjectsContext } from "../../context/ObjectsContext";
 import PolicyContext from "../../context/PolicyContext";
 import { MockPolicyEngineContext } from '../../context/PolicyEngineContext';
 import CharacterEdit from "./CharacterEdit";
 
+const character = {
+  id: 1,
+  user_id: 2,
+  name: "Foo",
+  choices: {
+    "c4826704-86dc-4daf-985b-d4514ece5bc5": { name: "Testy McTestFace" },
+  },
+};
+
 const server = setupServer(
-  rest.get('/api/character/2', (req, res, ctx) => {
+  rest.get('/api/character/1', (_, res, ctx) => {
     return res(ctx.json({
-      result: {
-        id: 2,
-        user_id: 2,
-        name: "Foo",
-      },
+      result: character,
     }))
   }),
 )
@@ -41,27 +47,36 @@ test('renders CharacterEdit to modify existing', async () => {
         username: "player",
       }}>
         <MockObjectsContext
-          types={['character']}
+          types={['user', 'character']}
           character={{
-            1: { id: 1, user_id: 2, name: "Foo" },
+            1: character,
             2: { id: 2, user_id: 2, name: "Bar" },
+          }}
+          user={{
+            1: { id: 1, username: "admin", role: ["admin"] },
+            2: { id: 2, username: "player", role: ["player"] },
           }}
         >
           <PolicyContext useContext={useObjectsContext} query={`authz/character/allow`}>
-            <MemoryRouter initialEntries={['/character/2/edit']} >
-              <Routes>
-                <Route
-                  path='/character/:id/edit'
-                  element={<CharacterEdit />}
-                />
-              </Routes>
-            </MemoryRouter>
+            <MockDnDMachineContext characterCompute={async (character) => character}>
+              <MemoryRouter initialEntries={['/character/1/edit']}>
+                <Routes>
+                  <Route
+                    path='/character/:id/edit'
+                    element={<CharacterEdit />}
+                  />
+                </Routes>
+              </MemoryRouter>
+            </MockDnDMachineContext>
           </PolicyContext>
         </MockObjectsContext>
       </MockUserContext>
     </MockPolicyEngineContext >
   ));
 
-  const updateButton = await waitFor(() => screen.getByText('Update'))
+  const input = await waitFor(() => screen.getByTestId('input-text-name').querySelector('input'));
+  expect(input.value).toBe('Testy McTestFace');
+
+  const updateButton = await waitFor(() => screen.getByText('Update'));
   expect(updateButton).toBeInTheDocument();
 });
