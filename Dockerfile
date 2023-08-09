@@ -34,7 +34,7 @@ RUN tar \
     /policy.wasm \
     > build/policy.wasm
 
-FROM --platform=${BUILDPLATFORM} golang:1.20 as backend
+FROM --platform=${BUILDPLATFORM} golang:1.21 as backend
 
 WORKDIR /build
 
@@ -68,7 +68,7 @@ RUN BUILD_TIME=$(date -Iseconds) \
     " \
     cmd/dndmachine/main.go
 
-FROM --platform=${BUILDPLATFORM} golang:1.20 AS security
+FROM --platform=${BUILDPLATFORM} golang:1.21 AS security
 
 ENV USER=dndmachine
 ENV UID=1000
