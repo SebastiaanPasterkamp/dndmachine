@@ -120,7 +120,7 @@ platform:
 
 steps:
   - name: discord:notification
-    image: appleboy/drone-discord:1.2.6
+    image: appleboy/drone-discord:1.3.0
     settings:
       webhook_id:
         from_secret: discord_id
