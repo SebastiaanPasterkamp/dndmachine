@@ -100,6 +100,8 @@ github.com/open-policy-agent/opa v0.55.0 h1:s7Vm4ph6zDqqP/KzvUSw9fsKVsm9lhbTZhYG
 github.com/open-policy-agent/opa v0.55.0/go.mod h1:2Vh8fj/bXCqSwGMbBiHGrw+O8yrho6T/fdaHt5ROmaQ=
 github.com/open-policy-agent/opa v0.56.0 h1:FUSb6MyckjuffOMshEG8P+HGnckxkJ8ENZJHEzAddhk=
 github.com/open-policy-agent/opa v0.56.0/go.mod h1:un01L10fkolr00KJMDSqGb2FXCjVyVQOybLtHOfSEfY=
+github.com/open-policy-agent/opa v0.57.0 h1:DftxYfOEHOheXvO2Q6HCIM2ZVdKrvnF4cZlU9C64MIQ=
+github.com/open-policy-agent/opa v0.57.0/go.mod h1:3FY6GNSbUqOhjCdvTXCBJ2rNuh66p/XrIc2owr/hSwo=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
@@ -197,6 +199,8 @@ google.golang.org/protobuf v1.26.0-rc.1/go.mod h1:jlhhOSvTdKEhbULTjvd4ARK9grFBp0
 google.golang.org/protobuf v1.26.0/go.mod h1:9q0QmTI4eRPtz6boOQmLYwt+qCgq0jsYwAQnmE0givc=
 google.golang.org/protobuf v1.30.0 h1:kPPoIgf3TsEvrm0PFe15JQ+570QVxYzEvvHqChK+cng=
 google.golang.org/protobuf v1.30.0/go.mod h1:HV8QOd/L58Z+nl8r43ehVNZIU/HEI6OcFqwMG9pJV4I=
+google.golang.org/protobuf v1.31.0 h1:g0LDEJHgrBl9N9r17Ru3sqWhkIx2NB67okBHPwC7hs8=
+google.golang.org/protobuf v1.31.0/go.mod h1:HV8QOd/L58Z+nl8r43ehVNZIU/HEI6OcFqwMG9pJV4I=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c h1:Hei/4ADfdWqJk1ZMxUNpqntNwaWcugrBjAiHlqqRiVk=
 gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 h1:uRGJdciOHaEIrze2W8Q3AKkepLTh2hOroT7a+7czfdQ=
