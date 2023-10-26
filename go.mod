@@ -8,7 +8,7 @@ require (
 	github.com/go-chi/chi/v5 v5.0.10
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-sql-driver/mysql v1.7.1
-	github.com/google/uuid v1.3.1
+	github.com/google/uuid v1.4.0
 	github.com/open-policy-agent/opa v0.57.1
 	golang.org/x/crypto v0.14.0
 	golang.org/x/sync v0.4.0
