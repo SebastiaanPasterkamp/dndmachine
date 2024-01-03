@@ -14,7 +14,7 @@
     "@mui/material": "5.15.0",
     "@mui/styles": "5.15.0",
     "@open-policy-agent/opa-wasm": "1.8.0",
-    "@testing-library/jest-dom": "5.17.0",
+    "@testing-library/jest-dom": "6.2.0",
     "@testing-library/react": "13.0.0-alpha.5",
     "@testing-library/user-event": "14.5.1",
     "fs": "0.0.1-security",
